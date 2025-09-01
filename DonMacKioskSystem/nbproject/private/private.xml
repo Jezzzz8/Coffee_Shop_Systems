@@ -3,15 +3,20 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Jess/OneDrive/Documents/NetBeansProjects/DonMacKioskSystem/src/kiosksystem/DonMacKioskSystem.java</file>
-            <file>file:/C:/Users/Jess/OneDrive/Documents/NetBeansProjects/DonMacKioskSystem/src/ui/KioskFrame.java</file>
-            <file>file:/C:/Users/Jess/OneDrive/Documents/NetBeansProjects/DonMacKioskSystem/src/ui/InventoryFrame.java</file>
-            <file>file:/C:/Users/Jess/OneDrive/Documents/NetBeansProjects/DonMacKioskSystem/src/ui/SignUpFrame.java</file>
-            <file>file:/C:/Users/Jess/OneDrive/Documents/NetBeansProjects/DonMacKioskSystem/src/ui/LoginFrame.java</file>
-            <file>file:/C:/Users/Jess/OneDrive/Documents/NetBeansProjects/DonMacKioskSystem/src/service/InventoryService.java</file>
-            <file>file:/C:/Users/Jess/OneDrive/Documents/NetBeansProjects/DonMacKioskSystem/src/service/OrderService.java</file>
-            <file>file:/C:/Users/Jess/OneDrive/Documents/NetBeansProjects/DonMacKioskSystem/src/model/CartItem.java</file>
-            <file>file:/C:/Users/Jess/OneDrive/Documents/NetBeansProjects/DonMacKioskSystem/src/model/Product.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/DonMacKioskSystem/src/kiosksystem/DonMacKioskSystem.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/DonMacKioskSystem/src/ui/InventoryFrame.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/DonMacKioskSystem/src/ui/KioskFrame.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/DonMacKioskSystem/src/ui/POSFrame.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/DonMacKioskSystem/src/ui/LoginFrame.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/DonMacKioskSystem/src/backend/SessionManager.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/DonMacKioskSystem/src/backend/UserAuthentication.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/DonMacKioskSystem/src/backend/DatabaseConnection.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/DonMacKioskSystem/src/backend/Product.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/DonMacKioskSystem/src/backend/ProductManager.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/DonMacKioskSystem/src/backend/CategoryManager.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/DonMacKioskSystem/src/backend/Category.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/DonMacKioskSystem/src/backend/SalesReportManager.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/DonMacKioskSystem/src/backend/SalesRecord.java</file>
         </group>
     </open-files>
 </project-private>

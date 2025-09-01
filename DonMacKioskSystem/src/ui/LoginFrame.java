@@ -21,8 +21,6 @@ public class LoginFrame extends javax.swing.JFrame {
         PasswordLabel = new javax.swing.JLabel();
         jPasswordField1 = new javax.swing.JPasswordField();
         LoginButton = new javax.swing.JButton();
-        SignUpLabel = new javax.swing.JLabel();
-        SignUpButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Login");
@@ -97,20 +95,6 @@ public class LoginFrame extends javax.swing.JFrame {
             }
         });
 
-        SignUpLabel.setText("I don't have an account");
-        SignUpLabel.setPreferredSize(new java.awt.Dimension(124, 30));
-
-        SignUpButton.setBackground(new java.awt.Color(0, 0, 0));
-        SignUpButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        SignUpButton.setForeground(new java.awt.Color(0, 204, 204));
-        SignUpButton.setText("Sign Up");
-        SignUpButton.setPreferredSize(new java.awt.Dimension(91, 35));
-        SignUpButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                SignUpButtonActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout RIGHTLayout = new javax.swing.GroupLayout(RIGHT);
         RIGHT.setLayout(RIGHTLayout);
         RIGHTLayout.setHorizontalGroup(
@@ -127,11 +111,7 @@ public class LoginFrame extends javax.swing.JFrame {
                             .addComponent(UsernameText, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
                             .addComponent(PasswordLabel)
                             .addComponent(jPasswordField1)
-                            .addComponent(LoginButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(RIGHTLayout.createSequentialGroup()
-                                .addComponent(SignUpLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(SignUpButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                            .addComponent(LoginButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap(50, Short.MAX_VALUE))
         );
         RIGHTLayout.setVerticalGroup(
@@ -149,11 +129,7 @@ public class LoginFrame extends javax.swing.JFrame {
                 .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(LoginButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(24, 24, 24)
-                .addGroup(RIGHTLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(SignUpLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(SignUpButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(111, Short.MAX_VALUE))
+                .addContainerGap(171, Short.MAX_VALUE))
         );
 
         LoginPanel.add(RIGHT);
@@ -172,20 +148,78 @@ public class LoginFrame extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jPasswordField1ActionPerformed
 
-    private void SignUpButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SignUpButtonActionPerformed
-        SignUpFrame SignUpFrame = new SignUpFrame();
-        SignUpFrame.setVisible(true);
-        SignUpFrame.pack();
-        SignUpFrame.setLocationRelativeTo(null);
-        this.dispose();
-    }//GEN-LAST:event_SignUpButtonActionPerformed
-
     private void LoginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LoginButtonActionPerformed
-        InventoryFrame InventoryFrame = new InventoryFrame();
-        InventoryFrame.setVisible(true);
-        InventoryFrame.pack();
-        InventoryFrame.setLocationRelativeTo(null);
-        this.dispose();
+
+        String username = UsernameText.getText();
+        String password = new String(jPasswordField1.getPassword());
+
+        if (username.isEmpty() || password.isEmpty()) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Please fill in all fields", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // UPDATED: Use authenticate() method instead of login()
+        if (backend.UserAuthentication.authenticate(username, password)) {
+            // Session is now set automatically in the authenticate() method
+            // No need to call SessionManager.login() separately
+
+            String fullName = backend.UserAuthentication.getUserFullName(username);
+            String role = backend.UserAuthentication.getUserRole(username);
+
+            String welcomeMessage = "Welcome, " + fullName + "!\n";
+            welcomeMessage += "Role: " + role + "\n\n";
+
+            // Role-specific redirection
+            if (backend.UserAuthentication.isAdmin(username)) {
+                welcomeMessage += "You have full system access privileges.";
+                javax.swing.JOptionPane.showMessageDialog(this, welcomeMessage, "Login Successful", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                InventoryFrame InventoryFrame = new InventoryFrame();
+                InventoryFrame.setVisible(true);
+                InventoryFrame.pack();
+                InventoryFrame.setLocationRelativeTo(null);
+                this.dispose();
+
+            } else if (backend.UserAuthentication.isManager(username)) {
+                welcomeMessage += "You can manage inventory and products.";
+                javax.swing.JOptionPane.showMessageDialog(this, welcomeMessage, "Login Successful", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                InventoryFrame InventoryFrame = new InventoryFrame();
+                InventoryFrame.setVisible(true);
+                InventoryFrame.pack();
+                InventoryFrame.setLocationRelativeTo(null);
+                this.dispose();
+
+            } else if (backend.UserAuthentication.isCashier(username)) {
+                welcomeMessage += "You can process sales and transactions.";
+                javax.swing.JOptionPane.showMessageDialog(this, welcomeMessage, "Login Successful", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                POSFrame POSFrame = new POSFrame();
+                POSFrame.setVisible(true);
+                POSFrame.pack();
+                POSFrame.setLocationRelativeTo(null);
+                this.dispose();
+
+            } else if (backend.UserAuthentication.isClerk(username)) {
+                // ADDED: Clerk role handling (if needed)
+                welcomeMessage += "You have clerk access privileges.";
+                javax.swing.JOptionPane.showMessageDialog(this, welcomeMessage, "Login Successful", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                InventoryFrame InventoryFrame = new InventoryFrame();
+                InventoryFrame.setVisible(true);
+                InventoryFrame.pack();
+                InventoryFrame.setLocationRelativeTo(null);
+                this.dispose();
+
+            } else {
+                // Default users (customers/regular users) go to Kiosk
+                welcomeMessage += "You have basic user access.";
+                javax.swing.JOptionPane.showMessageDialog(this, welcomeMessage, "Login Successful", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                KioskFrame KioskFrame = new KioskFrame();
+                KioskFrame.setVisible(true);
+                KioskFrame.pack();
+                KioskFrame.setLocationRelativeTo(null);
+                this.dispose();
+            }
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(this, "Invalid username or password", "Login Failed", javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_LoginButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -195,8 +229,6 @@ public class LoginFrame extends javax.swing.JFrame {
     private javax.swing.JLabel LogoLabel;
     private javax.swing.JLabel PasswordLabel;
     private javax.swing.JPanel RIGHT;
-    private javax.swing.JButton SignUpButton;
-    private javax.swing.JLabel SignUpLabel;
     private javax.swing.JLabel UsernameLabel;
     private javax.swing.JTextField UsernameText;
     private javax.swing.JLabel jLabel1;
