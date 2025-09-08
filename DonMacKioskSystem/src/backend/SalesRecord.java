@@ -1,4 +1,3 @@
-// SalesRecord.java
 package backend;
 
 import java.sql.Timestamp;
@@ -20,22 +19,29 @@ public class SalesRecord {
         this.subtotal = subtotal;
     }
     
-    // Getters and setters
+    // Additional constructor without orderId for compatibility
+    public SalesRecord(Timestamp date, String productName, int quantity, double price, double subtotal) {
+        this(0, date, productName, quantity, price, subtotal);
+    }
+    
+    // Getters
     public int getOrderId() { return orderId; }
-    public void setOrderId(int orderId) { this.orderId = orderId; }
-    
     public Timestamp getDate() { return date; }
-    public void setDate(Timestamp date) { this.date = date; }
-    
     public String getProductName() { return productName; }
-    public void setProductName(String productName) { this.productName = productName; }
-    
     public int getQuantity() { return quantity; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
-    
     public double getPrice() { return price; }
-    public void setPrice(double price) { this.price = price; }
-    
     public double getSubtotal() { return subtotal; }
-    public void setSubtotal(double subtotal) { this.subtotal = subtotal; }
+    
+    // Formatted getters for UI display
+    public String getFormattedDate() {
+        return date != null ? date.toString() : "N/A";
+    }
+    
+    public String getFormattedPrice() {
+        return String.format("₱%.2f", price);
+    }
+    
+    public String getFormattedSubtotal() {
+        return String.format("₱%.2f", subtotal);
+    }
 }

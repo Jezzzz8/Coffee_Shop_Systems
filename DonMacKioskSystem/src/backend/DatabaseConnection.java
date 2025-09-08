@@ -1,4 +1,3 @@
-// DatabaseConnection.java - MySQL version
 package backend;
 
 import java.sql.Connection;
@@ -7,39 +6,43 @@ import java.sql.SQLException;
 
 public class DatabaseConnection {
     private static Connection connection;
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/donmac_db";
+    private static final String DB_USER = "root";
+    private static final String DB_PASSWORD = "";
     
     public static Connection getConnection() {
-        if (connection == null) {
-            try {
-                // MySQL database connection
+        try {
+            if (connection == null || connection.isClosed()) {
                 Class.forName("com.mysql.cj.jdbc.Driver");
-                connection = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/donmac_kiosk?zeroDateTimeBehavior=CONVERT_TO_NULL", 
-                    "root", 
-                    "password"
-                );
-                
-                // Optional: Initialize database if it doesn't exist
-                initializeDatabase();
-            } catch (ClassNotFoundException | SQLException e) {
-                e.printStackTrace();
+                connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+                System.out.println("Database connected successfully!");
             }
+        } catch (ClassNotFoundException e) {
+            System.err.println("MySQL JDBC Driver not found: " + e.getMessage());
+        } catch (SQLException e) {
+            System.err.println("Database connection failed: " + e.getMessage());
         }
         return connection;
-    }
-    
-    private static void initializeDatabase() {
-        // You can keep this method for additional initialization
-        // or remove it if you've already created the database manually
     }
     
     public static void closeConnection() {
         if (connection != null) {
             try {
                 connection.close();
+                connection = null;
+                System.out.println("Database connection closed.");
             } catch (SQLException e) {
-                e.printStackTrace();
+                System.err.println("Error closing connection: " + e.getMessage());
             }
+        }
+    }
+    
+    public static boolean testConnection() {
+        try (Connection testConn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            return testConn.isValid(2);
+        } catch (SQLException e) {
+            System.err.println("Connection test failed: " + e.getMessage());
+            return false;
         }
     }
 }

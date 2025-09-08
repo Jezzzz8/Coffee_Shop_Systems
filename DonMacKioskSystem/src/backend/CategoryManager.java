@@ -1,4 +1,3 @@
-// CategoryManager.java
 package backend;
 
 import java.sql.Connection;
@@ -13,29 +12,29 @@ public class CategoryManager {
     public static List<Category> getAllCategories() {
         List<Category> categories = new ArrayList<>();
         Connection conn = DatabaseConnection.getConnection();
-        String sql = "SELECT * FROM categories ORDER BY name";
+        String sql = "SELECT * FROM category_tb ORDER BY category_name";
         
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             ResultSet rs = pstmt.executeQuery();
             
             while (rs.next()) {
                 Category category = new Category(
-                    rs.getInt("id"),
-                    rs.getString("name"),
+                    rs.getInt("category_id"),
+                    rs.getString("category_name"),
                     rs.getString("created_by"),
                     rs.getTimestamp("created_at")
                 );
                 categories.add(category);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error getting categories: " + e.getMessage());
         }
         return categories;
     }
     
     public static boolean addCategory(String name, String createdBy) {
         Connection conn = DatabaseConnection.getConnection();
-        String sql = "INSERT INTO categories (name, created_by) VALUES (?, ?)";
+        String sql = "INSERT INTO category_tb (category_name, created_by) VALUES (?, ?)";
         
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, name);
@@ -44,14 +43,14 @@ public class CategoryManager {
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error adding category: " + e.getMessage());
         }
         return false;
     }
     
     public static boolean deleteCategory(String name) {
         Connection conn = DatabaseConnection.getConnection();
-        String sql = "DELETE FROM categories WHERE name = ?";
+        String sql = "DELETE FROM category_tb WHERE category_name = ?";
         
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, name);
@@ -59,14 +58,14 @@ public class CategoryManager {
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error deleting category: " + e.getMessage());
         }
         return false;
     }
     
     public static int getCategoryCount() {
         Connection conn = DatabaseConnection.getConnection();
-        String sql = "SELECT COUNT(*) as count FROM categories";
+        String sql = "SELECT COUNT(*) as count FROM category_tb";
         
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             ResultSet rs = pstmt.executeQuery();
@@ -74,7 +73,7 @@ public class CategoryManager {
                 return rs.getInt("count");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error getting category count: " + e.getMessage());
         }
         return 0;
     }
@@ -82,16 +81,16 @@ public class CategoryManager {
     public static List<String> getCategoryNames() {
         List<String> categoryNames = new ArrayList<>();
         Connection conn = DatabaseConnection.getConnection();
-        String sql = "SELECT name FROM categories ORDER BY name";
+        String sql = "SELECT category_name FROM category_tb ORDER BY category_name";
         
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             ResultSet rs = pstmt.executeQuery();
             
             while (rs.next()) {
-                categoryNames.add(rs.getString("name"));
+                categoryNames.add(rs.getString("category_name"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error getting category names: " + e.getMessage());
         }
         return categoryNames;
     }

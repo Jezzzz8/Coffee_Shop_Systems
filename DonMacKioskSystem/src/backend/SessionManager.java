@@ -1,25 +1,25 @@
-// SessionManager.java
 package backend;
 
 public class SessionManager {
+    private static int currentUserId;
     private static String currentUsername;
     private static String currentRole;
-    private static boolean isLoggedIn = false;
+    private static boolean loggedIn = false;
     
-    public static void login(String username, String role) {
+    public static void login(String username) {
         currentUsername = username;
-        currentRole = role;
-        isLoggedIn = true;
+        loggedIn = true;
     }
     
     public static void logout() {
         currentUsername = null;
         currentRole = null;
-        isLoggedIn = false;
+        currentUserId = 0;
+        loggedIn = false;
     }
     
     public static boolean isLoggedIn() {
-        return isLoggedIn;
+        return loggedIn;
     }
     
     public static String getCurrentUsername() {
@@ -28,5 +28,18 @@ public class SessionManager {
     
     public static String getCurrentRole() {
         return currentRole;
+    }
+    
+    public static int getCurrentUserId() {
+        return currentUserId;
+    }
+    
+    // Add setter methods
+    public static void setCurrentRole(String role) {
+        currentRole = role;
+    }
+    
+    public static void setCurrentUserId(int userId) {
+        currentUserId = userId;
     }
 }

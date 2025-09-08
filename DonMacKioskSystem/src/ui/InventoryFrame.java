@@ -3,7 +3,6 @@ package ui;
 import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
 import backend.*;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -13,13 +12,15 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
@@ -32,48 +33,138 @@ public class InventoryFrame extends javax.swing.JFrame {
     
     public InventoryFrame() {
         initComponents();
+    
+        // Debug: Check session state immediately
+        System.out.println("=== INVENTORY FRAME INIT ===");
+        System.out.println("Session username: " + backend.SessionManager.getCurrentUsername());
+        System.out.println("Session role: " + backend.SessionManager.getCurrentRole());
+        System.out.println("Session logged in: " + backend.SessionManager.isLoggedIn());
+
         initApp();
     }
     
+    private void initApp() {
+        // Initialize database connection
+        try {
+            DatabaseConnection.getConnection();
+            // Check user access
+            checkUserAccess();
+            // Initialize data
+            initializeData();
+            // Set up role-based access
+            setupRoleBasedAccess();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Database connection failed: " + e.getMessage(), 
+                                        "Connection Error", JOptionPane.ERROR_MESSAGE);
+            // Instead of exiting, allow the user to retry or check settings
+            int option = JOptionPane.showConfirmDialog(this, 
+                "Would you like to retry the connection?", 
+                "Connection Failed", 
+                JOptionPane.YES_NO_OPTION);
+
+            if (option == JOptionPane.YES_OPTION) {
+                initApp(); // Retry
+            } else {
+                System.exit(1);
+            }
+        }
+    }
+
+    
     private void checkUserAccess() {
         if (!backend.SessionManager.isLoggedIn()) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Please login first", "Access Denied", javax.swing.JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Please login first", "Access Denied", JOptionPane.ERROR_MESSAGE);
             redirectToLogin();
             return;
         }
 
         String currentUser = backend.SessionManager.getCurrentUsername();
 
-        if (!backend.UserAuthentication.isAdmin(currentUser) && 
-            !backend.UserAuthentication.isManager(currentUser)) {
-
-            javax.swing.JOptionPane.showMessageDialog(this, 
-                "Access Denied! Only Administrators and Clerks can access this system.", 
+        if (!backend.UserAuthentication.isAdmin(currentUser)) {
+            JOptionPane.showMessageDialog(this, 
+                "Access Denied! Only Administrators and Managers can access this system.", 
                 "Permission Error", 
-                javax.swing.JOptionPane.ERROR_MESSAGE);
-
+                JOptionPane.ERROR_MESSAGE);
             redirectToLogin();
-            return;
         }
     }
     
     private void setupRoleBasedAccess() {
         String currentUser = backend.SessionManager.getCurrentUsername();
+        String currentRole = backend.SessionManager.getCurrentRole();
 
-        // Hide User Management tab and button for clerks
-        if (!backend.UserAuthentication.isAdmin(currentUser)) {
-            // Remove User Management tab
-            MainTabbedPane.removeTabAt(5); // User Management is at index 5
+        System.out.println("=== ROLE-BASED ACCESS SETUP ===");
+        System.out.println("Current user: " + currentUser);
+        System.out.println("Current role: " + currentRole);
+        System.out.println("Is admin: " + backend.UserAuthentication.isAdmin(currentUser));
 
-            // Hide User Management button from sidebar
-            UserManagementButton.setVisible(false);
-
-            // Adjust the layout since we removed a button
-            reorganizeSidebarLayout();
+        // Debug: Check all available tabs
+        System.out.println("Available tabs:");
+        for (int i = 0; i < MainTabbedPane.getTabCount(); i++) {
+            System.out.println("Tab " + i + ": " + MainTabbedPane.getTitleAt(i));
         }
 
-        // Update dashboard with user-specific data
-        updateDashboard();
+        // Hide User Management tab and button for non-admins
+        if (!backend.UserAuthentication.isAdmin(currentUser)) {
+            System.out.println("User is NOT admin - restricting access");
+
+            // Find and remove User Management tab (search by title since index might vary)
+            for (int i = 0; i < MainTabbedPane.getTabCount(); i++) {
+                String title = MainTabbedPane.getTitleAt(i);
+                if (title != null && title.toLowerCase().contains("user")) {
+                    System.out.println("Removing User Management tab at index: " + i);
+                    MainTabbedPane.removeTabAt(i);
+                    break;
+                }
+            }
+
+            // Hide User Management button from sidebar
+            if (UserManagementButton != null) {
+                UserManagementButton.setVisible(false);
+            }
+
+            // Hide Users box from dashboard
+            if (UsersBoxPanel != null) {
+                UsersBoxPanel.setVisible(false);
+            }
+
+            // Reorganize sidebar layout
+            reorganizeSidebarLayout();
+        } else {
+            System.out.println("User is ADMIN - granting full access");
+
+            // Ensure all admin features are visible
+            if (UserManagementButton != null) {
+                UserManagementButton.setVisible(true);
+            }
+
+            if (UsersBoxPanel != null) {
+                UsersBoxPanel.setVisible(true);
+            }
+
+            // Make sure User Management tab exists and is accessible
+            ensureAdminTabsAvailable();
+        }
+
+        System.out.println("=== ROLE SETUP COMPLETE ===");
+    }
+
+    private void ensureAdminTabsAvailable() {
+        // Check if User Management tab exists
+        boolean userManagementTabExists = false;
+        for (int i = 0; i < MainTabbedPane.getTabCount(); i++) {
+            String title = MainTabbedPane.getTitleAt(i);
+            if (title != null && title.toLowerCase().contains("user")) {
+                userManagementTabExists = true;
+                break;
+            }
+        }
+
+        if (!userManagementTabExists) {
+            System.out.println("User Management tab missing - readding it");
+            // You may need to recreate the tab here if it was previously removed
+            // This depends on how your tab structure is set up
+        }
     }
     
     private void reorganizeSidebarLayout() {
@@ -87,8 +178,6 @@ public class InventoryFrame extends javax.swing.JFrame {
         SideBarPanel.add(AddItemButton);
         SideBarPanel.add(SalesReportButton);
         SideBarPanel.add(CategoriesButton);
-
-        // Only add Logout button (UserManagementButton is hidden)
         SideBarPanel.add(LogoutButton);
 
         // Revalidate and repaint to update the layout
@@ -96,6 +185,7 @@ public class InventoryFrame extends javax.swing.JFrame {
         SideBarPanel.repaint();
     }
     
+    // Update your initializeData method
     private void initializeData() {
         // Load products
         currentProducts = ProductManager.getAllProducts();
@@ -106,45 +196,494 @@ public class InventoryFrame extends javax.swing.JFrame {
         refreshCategoryTable();
 
         // Load category names for dropdown
-        List<String> categoryNames = CategoryManager.getCategoryNames();
-        CategoryChoice.removeAll();
-        for (String name : categoryNames) {
-            CategoryChoice.add(name);
-        }
+        refreshCategoryDropdown();
 
         // Load today's sales by default
         currentSales = SalesReportManager.getTodaySales();
-        refreshSalesReportTable();
+        System.out.println("Today's sales: " + currentSales.size() + " records");
+
+        // Load users
+        refreshUserTable();
 
         // Update dashboard
         updateDashboard();
+        
+        // Update Role Dropdown
+        refreshRoleDropdown();
+        
+        // Refresh Activity Log
+        refreshActivityLogTable();
+    }
+    
+    private void refreshCategoryDropdown() {
+        List<String> categoryNames = CategoryManager.getCategoryNames();
+        CategoryChoice.removeAll();
+        CategoryChoiceUpdate.removeAll();
+        //CategoryUpdateChoice.removeAll(); // Add this component if needed
+        for (String name : categoryNames) {
+            CategoryChoice.add(name);
+            CategoryChoiceUpdate.add(name);
+            // If you have an update choice dropdown, add it here too
+        }
     }
     
     private void refreshInventoryTable() {
         DefaultTableModel model = (DefaultTableModel) InventoryTable.getModel();
         model.setRowCount(0);
 
+        // Store the current products for filtering
+        currentProducts = ProductManager.getAllProducts();
+
         for (int i = 0; i < currentProducts.size(); i++) {
             Product product = currentProducts.get(i);
+
+            // Get quantity from inventory
+            int quantity = InventoryManager.getStockQuantity(product.getId());
+
             Object[] row = {
                 i + 1,
                 product.getId(),
                 product.getName(),
                 product.getCategory(),
                 product.getDescription(),
-                product.getStock(),
                 product.getPrice(),
-                product.getId()  // Store just the product ID instead of the panel
+                quantity,
+                product.getId()  // Store product ID for actions
+            };
+            model.addRow(row);
+        }
+
+        // Set up the renderer and editor
+        if (InventoryTable.getColumnModel().getColumnCount() > 7) {
+            InventoryTable.getColumnModel().getColumn(7).setCellRenderer(new ButtonRenderer());
+            InventoryTable.getColumnModel().getColumn(7).setCellEditor(new ButtonEditor());
+        }
+    }
+    
+    private void refreshCategoryTable() {
+        DefaultTableModel model = (DefaultTableModel) CategoryTable.getModel();
+        model.setRowCount(0);
+
+        // Get search term for categories
+        String searchTerm = CategorySearchBar.getText().trim();
+
+        List<Category> filteredCategories = currentCategories;
+
+        // Filter categories by name if search term exists
+        if (!searchTerm.isEmpty()) {
+            filteredCategories = new ArrayList<>();
+            for (Category category : currentCategories) {
+                if (category.getName().toLowerCase().contains(searchTerm.toLowerCase())) {
+                    filteredCategories.add(category);
+                }
+            }
+        }
+
+        for (int i = 0; i < filteredCategories.size(); i++) {
+            Category category = filteredCategories.get(i);
+            Object[] row = {
+                i + 1,
+                category.getCreatedAt(),
+                category.getName(),
+                category.getCreatedBy(),
+                category.getName()  // Store category name for actions
             };
             model.addRow(row);
         }
 
         // Set up the renderer and editor for the Actions column
-        InventoryTable.getColumnModel().getColumn(7).setCellRenderer(new ButtonRenderer());
-        InventoryTable.getColumnModel().getColumn(7).setCellEditor(new ButtonEditor());
+        CategoryTable.getColumnModel().getColumn(4).setCellRenderer(new CategoryButtonRenderer());
+        CategoryTable.getColumnModel().getColumn(4).setCellEditor(new CategoryButtonEditor());
     }
     
-    private Object createActionButtons(int productId) {
+    private void refreshSalesReportTable() {
+        DefaultTableModel model = (DefaultTableModel) SalesReportTable.getModel();
+        model.setRowCount(0);
+
+        double totalSales = 0;
+
+        if (currentSales != null && !currentSales.isEmpty()) {
+            for (SalesRecord record : currentSales) {
+                Object[] row = {
+                    record.getDate(),
+                    record.getProductName(),
+                    record.getPrice(),
+                    record.getQuantity(),
+                    record.getSubtotal()
+                };
+                model.addRow(row);
+                totalSales += record.getSubtotal();
+            }
+            
+        } else {
+            System.out.println("No sales records found for period: " + currentSalesPeriod);
+            
+        }
+
+        TotalSalesTableLabel.setText("Total Sales: ₱" + String.format("%.2f", totalSales));
+        model.fireTableDataChanged();
+    }
+    
+    private void updateDashboard() {
+        // Update dashboard values
+        TotalItemAmountLabel.setText(String.valueOf(ProductManager.getTotalProducts()));
+        AvailableCategoriesAmountLabel.setText(String.valueOf(CategoryManager.getCategoryCount()));
+
+        // Get total users count
+        List<User> users = UserAuthentication.getAllUsers();
+        UsersAmountLabel.setText(String.valueOf(users.size()));
+
+        // CRITICAL: Refresh current sales data before calculating
+        currentSales = SalesReportManager.getTodaySales(); // Or use currentSalesPeriod
+
+        // Calculate total sales
+        double totalSales = calculateTotalSales();
+        TotalSalesAmountLabel.setText(String.format("₱%.2f", totalSales));
+
+        refreshSalesReportTable();
+
+    }
+    
+    private void filterInventoryTable() {
+        String searchTerm = InventorySearchBar.getText().trim().toLowerCase();
+        DefaultTableModel model = (DefaultTableModel) InventoryTable.getModel();
+
+        // If search term is empty, show all products
+        if (searchTerm.isEmpty()) {
+            refreshInventoryTable();
+            return;
+        }
+
+        // Filter the products based on search term
+        List<Product> filteredProducts = new ArrayList<>();
+        for (Product product : currentProducts) {
+            if (product.getName().toLowerCase().contains(searchTerm) ||
+                product.getCategory().toLowerCase().contains(searchTerm) ||
+                product.getDescription().toLowerCase().contains(searchTerm) ||
+                String.valueOf(product.getId()).contains(searchTerm) ||
+                String.valueOf(product.getPrice()).contains(searchTerm)) {
+                filteredProducts.add(product);
+            }
+        }
+
+        // Update the table with filtered results
+        model.setRowCount(0);
+
+        for (int i = 0; i < filteredProducts.size(); i++) {
+            Product product = filteredProducts.get(i);
+            int quantity = InventoryManager.getStockQuantity(product.getId());
+
+            Object[] row = {
+                i + 1,
+                product.getId(),
+                product.getName(),
+                product.getCategory(),
+                product.getDescription(),
+                product.getPrice(),
+                quantity,
+                product.getId()  // Store product ID for actions
+            };
+            model.addRow(row);
+        }
+
+        // Re-set the renderer and editor for the Actions column
+        if (InventoryTable.getColumnModel().getColumnCount() > 7) {
+            InventoryTable.getColumnModel().getColumn(7).setCellRenderer(new ButtonRenderer());
+            InventoryTable.getColumnModel().getColumn(7).setCellEditor(new ButtonEditor());
+        }
+    }
+
+    // Call this method whenever sales data might have changed
+    public void refreshSalesData() {
+        currentSales = SalesReportManager.getSalesByPeriod(currentSalesPeriod);
+        refreshSalesReportTable();
+        updateDashboard();
+    }
+    
+    private double calculateTotalSales() {
+        double total = 0;
+        for (SalesRecord record : currentSales) {
+            total += record.getSubtotal();
+        }
+        return total;
+    }
+    
+    private void loadProductForUpdate(int productId) {
+        Product product = ProductManager.getProductById(productId);
+        if (product != null) {
+            ItemNameUpdateTextBar.setText(product.getName());
+            CategoryChoiceUpdate.getSelectedItem();
+            PriceUpdateText.setText(String.valueOf(product.getPrice()));
+            DescriptionUpdateTextField.setText(product.getDescription());
+            ChooseImagePathUpdateTextField.setText(product.getImagePath()); // Load image path
+        }
+    }
+    
+    private void loadProductForStockEntry(int productId) {
+        Product product = ProductManager.getProductById(productId);
+        if (product != null) {
+            IDInformationValueLabel.setText(String.valueOf(product.getId()));
+            NameInformationValueLabel.setText(product.getName());
+            CategoryInformationValueLabel.setText(product.getCategory());
+            DescriptionInformationValueLabel.setText(product.getDescription());
+            PriceInformationValueLabel.setText(String.valueOf(product.getPrice()));
+            // You might want to add image display here if needed
+        }
+    }
+    
+    private void addNewProduct() {
+        try {
+            String name = ItemNameTextBar.getText();
+            String category = CategoryChoice.getSelectedItem();
+            double price = Double.parseDouble(PriceText.getText());
+            String description = DescriptionTextField.getText();
+            String imagePath = ChooseImagePathTextField.getText();
+
+            // Validate all fields
+            if (name.isEmpty() || category.isEmpty() || description.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please fill in all fields!");
+                return;
+            }
+
+            Product product = new Product(0, name, category, price, description, imagePath);
+
+            if (ProductManager.addProduct(product)) {
+                JOptionPane.showMessageDialog(this, "Product added successfully!");
+                clearAddItemForm();
+                initializeData(); // Refresh data
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to add product! Product ID may already exist.");
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Please enter valid numeric values for ID and Price!");
+        }
+    }
+    
+    private void updateProduct() {
+        try {
+            String name = ItemNameUpdateTextBar.getText();
+            String category = CategoryChoiceUpdate.getSelectedItem();
+            double price = Double.parseDouble(PriceUpdateText.getText());
+            String description = DescriptionUpdateTextField.getText();
+            String imagePath = ChooseImagePathUpdateTextField.getText();
+
+            Product product = new Product(0, name, category, price, description, imagePath);
+
+            if (ProductManager.updateProduct(product)) {
+                JOptionPane.showMessageDialog(this, "Product updated successfully!");
+                initializeData();
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to update product!");
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Please enter valid data!");
+        }
+    }
+    
+    private void addStock() {
+        try {
+            int id = Integer.parseInt(IDInformationValueLabel.getText());
+            int quantity = Integer.parseInt(StockEntryTextBar.getText());
+
+            if (ProductManager.updateStock(id, quantity)) {
+                JOptionPane.showMessageDialog(this, "Stock updated successfully!");
+                StockEntryTextBar.setText("");
+                initializeData();
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to update stock!");
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Please enter valid quantity!");
+        }
+    }
+    
+    private void addCategory() {
+        String categoryName = AddCategoryText.getText();
+        String currentUser = SessionManager.getCurrentUsername();
+
+        if (CategoryManager.addCategory(categoryName, currentUser)) {
+            JOptionPane.showMessageDialog(this, "Category added successfully!");
+            AddCategoryText.setText("");
+            initializeData();
+        } else {
+            JOptionPane.showMessageDialog(this, "Failed to add category! It may already exist.");
+        }
+    }
+    
+    private boolean validateProductInput(int id, String name, String category, double price, String description) {
+        if (id <= 0) {
+            JOptionPane.showMessageDialog(this, "Please enter a valid ID (positive number)!");
+            return false;
+        }
+
+        if (name == null || name.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter a product name!");
+            return false;
+        }
+
+        if (category == null || category.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please select a category!");
+            return false;
+        }
+
+        if (price <= 0) {
+            JOptionPane.showMessageDialog(this, "Please enter a valid price (positive number)!");
+            return false;
+        }
+
+        return true;
+    }
+    
+    private void deleteActivityLog() {
+        int selectedRow = ActivityLogTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select an activity log to delete!");
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this, 
+            "Are you sure you want to delete this activity log?", 
+            "Confirm Delete", JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            // Get the log ID from the first column (assuming it's the ID)
+            int logId = (Integer) ActivityLogTable.getValueAt(selectedRow, 0);
+
+            if (ActivityLogManager.deleteActivityLog(logId)) {
+                JOptionPane.showMessageDialog(this, "Activity log deleted successfully!");
+                refreshActivityLogTable();
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to delete activity log!");
+            }
+        }
+    }
+
+    // Add this method to your InventoryFrame class
+    private void refreshActivityLogTable() {
+        DefaultTableModel model = (DefaultTableModel) ActivityLogTable.getModel();
+        model.setRowCount(0);
+
+        try {
+            List<ActivityLog> activityLogs = ActivityLogManager.getActivityLogs();
+
+            for (int i = 0; i < activityLogs.size(); i++) {
+                ActivityLog log = activityLogs.get(i);
+                Object[] row = {
+                    log.getLogId(),        // Log ID
+                    log.getUsername(),     // Username
+                    log.getActivityType(), // Activity Type
+                    log.getDescription(),  // Description
+                    log.getTimestamp()     // Timestamp
+                };
+                model.addRow(row);
+            }
+        } catch (Exception e) {
+            System.out.println("Error loading activity logs: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Error loading activity logs: " + e.getMessage());
+        }
+
+        model.fireTableDataChanged();
+    }
+    
+    private void addUser() {
+        String firstName = FirstNameTextBar.getText();
+        String lastName = LastNameTextBar.getText();
+        String username = UsernameTextBar.getText();
+        String password = new String(PasswordTextBar.getPassword());
+        String repeatPassword = new String(RepeatPasswordTextBar1.getPassword());
+        String role = RoleChoice.getSelectedItem();
+
+        System.out.println("Creating user: " + username);
+        System.out.println("Password: " + password);
+        System.out.println("Role: " + role);
+
+        if (!password.equals(repeatPassword)) {
+            JOptionPane.showMessageDialog(this, "Passwords do not match!");
+            return;
+        }
+
+        if (UserAuthentication.addUser(firstName, lastName, username, password, role)) {
+            JOptionPane.showMessageDialog(this, "User added successfully!");
+
+            // Debug: Try to authenticate immediately
+            boolean canLogin = UserAuthentication.authenticate(username, password);
+            System.out.println("Can login with new user: " + canLogin);
+
+            clearAddUserForm();
+            initializeData();
+        } else {
+            JOptionPane.showMessageDialog(this, "Failed to add user! Username may already exist.");
+        }
+    }
+    
+    private void deleteUser() {
+        // You need a text field to input the username to delete
+        // For now, let's use a input dialog
+        String username = JOptionPane.showInputDialog(this, "Enter username to delete:");
+
+        if (username == null || username.trim().isEmpty()) {
+            return; // User cancelled or entered empty
+        }
+
+        username = username.trim();
+
+        if (username.equals(SessionManager.getCurrentUsername())) {
+            JOptionPane.showMessageDialog(this, "You cannot delete your own account!");
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(this, 
+            "Are you sure you want to delete user: " + username + "?", 
+            "Confirm Delete", JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            if (UserAuthentication.deleteUser(username)) {
+                JOptionPane.showMessageDialog(this, "User deleted successfully!");
+                initializeData(); // Refresh data
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to delete user!");
+            }
+        }
+    }
+    
+    private void clearAddItemForm() {
+        ItemNameTextBar.setText("");
+        PriceText.setText("");
+        DescriptionTextField.setText("");
+        ChooseImagePathTextField.setText("");
+        // Reset category selection if possible
+        if (CategoryChoice.getItemCount() > 0) {
+            CategoryChoice.select(0);
+        }
+    }
+    
+    private void clearAddUserForm() {
+        FirstNameTextBar.setText("");
+        LastNameTextBar.setText("");
+        UsernameTextBar.setText("");
+        PasswordTextBar.setText("");
+        RepeatPasswordTextBar1.setText("");
+    }
+    
+    private void redirectToLogin() {
+        LoginFrame loginFrame = new LoginFrame();
+        loginFrame.setVisible(true);
+        loginFrame.pack();
+        loginFrame.setLocationRelativeTo(null);
+        backend.SessionManager.logout();
+        this.dispose();
+    }
+    
+    private void logout() {
+        KioskFrame kioskFrame = new KioskFrame();
+        kioskFrame.setVisible(true);
+        kioskFrame.pack();
+        kioskFrame.setLocationRelativeTo(null);
+        backend.SessionManager.logout();
+        this.dispose();
+    }
+    
+    private JPanel createActionButtons(int productId) {
         JPanel panel = new javax.swing.JPanel();
         JButton updateBtn = new JButton("Update");
         JButton stockBtn = new JButton("Stock");
@@ -193,50 +732,10 @@ public class InventoryFrame extends javax.swing.JFrame {
         return panel;
     }
     
-    private void loadProductForUpdate(int productId) {
-        Product product = ProductManager.getProductById(productId);
-        if (product != null) {
-            ItemIDUpdateTextBar.setText(String.valueOf(product.getId()));
-            ItemNameUpdateTextBar.setText(product.getName());
-            CategoryUpdateText.setText(product.getCategory());
-            PriceUpdateText.setText(String.valueOf(product.getPrice()));
-            DescriptionUpdateTextField.setText(product.getDescription());
-            ChooseImagePathUpdateTextField.setText(product.getImagePath());
-        }
-    }
-    
-    private void loadProductForStockEntry(int productId) {
-        Product product = ProductManager.getProductById(productId);
-        if (product != null) {
-            IDInformationValueLabel.setText(String.valueOf(product.getId()));
-            NameInformationValueLabel.setText(product.getName());
-            CategoryInformationValueLabel.setText(product.getCategory());
-            DescriptionInformationValueLabel.setText(product.getDescription());
-            QuantityInformationValueLabel.setText(String.valueOf(product.getStock()));
-            PriceInformationValueLabel.setText(String.valueOf(product.getPrice()));
-        }
-    }
-    
-    private void refreshCategoryTable() {
-        DefaultTableModel model = (DefaultTableModel) CategoryTable.getModel();
-        model.setRowCount(0);
-
-        for (int i = 0; i < currentCategories.size(); i++) {
-            Category category = currentCategories.get(i);
-            Object[] row = {
-                i + 1,
-                category.getCreatedAt(),
-                category.getName(),
-                category.getCreatedBy(),
-                createCategoryDeleteButton(category.getName())
-            };
-            model.addRow(row);
-        }
-    }
-    
     private Object createCategoryDeleteButton(String categoryName) {
+        JPanel panel = new javax.swing.JPanel();
         JButton deleteBtn = new JButton("Delete");
-
+        
         deleteBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -254,63 +753,306 @@ public class InventoryFrame extends javax.swing.JFrame {
                 }
             }
         });
-
-        return deleteBtn;
+        panel.add(deleteBtn);
+        return panel;
     }
     
-    private void refreshSalesReportTable() {
-        DefaultTableModel model = (DefaultTableModel) SalesReportTable.getModel();
+    // Custom renderer for category delete buttons
+    class CategoryButtonRenderer extends JPanel implements TableCellRenderer {
+        private JButton deleteBtn;
+
+        public CategoryButtonRenderer() {
+            setLayout(new FlowLayout(FlowLayout.CENTER, 5, 2));
+            setOpaque(true);
+            deleteBtn = new JButton("Delete");
+
+            // Style button to be more compact
+            Dimension buttonSize = new Dimension(75, 25);
+            deleteBtn.setPreferredSize(buttonSize);
+            deleteBtn.setMaximumSize(buttonSize);
+            deleteBtn.setMinimumSize(buttonSize);
+
+            add(deleteBtn);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            if (isSelected) {
+                setBackground(table.getSelectionBackground());
+
+                deleteBtn.setBackground(new java.awt.Color(234,67,53));
+
+                deleteBtn.setForeground(new java.awt.Color(255, 255, 255));
+            } else {
+                setBackground(table.getBackground());
+
+                deleteBtn.setBackground(new java.awt.Color(234,67,53));
+
+                deleteBtn.setForeground(new java.awt.Color(255, 255, 255));
+            }
+            return this;
+        }
+    }
+    
+    // Custom editor for category delete buttons
+    class CategoryButtonEditor extends AbstractCellEditor implements TableCellEditor {
+        private JPanel panel;
+        private JButton deleteBtn;
+        private String currentCategoryName;
+        private int currentRow; // Track the current row
+
+        public CategoryButtonEditor() {
+            panel = new JPanel();
+            panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 0));
+            panel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+            panel.setOpaque(true);
+
+            deleteBtn = new JButton("Delete");
+
+            // Style button to be more compact
+            Dimension buttonSize = new Dimension(70, 25);
+            deleteBtn.setPreferredSize(buttonSize);
+            deleteBtn.setMaximumSize(buttonSize);
+            deleteBtn.setMinimumSize(buttonSize);
+
+            panel.add(deleteBtn);
+
+            // Add action listener
+            deleteBtn.addActionListener(e -> {
+                int confirm = JOptionPane.showConfirmDialog(null, 
+                    "Are you sure you want to delete this category?", "Confirm Delete", 
+                    JOptionPane.YES_NO_OPTION);
+
+                if (confirm == JOptionPane.YES_OPTION) {
+                    if (CategoryManager.deleteCategory(currentCategoryName)) {
+                        JOptionPane.showMessageDialog(null, "Category deleted successfully!");
+                        // Instead of calling initializeData(), refresh the table more carefully
+                        refreshCategoryTableAfterDelete(currentRow);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Failed to delete category!");
+                    }
+                }
+                fireEditingStopped();
+            });
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value,
+                boolean isSelected, int row, int column) {
+            currentCategoryName = (String) value;
+            currentRow = row; // Store the current row
+
+            if (isSelected) {
+                deleteBtn.setBackground(new java.awt.Color(234,67,53));
+
+                deleteBtn.setForeground(new java.awt.Color(255, 255, 255));
+            } else {
+                deleteBtn.setBackground(new java.awt.Color(234,67,53));
+
+                deleteBtn.setForeground(new java.awt.Color(255, 255, 255));
+            }
+
+            return panel;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            return currentCategoryName;
+        }
+
+        // Helper method to safely refresh the category table after deletion
+        private void refreshCategoryTableAfterDelete(int deletedRow) {
+            // Cancel editing first to avoid synchronization issues
+            if (CategoryTable.isEditing()) {
+                CategoryTable.getCellEditor().cancelCellEditing();
+            }
+
+            // Refresh the data
+            currentCategories = CategoryManager.getAllCategories();
+
+            // Update the table model safely
+            DefaultTableModel model = (DefaultTableModel) CategoryTable.getModel();
+            model.setRowCount(0); // Clear the table
+
+            for (int i = 0; i < currentCategories.size(); i++) {
+                Category category = currentCategories.get(i);
+                Object[] row = {
+                    i + 1,
+                    category.getCreatedAt(),
+                    category.getName(),
+                    category.getCreatedBy(),
+                    category.getName()  // Store category name instead of button panel
+                };
+                model.addRow(row);
+            }
+
+            // Re-set the renderer and editor
+            CategoryTable.getColumnModel().getColumn(4).setCellRenderer(new CategoryButtonRenderer());
+            CategoryTable.getColumnModel().getColumn(4).setCellEditor(new CategoryButtonEditor());
+        }
+    }
+    
+    private void refreshUserTable() {
+        DefaultTableModel model = (DefaultTableModel) AllUsersTable.getModel();
         model.setRowCount(0);
 
-        double totalSales = 0;
-
-        for (SalesRecord record : currentSales) {
+        List<User> users = UserAuthentication.getAllUsers();
+        for (int i = 0; i < users.size(); i++) {
+            User user = users.get(i);
             Object[] row = {
-                record.getDate(),
-                record.getProductName(),
-                record.getPrice(),
-                record.getQuantity(),
-                record.getSubtotal()
+                i + 1,
+                user.getUsername(),
+                user.getRole(),
+                user.getCreatedAt(),
+                user.getUsername()  // Store username for actions
             };
             model.addRow(row);
-            totalSales += record.getSubtotal();
         }
 
-        TotalSalesTableLabel.setText("Total Sales: ₱" + String.format("%.2f", totalSales));
+        // Set up the renderer and editor for the Actions column
+        AllUsersTable.getColumnModel().getColumn(4).setCellRenderer(new UserButtonRenderer());
+        AllUsersTable.getColumnModel().getColumn(4).setCellEditor(new UserButtonEditor());
     }
     
-    private void updateDashboard() {
-        // Update user count (only show for admins)
-        String currentUser = backend.SessionManager.getCurrentUsername();
-        if (backend.UserAuthentication.isAdmin(currentUser)) {
-            UsersAmountLabel.setText(String.valueOf(backend.UserAuthentication.getUserCount()));
-        } else {
-            // Hide users box for non-admins
-            UsersBoxPanel.setVisible(false);
+    // User Button Renderer
+    class UserButtonRenderer extends JPanel implements TableCellRenderer {
+        private JButton deleteBtn;
+
+        public UserButtonRenderer() {
+            setLayout(new FlowLayout(FlowLayout.CENTER, 5, 2));
+            setOpaque(true);
+
+            deleteBtn = new JButton("Delete");
+
+            // Style button to be more compact - same as your existing buttons
+            Dimension buttonSize = new Dimension(70, 25);
+            deleteBtn.setPreferredSize(buttonSize);
+            deleteBtn.setMaximumSize(buttonSize);
+            deleteBtn.setMinimumSize(buttonSize);
+
+            add(deleteBtn);
         }
 
-        // Update other dashboard values
-        TotalItemAmountLabel.setText(String.valueOf(ProductManager.getTotalProducts()));
-        AvailableCategoriesAmountLabel.setText(String.valueOf(CategoryManager.getCategoryCount()));
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            if (isSelected) {
+                setBackground(table.getSelectionBackground());
+                deleteBtn.setBackground(new java.awt.Color(234,67,53)); // Same red color
+                deleteBtn.setForeground(new java.awt.Color(255, 255, 255)); // White text
+            } else {
+                setBackground(table.getBackground());
+                deleteBtn.setBackground(new java.awt.Color(234,67,53)); // Same red color
+                deleteBtn.setForeground(new java.awt.Color(255, 255, 255)); // White text
+            }
+            return this;
+        }
+    }
 
-        // Calculate total sales (you might need to implement this)
-        double totalSales = calculateTotalSales();
-        TotalSalesAmountLabel.setText(String.format("%.2f", totalSales));
+    // User Button Editor
+    class UserButtonEditor extends AbstractCellEditor implements TableCellEditor {
+        private JPanel panel;
+        private JButton deleteBtn;
+        private String currentUsername;
+        private int currentRow; // Track the current row
+
+        public UserButtonEditor() {
+            panel = new JPanel();
+            panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 0));
+            panel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+            panel.setOpaque(true);
+
+            deleteBtn = new JButton("Delete");
+
+            // Style button to be more compact - same as your existing buttons
+            Dimension buttonSize = new Dimension(70, 25);
+            deleteBtn.setPreferredSize(buttonSize);
+            deleteBtn.setMaximumSize(buttonSize);
+            deleteBtn.setMinimumSize(buttonSize);
+
+            panel.add(deleteBtn);
+
+            // Add action listener
+            deleteBtn.addActionListener(e -> {
+                int confirm = JOptionPane.showConfirmDialog(null, 
+                    "Are you sure you want to delete user: " + currentUsername + "?", 
+                    "Confirm Delete", JOptionPane.YES_NO_OPTION);
+
+                if (confirm == JOptionPane.YES_OPTION) {
+                    if (UserAuthentication.deleteUser(currentUsername)) {
+                        JOptionPane.showMessageDialog(null, "User deleted successfully!");
+                        // Instead of calling initializeData(), refresh the table more carefully
+                        refreshUserTableAfterDelete(currentRow);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Failed to delete user!");
+                    }
+                }
+                fireEditingStopped();
+            });
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value,
+                boolean isSelected, int row, int column) {
+            currentUsername = (String) value;
+            currentRow = row; // Store the current row
+
+            if (isSelected) {
+                deleteBtn.setBackground(new java.awt.Color(234,67,53));
+
+                deleteBtn.setForeground(new java.awt.Color(255, 255, 255));
+            } else {
+                deleteBtn.setBackground(new java.awt.Color(234,67,53));
+
+                deleteBtn.setForeground(new java.awt.Color(255, 255, 255));
+            }
+
+            return panel;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            return currentUsername;
+        }
+
+        // Helper method to safely refresh the user table after deletion
+        private void refreshUserTableAfterDelete(int deletedRow) {
+            // Cancel editing first to avoid synchronization issues
+            if (AllUsersTable.isEditing()) {
+                AllUsersTable.getCellEditor().cancelCellEditing();
+            }
+
+            // Update the table model safely
+            DefaultTableModel model = (DefaultTableModel) AllUsersTable.getModel();
+            model.setRowCount(0); // Clear the table
+
+            List<User> users = UserAuthentication.getAllUsers();
+            for (int i = 0; i < users.size(); i++) {
+                User user = users.get(i);
+                Object[] row = {
+                    i + 1,
+                    user.getUsername(),
+                    user.getRole(),
+                    user.getCreatedAt(),
+                    user.getUsername()  // Store username for actions
+                };
+                model.addRow(row);
+            }
+
+            // Re-set the renderer and editor
+            AllUsersTable.getColumnModel().getColumn(4).setCellRenderer(new UserButtonRenderer());
+            AllUsersTable.getColumnModel().getColumn(4).setCellEditor(new UserButtonEditor());
+        }
     }
     
-    private double calculateTotalSales() {
-        // This is a placeholder - you'll need to implement actual sales calculation
-        return 0.0;
-    }
-    
-    
-    private void redirectToLogin() {
-        LoginFrame loginFrame = new LoginFrame();
-        loginFrame.setVisible(true);
-        loginFrame.pack();
-        loginFrame.setLocationRelativeTo(null);
-        backend.SessionManager.logout();
-        this.dispose();
+    private void refreshRoleDropdown() {
+        RoleChoice.removeAll();
+        RoleChoice.add("Admin");
+        RoleChoice.add("User");
+        RoleChoice.add("Clerk");
+        RoleChoice.add("Cashier");
+        // Add other roles as needed
     }
     
     // Custom renderer for action buttons
@@ -318,10 +1060,26 @@ public class InventoryFrame extends javax.swing.JFrame {
         private JButton updateBtn, stockBtn, deleteBtn;
 
         public ButtonRenderer() {
-            setLayout(new FlowLayout(FlowLayout.CENTER, 5, 0));
+            setLayout(new FlowLayout(FlowLayout.CENTER, 5, 2));
+            setOpaque(true);
+
             updateBtn = new JButton("Update");
             stockBtn = new JButton("Stock");
             deleteBtn = new JButton("Delete");
+
+            // Style buttons to be more compact
+            Dimension buttonSize = new Dimension(75, 25);
+            updateBtn.setPreferredSize(buttonSize);
+            updateBtn.setMaximumSize(buttonSize);
+            updateBtn.setMinimumSize(buttonSize);
+
+            stockBtn.setPreferredSize(buttonSize);
+            stockBtn.setMaximumSize(buttonSize);
+            stockBtn.setMinimumSize(buttonSize);
+
+            deleteBtn.setPreferredSize(buttonSize);
+            deleteBtn.setMaximumSize(buttonSize);
+            deleteBtn.setMinimumSize(buttonSize);
 
             add(updateBtn);
             add(stockBtn);
@@ -331,6 +1089,25 @@ public class InventoryFrame extends javax.swing.JFrame {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
+            if (isSelected) {
+                setBackground(table.getSelectionBackground());
+                updateBtn.setBackground(new java.awt.Color(66,133,244));
+                stockBtn.setBackground(new java.awt.Color(52,168,83));
+                deleteBtn.setBackground(new java.awt.Color(234,67,53));
+                
+                updateBtn.setForeground(new java.awt.Color(255, 255, 255));
+                stockBtn.setForeground(new java.awt.Color(255, 255, 255));
+                deleteBtn.setForeground(new java.awt.Color(255, 255, 255));
+            } else {
+                setBackground(table.getBackground());
+                updateBtn.setBackground(new java.awt.Color(66,133,244));
+                stockBtn.setBackground(new java.awt.Color(52,168,83));
+                deleteBtn.setBackground(new java.awt.Color(234,67,53));
+                
+                updateBtn.setForeground(new java.awt.Color(255, 255, 255));
+                stockBtn.setForeground(new java.awt.Color(255, 255, 255));
+                deleteBtn.setForeground(new java.awt.Color(255, 255, 255));
+            }
             return this;
         }
     }
@@ -340,11 +1117,13 @@ public class InventoryFrame extends javax.swing.JFrame {
         private JPanel panel;
         private JButton updateBtn, stockBtn, deleteBtn;
         private int currentProductId;
+        private int currentRow; // Track the current row
 
         public ButtonEditor() {
             panel = new JPanel();
-            panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS)); // Use BoxLayout horizontally
-            panel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2)); // Add some padding
+            panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 0));
+            panel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+            panel.setOpaque(true);
 
             updateBtn = new JButton("Update");
             stockBtn = new JButton("Stock");
@@ -364,11 +1143,8 @@ public class InventoryFrame extends javax.swing.JFrame {
             deleteBtn.setMaximumSize(buttonSize);
             deleteBtn.setMinimumSize(buttonSize);
 
-            // Add small gaps between buttons
             panel.add(updateBtn);
-            panel.add(Box.createHorizontalStrut(5)); // 5px gap
             panel.add(stockBtn);
-            panel.add(Box.createHorizontalStrut(5)); // 5px gap
             panel.add(deleteBtn);
 
             // Add action listeners
@@ -394,7 +1170,8 @@ public class InventoryFrame extends javax.swing.JFrame {
                 if (confirm == JOptionPane.YES_OPTION) {
                     if (ProductManager.deleteProduct(currentProductId)) {
                         JOptionPane.showMessageDialog(null, "Product deleted successfully!");
-                        initializeData(); // Refresh data
+                        // Instead of calling initializeData(), refresh the table more carefully
+                        refreshTableAfterDelete(currentRow);
                     } else {
                         JOptionPane.showMessageDialog(null, "Failed to delete product!");
                     }
@@ -407,6 +1184,26 @@ public class InventoryFrame extends javax.swing.JFrame {
         public Component getTableCellEditorComponent(JTable table, Object value,
                 boolean isSelected, int row, int column) {
             currentProductId = (Integer) value;
+            currentRow = row; // Store the current row
+
+            if (isSelected) {
+                updateBtn.setBackground(new java.awt.Color(66,133,244));
+                stockBtn.setBackground(new java.awt.Color(52,168,83));
+                deleteBtn.setBackground(new java.awt.Color(234,67,53));
+                
+                updateBtn.setForeground(new java.awt.Color(255, 255, 255));
+                stockBtn.setForeground(new java.awt.Color(255, 255, 255));
+                deleteBtn.setForeground(new java.awt.Color(255, 255, 255));
+            } else {
+                updateBtn.setBackground(new java.awt.Color(66,133,244));
+                stockBtn.setBackground(new java.awt.Color(52,168,83));
+                deleteBtn.setBackground(new java.awt.Color(234,67,53));
+                
+                updateBtn.setForeground(new java.awt.Color(255, 255, 255));
+                stockBtn.setForeground(new java.awt.Color(255, 255, 255));
+                deleteBtn.setForeground(new java.awt.Color(255, 255, 255));
+            }
+
             return panel;
         }
 
@@ -414,6 +1211,51 @@ public class InventoryFrame extends javax.swing.JFrame {
         public Object getCellEditorValue() {
             return currentProductId;
         }
+
+        // Helper method to safely refresh the table after deletion
+        private void refreshTableAfterDelete(int deletedRow) {
+            // Use SwingUtilities to ensure thread safety
+            SwingUtilities.invokeLater(() -> {
+                // Cancel editing first to avoid synchronization issues
+                if (InventoryTable.isEditing()) {
+                    InventoryTable.getCellEditor().cancelCellEditing();
+                }
+
+                // Refresh the data
+                currentProducts = ProductManager.getAllProducts();
+
+                // Update the table model safely
+                DefaultTableModel model = (DefaultTableModel) InventoryTable.getModel();
+                model.setRowCount(0); // Clear the table
+
+                for (int i = 0; i < currentProducts.size(); i++) {
+                    Product product = currentProducts.get(i);
+                    Object[] row = {
+                        i + 1,
+                        product.getId(),
+                        product.getName(),
+                        product.getCategory(),
+                        product.getDescription(),
+                        product.getPrice(),
+                        product.getId()  // Store product ID instead of the panel
+                    };
+                    model.addRow(row);
+                }
+
+                // Re-set the renderer and editor
+                if (InventoryTable.getColumnModel().getColumnCount() > 7) {
+                    InventoryTable.getColumnModel().getColumn(7).setCellRenderer(new ButtonRenderer());
+                    InventoryTable.getColumnModel().getColumn(7).setCellEditor(new ButtonEditor());
+                }
+            });
+        }
+    }
+    
+    @Override
+    public void dispose() {
+        // Clean up resources
+        DatabaseConnection.closeConnection();
+        super.dispose();
     }
     
     @SuppressWarnings("unchecked")
@@ -477,8 +1319,6 @@ public class InventoryFrame extends javax.swing.JFrame {
         DescriptionLabel = new javax.swing.JLabel();
         DescriptionTextField = new javax.swing.JTextField();
         AddItemConfirmButton = new javax.swing.JButton();
-        ItemIDLabel = new javax.swing.JLabel();
-        ItemIDTextBar = new javax.swing.JTextField();
         ChooseImageLabel = new javax.swing.JLabel();
         ChooseImagePathTextField = new java.awt.TextField();
         ChooseImageFileButton = new javax.swing.JButton();
@@ -533,9 +1373,12 @@ public class InventoryFrame extends javax.swing.JFrame {
         AllUsersPanel = new javax.swing.JPanel();
         jScrollPane4 = new javax.swing.JScrollPane();
         AllUsersTable = new javax.swing.JTable();
-        DeleteUserTextBar = new javax.swing.JButton();
-        ItemInformationPanelLabel1 = new javax.swing.JLabel();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        ActivityLogTable = new javax.swing.JTable();
+        ActivityLogPanelLabel = new javax.swing.JLabel();
+        DeleteActivityLogConfirmButton3 = new javax.swing.JButton();
         AddStockPanelLabel1 = new javax.swing.JLabel();
+        ItemInformationPanelLabel1 = new javax.swing.JLabel();
         footer5 = new javax.swing.JPanel();
         StockEntryTab = new javax.swing.JPanel();
         header6 = new javax.swing.JPanel();
@@ -568,30 +1411,28 @@ public class InventoryFrame extends javax.swing.JFrame {
         ItemNameUpdateLabel = new javax.swing.JLabel();
         ItemNameUpdateTextBar = new javax.swing.JTextField();
         CategoryUpdateLabel = new javax.swing.JLabel();
-        CategoryUpdateText = new javax.swing.JTextField();
         PriceUpdateLabel = new javax.swing.JLabel();
         PriceUpdateText = new javax.swing.JTextField();
         DescriptionUpdateLabel = new javax.swing.JLabel();
         DescriptionUpdateTextField = new javax.swing.JTextField();
         AddItemConfirmUpdateButton = new javax.swing.JButton();
-        ItemIDUpdateLabel = new javax.swing.JLabel();
-        ItemIDUpdateTextBar = new javax.swing.JTextField();
         ChooseImageUpdateLabel = new javax.swing.JLabel();
         ChooseImagePathUpdateTextField = new java.awt.TextField();
         ChooseImageFileUpdateButton = new javax.swing.JButton();
+        CategoryChoiceUpdate = new java.awt.Choice();
         footer8 = new javax.swing.JPanel();
         UpdateItemPanelLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Inventory");
+        setBackground(new java.awt.Color(201, 177, 158));
         setLocationByPlatform(true);
         setMaximizedBounds(new java.awt.Rectangle(0, 0, 1000, 600));
         setMinimumSize(new java.awt.Dimension(1000, 600));
         setPreferredSize(new java.awt.Dimension(1000, 600));
         setSize(new java.awt.Dimension(1000, 600));
-        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jPanel1.setBackground(new java.awt.Color(153, 153, 153));
+        jPanel1.setBackground(new java.awt.Color(201, 177, 158));
         jPanel1.setPreferredSize(new java.awt.Dimension(1000, 600));
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -893,11 +1734,11 @@ public class InventoryFrame extends javax.swing.JFrame {
 
             },
             new String [] {
-                "#", "ID", "Name", "Category", "Description", "Quantity", "Price", "Actions"
+                "#", "ID", "Name", "Category", "Description", "Price", "Quantity", "Actions"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.Integer.class, java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Float.class, java.lang.Integer.class
+                java.lang.Integer.class, java.lang.Integer.class, java.lang.Object.class, java.lang.String.class, java.lang.String.class, java.lang.Float.class, java.lang.Integer.class, java.lang.Integer.class
             };
             boolean[] canEdit = new boolean [] {
                 false, false, false, false, false, false, false, true
@@ -913,7 +1754,7 @@ public class InventoryFrame extends javax.swing.JFrame {
         });
         InventoryTable.setFillsViewportHeight(true);
         InventoryTable.setGridColor(new java.awt.Color(121, 63, 26));
-        InventoryTable.setRowHeight(35);
+        InventoryTable.setRowHeight(60);
         InventoryTable.setSelectionBackground(new java.awt.Color(173, 103, 48));
         InventoryTable.setSelectionForeground(new java.awt.Color(249, 241, 240));
         InventoryTable.setShowGrid(true);
@@ -922,21 +1763,21 @@ public class InventoryFrame extends javax.swing.JFrame {
         jScrollPane1.setViewportView(InventoryTable);
         if (InventoryTable.getColumnModel().getColumnCount() > 0) {
             InventoryTable.getColumnModel().getColumn(0).setResizable(false);
-            InventoryTable.getColumnModel().getColumn(0).setPreferredWidth(10);
+            InventoryTable.getColumnModel().getColumn(0).setPreferredWidth(5);
             InventoryTable.getColumnModel().getColumn(1).setResizable(false);
-            InventoryTable.getColumnModel().getColumn(1).setPreferredWidth(10);
+            InventoryTable.getColumnModel().getColumn(1).setPreferredWidth(5);
             InventoryTable.getColumnModel().getColumn(2).setResizable(false);
             InventoryTable.getColumnModel().getColumn(2).setPreferredWidth(50);
             InventoryTable.getColumnModel().getColumn(3).setResizable(false);
             InventoryTable.getColumnModel().getColumn(3).setPreferredWidth(50);
             InventoryTable.getColumnModel().getColumn(4).setResizable(false);
-            InventoryTable.getColumnModel().getColumn(4).setPreferredWidth(50);
+            InventoryTable.getColumnModel().getColumn(4).setPreferredWidth(100);
             InventoryTable.getColumnModel().getColumn(5).setResizable(false);
-            InventoryTable.getColumnModel().getColumn(5).setPreferredWidth(10);
+            InventoryTable.getColumnModel().getColumn(5).setPreferredWidth(5);
             InventoryTable.getColumnModel().getColumn(6).setResizable(false);
-            InventoryTable.getColumnModel().getColumn(6).setPreferredWidth(10);
+            InventoryTable.getColumnModel().getColumn(6).setPreferredWidth(5);
             InventoryTable.getColumnModel().getColumn(7).setResizable(false);
-            InventoryTable.getColumnModel().getColumn(7).setPreferredWidth(100);
+            InventoryTable.getColumnModel().getColumn(7).setPreferredWidth(175);
         }
 
         InventoryTablePanel.add(jScrollPane1);
@@ -946,6 +1787,20 @@ public class InventoryFrame extends javax.swing.JFrame {
         InventorySearchBar.setBackground(new java.awt.Color(249, 241, 240));
         InventorySearchBar.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         InventorySearchBar.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.LOWERED));
+        InventorySearchBar.getDocument().addDocumentListener(new DocumentListener() {
+
+            public void insertUpdate(DocumentEvent e) {
+                filterInventoryTable();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                filterInventoryTable();
+            }
+
+            public void changedUpdate(DocumentEvent e) {
+                filterInventoryTable();
+            }
+        });
         InventorySearchBar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 InventorySearchBarActionPerformed(evt);
@@ -1012,7 +1867,7 @@ public class InventoryFrame extends javax.swing.JFrame {
         ItemNameLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         ItemNameLabel.setForeground(new java.awt.Color(31, 40, 35));
         ItemNameLabel.setText("Item Name");
-        AddItemPanel.add(ItemNameLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, 140, 20));
+        AddItemPanel.add(ItemNameLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, 140, 20));
 
         ItemNameTextBar.setBackground(new java.awt.Color(249, 241, 240));
         ItemNameTextBar.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
@@ -1022,17 +1877,17 @@ public class InventoryFrame extends javax.swing.JFrame {
                 ItemNameTextBarActionPerformed(evt);
             }
         });
-        AddItemPanel.add(ItemNameTextBar, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 90, 730, 30));
+        AddItemPanel.add(ItemNameTextBar, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 40, 680, 30));
 
         CategoryLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         CategoryLabel.setForeground(new java.awt.Color(31, 40, 35));
         CategoryLabel.setText("Category");
-        AddItemPanel.add(CategoryLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 190, 140, 20));
+        AddItemPanel.add(CategoryLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 140, 140, 20));
 
         PriceLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         PriceLabel.setForeground(new java.awt.Color(31, 40, 35));
         PriceLabel.setText("Price");
-        AddItemPanel.add(PriceLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 130, 140, 20));
+        AddItemPanel.add(PriceLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, 140, 20));
 
         PriceText.setBackground(new java.awt.Color(249, 241, 240));
         PriceText.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
@@ -1042,22 +1897,22 @@ public class InventoryFrame extends javax.swing.JFrame {
                 PriceTextActionPerformed(evt);
             }
         });
-        AddItemPanel.add(PriceText, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 150, 730, 30));
+        AddItemPanel.add(PriceText, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 100, 680, 30));
 
         DescriptionLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         DescriptionLabel.setForeground(new java.awt.Color(31, 40, 35));
         DescriptionLabel.setText("Item Description");
-        AddItemPanel.add(DescriptionLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 310, 140, 20));
+        AddItemPanel.add(DescriptionLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 260, 140, 20));
 
         DescriptionTextField.setBackground(new java.awt.Color(249, 241, 240));
         DescriptionTextField.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         DescriptionTextField.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.LOWERED));
-        AddItemPanel.add(DescriptionTextField, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 340, 730, 80));
+        AddItemPanel.add(DescriptionTextField, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 290, 680, 60));
 
         AddItemConfirmButton.setBackground(new java.awt.Color(173, 103, 48));
         AddItemConfirmButton.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         AddItemConfirmButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ui/Images/icons/queue.png"))); // NOI18N
-        AddItemConfirmButton.setText("ADD ITEM");
+        AddItemConfirmButton.setText("ADD");
         AddItemConfirmButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         AddItemConfirmButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         AddItemConfirmButton.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -1068,37 +1923,24 @@ public class InventoryFrame extends javax.swing.JFrame {
                 AddItemConfirmButtonActionPerformed(evt);
             }
         });
-        AddItemPanel.add(AddItemConfirmButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 430, 120, 40));
-
-        ItemIDLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        ItemIDLabel.setForeground(new java.awt.Color(31, 40, 35));
-        ItemIDLabel.setText("Item ID");
-        AddItemPanel.add(ItemIDLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, 140, 20));
-
-        ItemIDTextBar.setBackground(new java.awt.Color(249, 241, 240));
-        ItemIDTextBar.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        ItemIDTextBar.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.LOWERED));
-        ItemIDTextBar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ItemIDTextBarActionPerformed(evt);
-            }
-        });
-        AddItemPanel.add(ItemIDTextBar, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 30, 730, 30));
+        AddItemPanel.add(AddItemConfirmButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 400, 120, 40));
 
         ChooseImageLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         ChooseImageLabel.setForeground(new java.awt.Color(31, 40, 35));
         ChooseImageLabel.setText("Item Image");
-        AddItemPanel.add(ChooseImageLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 250, 140, 20));
+        AddItemPanel.add(ChooseImageLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 200, 140, 20));
 
         ChooseImagePathTextField.setBackground(new java.awt.Color(249, 241, 240));
+        ChooseImagePathTextField.setCursor(new java.awt.Cursor(java.awt.Cursor.TEXT_CURSOR));
         ChooseImagePathTextField.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         ChooseImagePathTextField.setForeground(new java.awt.Color(31, 40, 35));
+        ChooseImagePathTextField.setText("\\ui\\images\\product_images\\default.png");
         ChooseImagePathTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 ChooseImagePathTextFieldActionPerformed(evt);
             }
         });
-        AddItemPanel.add(ChooseImagePathTextField, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 280, 360, 20));
+        AddItemPanel.add(ChooseImagePathTextField, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 230, 360, 20));
 
         ChooseImageFileButton.setBackground(new java.awt.Color(249, 241, 240));
         ChooseImageFileButton.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
@@ -1113,12 +1955,12 @@ public class InventoryFrame extends javax.swing.JFrame {
                 ChooseImageFileButtonActionPerformed(evt);
             }
         });
-        AddItemPanel.add(ChooseImageFileButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 270, 120, 40));
+        AddItemPanel.add(ChooseImageFileButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 220, 120, 40));
 
         CategoryChoice.setBackground(new java.awt.Color(249, 241, 240));
-        AddItemPanel.add(CategoryChoice, new org.netbeans.lib.awtextra.AbsoluteConstraints(18, 210, 730, 40));
+        AddItemPanel.add(CategoryChoice, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 160, 680, 40));
 
-        AddItemContentPanel.add(AddItemPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 770, 480));
+        AddItemContentPanel.add(AddItemPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 20, 730, 460));
 
         AddItemTab.add(AddItemContentPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 50, 790, 500));
 
@@ -1364,7 +2206,7 @@ public class InventoryFrame extends javax.swing.JFrame {
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
                 false, false, false, false, true
@@ -1576,9 +2418,9 @@ public class InventoryFrame extends javax.swing.JFrame {
                 AddNewUserConfirmButton2ActionPerformed(evt);
             }
         });
-        AddUsersPanel.add(AddNewUserConfirmButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 380, -1, -1));
+        AddUsersPanel.add(AddNewUserConfirmButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 390, -1, -1));
 
-        UserManagementContentPanel.add(AddUsersPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 40, 260, 450));
+        UserManagementContentPanel.add(AddUsersPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 40, 240, 450));
 
         AllUsersPanel.setBackground(new java.awt.Color(201, 177, 158));
         AllUsersPanel.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.LOWERED));
@@ -1596,7 +2438,7 @@ public class InventoryFrame extends javax.swing.JFrame {
 
             },
             new String [] {
-                "#", "Username", "Account Type", "Date/Time Created", "Action"
+                "UserID", "Username", "Account Type", "Date/Time Created", "Action"
             }
         ) {
             Class[] types = new Class [] {
@@ -1616,6 +2458,7 @@ public class InventoryFrame extends javax.swing.JFrame {
         });
         AllUsersTable.setFillsViewportHeight(true);
         AllUsersTable.setGridColor(new java.awt.Color(121, 63, 26));
+        AllUsersTable.setPreferredSize(new java.awt.Dimension(480, 180));
         AllUsersTable.setRowHeight(35);
         AllUsersTable.setSelectionBackground(new java.awt.Color(173, 103, 48));
         AllUsersTable.setSelectionForeground(new java.awt.Color(249, 241, 240));
@@ -1625,51 +2468,110 @@ public class InventoryFrame extends javax.swing.JFrame {
         jScrollPane4.setViewportView(AllUsersTable);
         if (AllUsersTable.getColumnModel().getColumnCount() > 0) {
             AllUsersTable.getColumnModel().getColumn(0).setResizable(false);
-            AllUsersTable.getColumnModel().getColumn(0).setPreferredWidth(50);
+            AllUsersTable.getColumnModel().getColumn(0).setPreferredWidth(5);
             AllUsersTable.getColumnModel().getColumn(1).setResizable(false);
-            AllUsersTable.getColumnModel().getColumn(1).setPreferredWidth(70);
+            AllUsersTable.getColumnModel().getColumn(1).setPreferredWidth(50);
             AllUsersTable.getColumnModel().getColumn(2).setResizable(false);
-            AllUsersTable.getColumnModel().getColumn(2).setPreferredWidth(70);
+            AllUsersTable.getColumnModel().getColumn(2).setPreferredWidth(50);
             AllUsersTable.getColumnModel().getColumn(3).setResizable(false);
             AllUsersTable.getColumnModel().getColumn(3).setPreferredWidth(100);
             AllUsersTable.getColumnModel().getColumn(4).setResizable(false);
             AllUsersTable.getColumnModel().getColumn(4).setPreferredWidth(100);
         }
 
-        AllUsersPanel.add(jScrollPane4, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 480, 380));
+        AllUsersPanel.add(jScrollPane4, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 500, 200));
 
-        DeleteUserTextBar.setBackground(new java.awt.Color(173, 103, 48));
-        DeleteUserTextBar.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        DeleteUserTextBar.setText("DELETE USER");
-        DeleteUserTextBar.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        DeleteUserTextBar.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        DeleteUserTextBar.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-        DeleteUserTextBar.setIconTextGap(10);
-        DeleteUserTextBar.setPreferredSize(new java.awt.Dimension(120, 40));
-        DeleteUserTextBar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                DeleteUserTextBarActionPerformed(evt);
+        jScrollPane5.setPreferredSize(new java.awt.Dimension(480, 180));
+
+        ActivityLogTable.setBackground(new java.awt.Color(249, 241, 240));
+        ActivityLogTable.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.LOWERED));
+        ActivityLogTable.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        ActivityLogTable.setForeground(new java.awt.Color(31, 40, 35));
+        ActivityLogTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "#", "User", "Type ", "Description", "Date/Time"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
             }
         });
-        AllUsersPanel.add(DeleteUserTextBar, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 400, -1, -1));
+        ActivityLogTable.setFillsViewportHeight(true);
+        ActivityLogTable.setGridColor(new java.awt.Color(121, 63, 26));
+        ActivityLogTable.setPreferredSize(new java.awt.Dimension(480, 180));
+        ActivityLogTable.setRowHeight(35);
+        ActivityLogTable.setSelectionBackground(new java.awt.Color(173, 103, 48));
+        ActivityLogTable.setSelectionForeground(new java.awt.Color(249, 241, 240));
+        ActivityLogTable.setShowGrid(true);
+        ActivityLogTable.getTableHeader().setResizingAllowed(false);
+        ActivityLogTable.getTableHeader().setReorderingAllowed(false);
+        jScrollPane5.setViewportView(ActivityLogTable);
+        if (ActivityLogTable.getColumnModel().getColumnCount() > 0) {
+            ActivityLogTable.getColumnModel().getColumn(0).setResizable(false);
+            ActivityLogTable.getColumnModel().getColumn(0).setPreferredWidth(5);
+            ActivityLogTable.getColumnModel().getColumn(1).setResizable(false);
+            ActivityLogTable.getColumnModel().getColumn(1).setPreferredWidth(50);
+            ActivityLogTable.getColumnModel().getColumn(2).setResizable(false);
+            ActivityLogTable.getColumnModel().getColumn(2).setPreferredWidth(50);
+            ActivityLogTable.getColumnModel().getColumn(3).setResizable(false);
+            ActivityLogTable.getColumnModel().getColumn(3).setPreferredWidth(150);
+            ActivityLogTable.getColumnModel().getColumn(4).setResizable(false);
+            ActivityLogTable.getColumnModel().getColumn(4).setPreferredWidth(100);
+        }
 
-        UserManagementContentPanel.add(AllUsersPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 40, 500, 450));
+        AllUsersPanel.add(jScrollPane5, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 260, 500, 180));
 
-        ItemInformationPanelLabel1.setBackground(new java.awt.Color(249, 241, 240));
-        ItemInformationPanelLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        ItemInformationPanelLabel1.setForeground(new java.awt.Color(255, 255, 255));
-        ItemInformationPanelLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        ItemInformationPanelLabel1.setText("ALL USERS");
-        ItemInformationPanelLabel1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        UserManagementContentPanel.add(ItemInformationPanelLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 0, 500, 40));
+        ActivityLogPanelLabel.setBackground(new java.awt.Color(249, 241, 240));
+        ActivityLogPanelLabel.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        ActivityLogPanelLabel.setForeground(new java.awt.Color(255, 255, 255));
+        ActivityLogPanelLabel.setText("ACTIVITY LOG");
+        ActivityLogPanelLabel.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        AllUsersPanel.add(ActivityLogPanelLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 210, 240, 50));
+
+        DeleteActivityLogConfirmButton3.setBackground(new java.awt.Color(173, 103, 48));
+        DeleteActivityLogConfirmButton3.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        DeleteActivityLogConfirmButton3.setText("DELETE LOG");
+        DeleteActivityLogConfirmButton3.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        DeleteActivityLogConfirmButton3.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        DeleteActivityLogConfirmButton3.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        DeleteActivityLogConfirmButton3.setIconTextGap(10);
+        DeleteActivityLogConfirmButton3.setPreferredSize(new java.awt.Dimension(120, 40));
+        DeleteActivityLogConfirmButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                DeleteActivityLogConfirmButton3ActionPerformed(evt);
+            }
+        });
+        AllUsersPanel.add(DeleteActivityLogConfirmButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 220, 90, 30));
+
+        UserManagementContentPanel.add(AllUsersPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 40, 520, 450));
 
         AddStockPanelLabel1.setBackground(new java.awt.Color(249, 241, 240));
         AddStockPanelLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         AddStockPanelLabel1.setForeground(new java.awt.Color(255, 255, 255));
-        AddStockPanelLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         AddStockPanelLabel1.setText("ADD USERS");
         AddStockPanelLabel1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        UserManagementContentPanel.add(AddStockPanelLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 260, 40));
+        UserManagementContentPanel.add(AddStockPanelLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 240, 40));
+
+        ItemInformationPanelLabel1.setBackground(new java.awt.Color(249, 241, 240));
+        ItemInformationPanelLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        ItemInformationPanelLabel1.setForeground(new java.awt.Color(255, 255, 255));
+        ItemInformationPanelLabel1.setText("ALL USERS");
+        ItemInformationPanelLabel1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        UserManagementContentPanel.add(ItemInformationPanelLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 0, 520, 40));
 
         UserManagementTab.add(UserManagementContentPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 50, 790, 500));
 
@@ -1890,7 +2792,7 @@ public class InventoryFrame extends javax.swing.JFrame {
         ItemNameUpdateLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         ItemNameUpdateLabel.setForeground(new java.awt.Color(31, 40, 35));
         ItemNameUpdateLabel.setText("Item Name");
-        UpdateItemPanelContent.add(ItemNameUpdateLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, 140, 20));
+        UpdateItemPanelContent.add(ItemNameUpdateLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, 140, 20));
 
         ItemNameUpdateTextBar.setBackground(new java.awt.Color(249, 241, 240));
         ItemNameUpdateTextBar.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
@@ -1900,27 +2802,17 @@ public class InventoryFrame extends javax.swing.JFrame {
                 ItemNameUpdateTextBarActionPerformed(evt);
             }
         });
-        UpdateItemPanelContent.add(ItemNameUpdateTextBar, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 90, 670, 30));
+        UpdateItemPanelContent.add(ItemNameUpdateTextBar, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 30, 680, 30));
 
         CategoryUpdateLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         CategoryUpdateLabel.setForeground(new java.awt.Color(31, 40, 35));
         CategoryUpdateLabel.setText("Category");
-        UpdateItemPanelContent.add(CategoryUpdateLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 190, 140, 20));
-
-        CategoryUpdateText.setBackground(new java.awt.Color(249, 241, 240));
-        CategoryUpdateText.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        CategoryUpdateText.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.LOWERED));
-        CategoryUpdateText.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                CategoryUpdateTextActionPerformed(evt);
-            }
-        });
-        UpdateItemPanelContent.add(CategoryUpdateText, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 210, 670, 30));
+        UpdateItemPanelContent.add(CategoryUpdateLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 130, 140, 20));
 
         PriceUpdateLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         PriceUpdateLabel.setForeground(new java.awt.Color(31, 40, 35));
         PriceUpdateLabel.setText("Price");
-        UpdateItemPanelContent.add(PriceUpdateLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 130, 140, 20));
+        UpdateItemPanelContent.add(PriceUpdateLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, 140, 20));
 
         PriceUpdateText.setBackground(new java.awt.Color(249, 241, 240));
         PriceUpdateText.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
@@ -1930,22 +2822,22 @@ public class InventoryFrame extends javax.swing.JFrame {
                 PriceUpdateTextActionPerformed(evt);
             }
         });
-        UpdateItemPanelContent.add(PriceUpdateText, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 150, 670, 30));
+        UpdateItemPanelContent.add(PriceUpdateText, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 90, 680, 30));
 
         DescriptionUpdateLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         DescriptionUpdateLabel.setForeground(new java.awt.Color(31, 40, 35));
         DescriptionUpdateLabel.setText("Item Description");
-        UpdateItemPanelContent.add(DescriptionUpdateLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 310, 140, 20));
+        UpdateItemPanelContent.add(DescriptionUpdateLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 250, 140, 20));
 
         DescriptionUpdateTextField.setBackground(new java.awt.Color(249, 241, 240));
         DescriptionUpdateTextField.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         DescriptionUpdateTextField.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.LOWERED));
-        UpdateItemPanelContent.add(DescriptionUpdateTextField, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 340, 670, 60));
+        UpdateItemPanelContent.add(DescriptionUpdateTextField, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 280, 680, 60));
 
         AddItemConfirmUpdateButton.setBackground(new java.awt.Color(173, 103, 48));
         AddItemConfirmUpdateButton.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         AddItemConfirmUpdateButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/ui/Images/icons/queue.png"))); // NOI18N
-        AddItemConfirmUpdateButton.setText("ADD ITEM");
+        AddItemConfirmUpdateButton.setText("UPDATE");
         AddItemConfirmUpdateButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         AddItemConfirmUpdateButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         AddItemConfirmUpdateButton.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
@@ -1956,37 +2848,23 @@ public class InventoryFrame extends javax.swing.JFrame {
                 AddItemConfirmUpdateButtonActionPerformed(evt);
             }
         });
-        UpdateItemPanelContent.add(AddItemConfirmUpdateButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 410, 120, 40));
-
-        ItemIDUpdateLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        ItemIDUpdateLabel.setForeground(new java.awt.Color(31, 40, 35));
-        ItemIDUpdateLabel.setText("Item ID");
-        UpdateItemPanelContent.add(ItemIDUpdateLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, 140, 20));
-
-        ItemIDUpdateTextBar.setBackground(new java.awt.Color(249, 241, 240));
-        ItemIDUpdateTextBar.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        ItemIDUpdateTextBar.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.LOWERED));
-        ItemIDUpdateTextBar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ItemIDUpdateTextBarActionPerformed(evt);
-            }
-        });
-        UpdateItemPanelContent.add(ItemIDUpdateTextBar, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 30, 670, 30));
+        UpdateItemPanelContent.add(AddItemConfirmUpdateButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 390, 120, 40));
 
         ChooseImageUpdateLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         ChooseImageUpdateLabel.setForeground(new java.awt.Color(31, 40, 35));
         ChooseImageUpdateLabel.setText("Item Image");
-        UpdateItemPanelContent.add(ChooseImageUpdateLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 250, 140, 20));
+        UpdateItemPanelContent.add(ChooseImageUpdateLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 190, 140, 20));
 
         ChooseImagePathUpdateTextField.setBackground(new java.awt.Color(249, 241, 240));
         ChooseImagePathUpdateTextField.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         ChooseImagePathUpdateTextField.setForeground(new java.awt.Color(31, 40, 35));
+        ChooseImagePathUpdateTextField.setText("\\ui\\images\\product_images\\default.png");
         ChooseImagePathUpdateTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 ChooseImagePathUpdateTextFieldActionPerformed(evt);
             }
         });
-        UpdateItemPanelContent.add(ChooseImagePathUpdateTextField, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 280, 360, 20));
+        UpdateItemPanelContent.add(ChooseImagePathUpdateTextField, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 220, 360, 20));
 
         ChooseImageFileUpdateButton.setBackground(new java.awt.Color(249, 241, 240));
         ChooseImageFileUpdateButton.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
@@ -2001,9 +2879,12 @@ public class InventoryFrame extends javax.swing.JFrame {
                 ChooseImageFileUpdateButtonActionPerformed(evt);
             }
         });
-        UpdateItemPanelContent.add(ChooseImageFileUpdateButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 270, 120, 40));
+        UpdateItemPanelContent.add(ChooseImageFileUpdateButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 210, 120, 40));
 
-        UpdateEntryTab.add(UpdateItemPanelContent, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 80, 720, 460));
+        CategoryChoiceUpdate.setBackground(new java.awt.Color(249, 241, 240));
+        UpdateItemPanelContent.add(CategoryChoiceUpdate, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 150, 680, 40));
+
+        UpdateEntryTab.add(UpdateItemPanelContent, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 80, 730, 460));
 
         footer8.setBackground(new java.awt.Color(121, 63, 26));
         footer8.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.LOWERED));
@@ -2022,7 +2903,16 @@ public class InventoryFrame extends javax.swing.JFrame {
 
         jPanel1.add(MainTabbedPane, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 0, -1, -1));
 
-        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        );
 
         getAccessibleContext().setAccessibleName("INVENTORY");
 
@@ -2073,7 +2963,7 @@ public class InventoryFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_DashboardButtonActionPerformed
 
     private void InventorySearchBarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_InventorySearchBarActionPerformed
-        // TODO add your handling code here:
+        filterInventoryTable();
     }//GEN-LAST:event_InventorySearchBarActionPerformed
 
     private void ItemNameTextBarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ItemNameTextBarActionPerformed
@@ -2086,58 +2976,82 @@ public class InventoryFrame extends javax.swing.JFrame {
 
     private void AddItemConfirmButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddItemConfirmButtonActionPerformed
         try {
+            // Get the ID from the text field
             String name = ItemNameTextBar.getText();
             String category = CategoryChoice.getSelectedItem();
             double price = Double.parseDouble(PriceText.getText());
             String description = DescriptionTextField.getText();
             String imagePath = ChooseImagePathTextField.getText();
 
-            Product product = new Product(0, name, description, price, 0, category, imagePath);
+            // Validate input
+            if (name.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter a product name!");
+                return;
+            }
+
+            if (category == null || category.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please select a category!");
+                return;
+            }
+
+            if (description.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter a description!");
+                return;
+            }
+
+            if (price <= 0) {
+                JOptionPane.showMessageDialog(this, "Please enter a valid price (positive number)!");
+                return;
+            }
+
+            Product product = new Product(0, name, category, price, description, imagePath);
 
             if (ProductManager.addProduct(product)) {
                 JOptionPane.showMessageDialog(this, "Product added successfully!");
                 clearAddItemForm();
                 initializeData(); // Refresh data
             } else {
-                JOptionPane.showMessageDialog(this, "Failed to add product!");
+                JOptionPane.showMessageDialog(this, "Failed to add product! Product ID may already exist.");
             }
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Please enter valid price!");
+            JOptionPane.showMessageDialog(this, "Please enter valid ID and price!");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "An error occurred: " + e.getMessage());
         }
     }//GEN-LAST:event_AddItemConfirmButtonActionPerformed
 
-    private void clearAddItemForm() {
-        ItemNameTextBar.setText("");
-        PriceText.setText("");
-        DescriptionTextField.setText("");
-        ChooseImagePathTextField.setText("");
-    }
-    
-    private void ItemIDTextBarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ItemIDTextBarActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_ItemIDTextBarActionPerformed
-
     private void ChooseImageFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ChooseImageFileButtonActionPerformed
-        JFileChooser filechooser = new JFileChooser();
-        
+        JFileChooser fileChooser = new JFileChooser();
+
         FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
-        "Image files (JPG, JPEG, PNG, GIF, BMP)", 
-        "jpg", "jpeg", "png", "gif", "bmp"
+            "Image files (JPG, JPEG, PNG, GIF, BMP)", 
+            "jpg", "jpeg", "png", "gif", "bmp"
         );
-        
-        filechooser.setFileFilter(imageFilter);
-        
-        int result = filechooser.showOpenDialog(null);
-        
-         if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File f = filechooser.getSelectedFile();
-            String filename = f.getAbsolutePath();
-            ChooseImagePathTextField.setText(filename);
+
+        fileChooser.setFileFilter(imageFilter);
+
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            String filePath = file.getAbsolutePath();
+            ChooseImagePathTextField.setText(filePath); // Set the ADD form field
         }
     }//GEN-LAST:event_ChooseImageFileButtonActionPerformed
 
     private void ChooseImagePathTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ChooseImagePathTextFieldActionPerformed
-        // TODO add your handling code here:
+        JFileChooser fileChooser = new JFileChooser();
+
+        FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
+            "Image files (JPG, JPEG, PNG, GIF, BMP)", 
+            "jpg", "jpeg", "png", "gif", "bmp"
+        );
+
+        fileChooser.setFileFilter(imageFilter);
+
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            String filePath = file.getAbsolutePath();
+            ChooseImagePathTextField.setText(filePath); // Set the ADD form field
+        }
     }//GEN-LAST:event_ChooseImagePathTextFieldActionPerformed
 
     private void StockEntryTextBarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_StockEntryTextBarActionPerformed
@@ -2145,16 +3059,12 @@ public class InventoryFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_StockEntryTextBarActionPerformed
 
     private void AddItemConfirmButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddItemConfirmButton1ActionPerformed
-        // TODO add your handling code here:
+        addStock();
     }//GEN-LAST:event_AddItemConfirmButton1ActionPerformed
 
     private void ItemNameUpdateTextBarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ItemNameUpdateTextBarActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_ItemNameUpdateTextBarActionPerformed
-
-    private void CategoryUpdateTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CategoryUpdateTextActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_CategoryUpdateTextActionPerformed
 
     private void PriceUpdateTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_PriceUpdateTextActionPerformed
         // TODO add your handling code here:
@@ -2162,14 +3072,13 @@ public class InventoryFrame extends javax.swing.JFrame {
 
     private void AddItemConfirmUpdateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddItemConfirmUpdateButtonActionPerformed
             try {
-            int id = Integer.parseInt(ItemIDUpdateTextBar.getText());
             String name = ItemNameUpdateTextBar.getText();
-            String category = CategoryUpdateText.getText();
+            String category = CategoryChoiceUpdate.getSelectedItem();
             double price = Double.parseDouble(PriceUpdateText.getText());
             String description = DescriptionUpdateTextField.getText();
             String imagePath = ChooseImagePathUpdateTextField.getText();
 
-            Product product = new Product(id, name, description, price, 0, category, imagePath);
+            Product product = new Product(0, name, category, price, description,  imagePath);
 
             if (ProductManager.updateProduct(product)) {
                 JOptionPane.showMessageDialog(this, "Product updated successfully!");
@@ -2181,82 +3090,39 @@ public class InventoryFrame extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Please enter valid data!");
         }
     }//GEN-LAST:event_AddItemConfirmUpdateButtonActionPerformed
-    
-    private void StockEntryConfirmButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        try {
-            int id = Integer.parseInt(IDInformationValueLabel.getText());
-            int quantity = Integer.parseInt(StockEntryTextBar.getText());
-
-            if (ProductManager.updateStock(id, quantity)) {
-                JOptionPane.showMessageDialog(this, "Stock updated successfully!");
-                StockEntryTextBar.setText("");
-                initializeData(); // Refresh data
-            } else {
-                JOptionPane.showMessageDialog(this, "Failed to update stock!");
-            }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Please enter valid quantity!");
-        }
-    }
-    
-    private void AddUserConfirmButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        String firstName = FirstNameTextBar.getText();
-        String lastName = LastNameTextBar.getText();
-        String username = UsernameTextBar.getText();
-        String password = new String(PasswordTextBar.getPassword());
-        String role = RoleChoice.getSelectedItem().toString();
-
-        if (UserAuthentication.addUser(firstName, lastName, username, password, role)) {
-            JOptionPane.showMessageDialog(this, "User added successfully!");
-            clearAddUserForm();
-            initializeData(); // Refresh data
-        } else {
-            JOptionPane.showMessageDialog(this, "Failed to add user!");
-        }
-    }
-    
-    private void clearAddUserForm() {
-        FirstNameTextBar.setText("");
-        LastNameTextBar.setText("");
-        UsernameTextBar.setText("");
-        PasswordTextBar.setText("");
-    }
-    
-    private void DeleteUserButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        String username = DeleteUserTextBar.getText();
-
-        if (username.equals(SessionManager.getCurrentUsername())) {
-            JOptionPane.showMessageDialog(this, "You cannot delete your own account!");
-            return;
-        }
-
-        int confirm = JOptionPane.showConfirmDialog(this, 
-            "Are you sure you want to delete user: " + username + "?", 
-            "Confirm Delete", JOptionPane.YES_NO_OPTION);
-
-        if (confirm == JOptionPane.YES_OPTION) {
-            if (UserAuthentication.deleteUser(username)) {
-                JOptionPane.showMessageDialog(this, "User deleted successfully!");
-                DeleteUserTextBar.setText("");
-                initializeData(); // Refresh data
-            } else {
-                JOptionPane.showMessageDialog(this, "Failed to delete user!");
-            }
-        }
-    }
-    
-    
-    
-    private void ItemIDUpdateTextBarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ItemIDUpdateTextBarActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_ItemIDUpdateTextBarActionPerformed
 
     private void ChooseImagePathUpdateTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ChooseImagePathUpdateTextFieldActionPerformed
-        // TODO add your handling code here:
+        JFileChooser fileChooser = new JFileChooser();
+
+        FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
+            "Image files (JPG, JPEG, PNG, GIF, BMP)", 
+            "jpg", "jpeg", "png", "gif", "bmp"
+        );
+
+        fileChooser.setFileFilter(imageFilter);
+
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            String filePath = file.getAbsolutePath();
+            ChooseImagePathUpdateTextField.setText(filePath); // Set the UPDATE form field
+        }
     }//GEN-LAST:event_ChooseImagePathUpdateTextFieldActionPerformed
 
     private void ChooseImageFileUpdateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ChooseImageFileUpdateButtonActionPerformed
-        // TODO add your handling code here:
+        JFileChooser fileChooser = new JFileChooser();
+
+        FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
+            "Image files (JPG, JPEG, PNG, GIF, BMP)", 
+            "jpg", "jpeg", "png", "gif", "bmp"
+        );
+
+        fileChooser.setFileFilter(imageFilter);
+
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            String filePath = file.getAbsolutePath();
+            ChooseImagePathUpdateTextField.setText(filePath); // Set the UPDATE form field
+        }
     }//GEN-LAST:event_ChooseImageFileUpdateButtonActionPerformed
 
     private void CategorySearchBarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CategorySearchBarActionPerformed
@@ -2281,31 +3147,47 @@ public class InventoryFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_AddCategoryConfirmButtonActionPerformed
 
     private void AnnualSalesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AnnualSalesButtonActionPerformed
-        currentSales = SalesReportManager.getAnnualSales();
-        currentSalesPeriod = "Annual";
-        refreshSalesReportTable();
+        try {
+            currentSales = SalesReportManager.getAnnualSales();
+            currentSalesPeriod = "Annual";
+            refreshSalesReportTable();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error loading annual sales: " + e.getMessage());
+        }
     }//GEN-LAST:event_AnnualSalesButtonActionPerformed
 
     private void TodaySalesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TodaySalesButtonActionPerformed
-        currentSales = SalesReportManager.getTodaySales();
-        currentSalesPeriod = "Today";
-        refreshSalesReportTable();
+        try {
+            currentSales = SalesReportManager.getTodaySales();
+            currentSalesPeriod = "Today";
+            refreshSalesReportTable();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error loading today's sales: " + e.getMessage());
+        }
     }//GEN-LAST:event_TodaySalesButtonActionPerformed
 
     private void ThisWeekSalesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ThisWeekSalesButtonActionPerformed
-        currentSales = SalesReportManager.getThisWeekSales();
-        currentSalesPeriod = "This Week";
-        refreshSalesReportTable();
+        try {
+            currentSales = SalesReportManager.getThisWeekSales();
+            currentSalesPeriod = "This Week";
+            refreshSalesReportTable();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error loading this week's sales: " + e.getMessage());
+        }
     }//GEN-LAST:event_ThisWeekSalesButtonActionPerformed
 
     private void MonthlySalesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MonthlySalesButtonActionPerformed
-        currentSales = SalesReportManager.getMonthlySales();
-        currentSalesPeriod = "Monthly";
-        refreshSalesReportTable();
+        try {
+            currentSales = SalesReportManager.getMonthlySales();
+            currentSalesPeriod = "Monthly";
+            refreshSalesReportTable();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error loading monthly sales: " + e.getMessage());
+        }
     }//GEN-LAST:event_MonthlySalesButtonActionPerformed
 
     private void AddNewUserConfirmButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddNewUserConfirmButton2ActionPerformed
-        // TODO add your handling code here:
+        addUser();
     }//GEN-LAST:event_AddNewUserConfirmButton2ActionPerformed
 
     private void UsernameTextBarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UsernameTextBarActionPerformed
@@ -2328,51 +3210,14 @@ public class InventoryFrame extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_RepeatPasswordTextBar1ActionPerformed
 
-    private void DeleteUserTextBarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DeleteUserTextBarActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_DeleteUserTextBarActionPerformed
-    
-    private void initApp() {
-        // Initialize database connection
-        DatabaseConnection.getConnection();
+    private void DeleteActivityLogConfirmButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DeleteActivityLogConfirmButton3ActionPerformed
+        deleteActivityLog();
+    }//GEN-LAST:event_DeleteActivityLogConfirmButton3ActionPerformed
 
-        // Initialize data
-        initializeData();
-
-        // Set up event listeners for sales report buttons
-        TodaySalesButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                TodaySalesButtonActionPerformed(e);
-            }
-        });
-
-        ThisWeekSalesButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ThisWeekSalesButtonActionPerformed(e);
-            }
-        });
-
-        MonthlySalesButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                MonthlySalesButtonActionPerformed(e);
-            }
-        });
-
-        AnnualSalesButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                AnnualSalesButtonActionPerformed(e);
-            }
-        });
-
-        // Add other button listeners...
-    }
-    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel AccountTypeLabel;
+    private javax.swing.JLabel ActivityLogPanelLabel;
+    private javax.swing.JTable ActivityLogTable;
     private javax.swing.JButton AddCategoryConfirmButton;
     private javax.swing.JLabel AddCategoryLabel;
     private javax.swing.JTextField AddCategoryText;
@@ -2400,6 +3245,7 @@ public class InventoryFrame extends javax.swing.JFrame {
     private javax.swing.JPanel CategoriesTab;
     private javax.swing.JLabel CategoriesTabTitleLabel;
     private java.awt.Choice CategoryChoice;
+    private java.awt.Choice CategoryChoiceUpdate;
     private javax.swing.JLabel CategoryInformationLabel;
     private javax.swing.JLabel CategoryInformationValueLabel;
     private javax.swing.JLabel CategoryLabel;
@@ -2409,7 +3255,6 @@ public class InventoryFrame extends javax.swing.JFrame {
     private javax.swing.JTable CategoryTable;
     private javax.swing.JPanel CategoryTablePanel;
     private javax.swing.JLabel CategoryUpdateLabel;
-    private javax.swing.JTextField CategoryUpdateText;
     private javax.swing.JButton ChooseImageFileButton;
     private javax.swing.JButton ChooseImageFileUpdateButton;
     private javax.swing.JLabel ChooseImageLabel;
@@ -2421,7 +3266,7 @@ public class InventoryFrame extends javax.swing.JFrame {
     private javax.swing.JPanel DashboardTab;
     private javax.swing.JLabel DashboardTitleLabel;
     private javax.swing.JPanel DashboardUpdatesPanel;
-    private javax.swing.JButton DeleteUserTextBar;
+    private javax.swing.JButton DeleteActivityLogConfirmButton3;
     private javax.swing.JLabel DescriptionInformationLabel;
     private javax.swing.JLabel DescriptionInformationValueLabel;
     private javax.swing.JLabel DescriptionLabel;
@@ -2441,10 +3286,6 @@ public class InventoryFrame extends javax.swing.JFrame {
     private javax.swing.JLabel InventoryTabTitleLabel1;
     private javax.swing.JTable InventoryTable;
     private javax.swing.JPanel InventoryTablePanel;
-    private javax.swing.JLabel ItemIDLabel;
-    private javax.swing.JTextField ItemIDTextBar;
-    private javax.swing.JLabel ItemIDUpdateLabel;
-    private javax.swing.JTextField ItemIDUpdateTextBar;
     private javax.swing.JLabel ItemInformationPanelLabel;
     private javax.swing.JLabel ItemInformationPanelLabel1;
     private javax.swing.JLabel ItemNameLabel;
@@ -2533,5 +3374,6 @@ public class InventoryFrame extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JScrollPane jScrollPane5;
     // End of variables declaration//GEN-END:variables
 }
