@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 08, 2025 at 07:31 PM
+-- Generation Time: Sep 09, 2025 at 01:09 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -104,6 +104,63 @@ END$$
 
 DELIMITER ;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `activity_log_report_tb`
+--
+
+CREATE TABLE `activity_log_report_tb` (
+  `report_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `activity_type` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `activity_date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `generated_by` int(11) DEFAULT NULL,
+  `generation_date` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `activity_log_tb`
+--
+
+CREATE TABLE `activity_log_tb` (
+  `log_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `activity_type` varchar(50) NOT NULL,
+  `description` text DEFAULT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `cashier_tb`
+--
+
+CREATE TABLE `cashier_tb` (
+  `cashier_id` int(11) NOT NULL,
+  `cashier_name` varchar(100) NOT NULL,
+  `shift_schedule` varchar(100) DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `category_tb`
+--
+
+CREATE TABLE `category_tb` (
+  `category_id` int(11) NOT NULL,
+  `category_name` varchar(100) NOT NULL,
+  `created_by` varchar(100) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 --
 -- Dumping data for table `category_tb`
 --
@@ -114,6 +171,21 @@ INSERT INTO `category_tb` (`category_id`, `category_name`, `created_by`, `create
 (4, 'Refreshment', 'admin', '2025-09-06 14:58:24'),
 (5, 'Pastry', 'admin', '2025-09-06 14:58:33');
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_tb`
+--
+
+CREATE TABLE `customer_tb` (
+  `customer_id` int(11) NOT NULL,
+  `first_name` varchar(50) NOT NULL,
+  `last_name` varchar(50) NOT NULL,
+  `contact_no` varchar(20) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 --
 -- Dumping data for table `customer_tb`
 --
@@ -121,6 +193,19 @@ INSERT INTO `category_tb` (`category_id`, `category_name`, `created_by`, `create
 INSERT INTO `customer_tb` (`customer_id`, `first_name`, `last_name`, `contact_no`, `email`, `created_at`) VALUES
 (3, 'Mike', 'Johnson', '09127778899', 'mike.johnson@email.com', '2025-09-05 12:55:01'),
 (4, 'Walk-in', 'Customer', '000-000-0000', 'walkin@donmac.com', '2025-09-07 13:03:57');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `inventory_tb`
+--
+
+CREATE TABLE `inventory_tb` (
+  `inventory_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `stock_quantity` int(11) NOT NULL DEFAULT 0,
+  `last_updated` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `inventory_tb`
@@ -140,6 +225,59 @@ INSERT INTO `inventory_tb` (`inventory_id`, `product_id`, `stock_quantity`, `las
 (18, 18, 0, '2025-09-08 09:49:53'),
 (19, 19, 0, '2025-09-08 09:49:53');
 
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `order_details_vw`
+-- (See below for the actual view)
+--
+CREATE TABLE `order_details_vw` (
+`order_id` int(11)
+,`order_date` timestamp
+,`total_amount` decimal(10,2)
+,`payment_method` enum('Cash','Card','E-Wallet')
+,`status` enum('Pending','Preparing','Ready','Completed','Cancelled')
+,`first_name` varchar(50)
+,`last_name` varchar(50)
+,`contact_no` varchar(20)
+,`email` varchar(100)
+,`cashier_name` varchar(100)
+,`shift_schedule` varchar(100)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `order_items_detailed_vw`
+-- (See below for the actual view)
+--
+CREATE TABLE `order_items_detailed_vw` (
+`order_item_id` int(11)
+,`order_id` int(11)
+,`quantity` int(11)
+,`subtotal` decimal(10,2)
+,`product_name` varchar(100)
+,`category` varchar(50)
+,`price` decimal(10,2)
+,`order_date` timestamp
+,`first_name` varchar(50)
+,`last_name` varchar(50)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `order_item_tb`
+--
+
+CREATE TABLE `order_item_tb` (
+  `order_item_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL CHECK (`quantity` > 0),
+  `subtotal` decimal(10,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 --
 -- Dumping data for table `order_item_tb`
 --
@@ -150,6 +288,42 @@ INSERT INTO `order_item_tb` (`order_item_id`, `order_id`, `product_id`, `quantit
 (25, 9, 16, 6, 234.00);
 
 --
+-- Triggers `order_item_tb`
+--
+DELIMITER $$
+CREATE TRIGGER `before_order_item_insert_trg` BEFORE INSERT ON `order_item_tb` FOR EACH ROW BEGIN
+    DECLARE v_current_stock INT;
+    
+    -- Check if enough stock is available
+    SELECT stock_quantity INTO v_current_stock 
+    FROM inventory_tb 
+    WHERE product_id = NEW.product_id;
+    
+    IF v_current_stock < NEW.quantity THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Insufficient stock available';
+    END IF;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `order_tb`
+--
+
+CREATE TABLE `order_tb` (
+  `order_id` int(11) NOT NULL,
+  `customer_id` int(11) DEFAULT NULL,
+  `cashier_id` int(11) DEFAULT NULL,
+  `order_date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `total_amount` decimal(10,2) NOT NULL,
+  `payment_method` enum('Cash','Card','E-Wallet') NOT NULL,
+  `status` enum('Pending','Preparing','Ready','Completed','Cancelled') DEFAULT 'Pending'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
 -- Dumping data for table `order_tb`
 --
 
@@ -157,6 +331,39 @@ INSERT INTO `order_tb` (`order_id`, `customer_id`, `cashier_id`, `order_date`, `
 (1, 4, NULL, '2025-09-08 17:09:25', 312.00, 'Cash', 'Pending'),
 (8, 4, NULL, '2025-09-08 17:24:57', 117.00, 'Cash', 'Pending'),
 (9, 4, NULL, '2025-09-08 17:25:14', 234.00, 'Cash', 'Pending');
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `product_inventory_vw`
+-- (See below for the actual view)
+--
+CREATE TABLE `product_inventory_vw` (
+`product_id` int(11)
+,`product_name` varchar(100)
+,`category` varchar(50)
+,`price` decimal(10,2)
+,`description` text
+,`stock_quantity` int(11)
+,`last_updated` timestamp
+);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `product_tb`
+--
+
+CREATE TABLE `product_tb` (
+  `product_id` int(11) NOT NULL,
+  `product_name` varchar(100) NOT NULL,
+  `category` varchar(50) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `description` text DEFAULT NULL,
+  `image_path` varchar(255) DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `product_tb`
@@ -175,6 +382,52 @@ INSERT INTO `product_tb` (`product_id`, `product_name`, `category`, `price`, `de
 (17, 'Hot Caramel', 'Coffee', 39.00, 'Hot caramel coffee', '\\ui\\Images\\product_images\\hot_caramel.png', 1, '2025-09-08 09:49:53'),
 (18, 'Hot Darko', 'Coffee', 39.00, 'Hot dark chocolate coffee', '\\ui\\Images\\product_images\\hot_darko.png', 1, '2025-09-08 09:49:53'),
 (19, 'Don Barako', 'Coffee', 39.00, 'Strong local barako coffee', '\\ui\\Images\\product_images\\don_barako.png', 1, '2025-09-08 09:49:53');
+
+--
+-- Triggers `product_tb`
+--
+DELIMITER $$
+CREATE TRIGGER `after_product_insert_trg` AFTER INSERT ON `product_tb` FOR EACH ROW BEGIN
+    INSERT INTO inventory_tb (product_id, stock_quantity)
+    VALUES (NEW.product_id, 0);
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `sales_report_tb`
+--
+
+CREATE TABLE `sales_report_tb` (
+  `report_id` int(11) NOT NULL,
+  `report_date` date NOT NULL,
+  `report_period` enum('daily','weekly','monthly','annual') NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `quantity_sold` int(11) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `subtotal` decimal(10,2) NOT NULL,
+  `generated_by` int(11) DEFAULT NULL,
+  `generation_date` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL,
+  `first_name` varchar(50) NOT NULL,
+  `last_name` varchar(50) NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` enum('admin','cashier','manager','clerk') NOT NULL DEFAULT 'cashier',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
@@ -212,6 +465,207 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 DROP TABLE IF EXISTS `product_inventory_vw`;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `product_inventory_vw`  AS SELECT `p`.`product_id` AS `product_id`, `p`.`product_name` AS `product_name`, `p`.`category` AS `category`, `p`.`price` AS `price`, `p`.`description` AS `description`, `i`.`stock_quantity` AS `stock_quantity`, `i`.`last_updated` AS `last_updated` FROM (`product_tb` `p` left join `inventory_tb` `i` on(`p`.`product_id` = `i`.`product_id`)) ;
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `activity_log_report_tb`
+--
+ALTER TABLE `activity_log_report_tb`
+  ADD PRIMARY KEY (`report_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `generated_by` (`generated_by`);
+
+--
+-- Indexes for table `activity_log_tb`
+--
+ALTER TABLE `activity_log_tb`
+  ADD PRIMARY KEY (`log_id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
+-- Indexes for table `cashier_tb`
+--
+ALTER TABLE `cashier_tb`
+  ADD PRIMARY KEY (`cashier_id`);
+
+--
+-- Indexes for table `category_tb`
+--
+ALTER TABLE `category_tb`
+  ADD PRIMARY KEY (`category_id`),
+  ADD UNIQUE KEY `name` (`category_name`);
+
+--
+-- Indexes for table `customer_tb`
+--
+ALTER TABLE `customer_tb`
+  ADD PRIMARY KEY (`customer_id`),
+  ADD KEY `idx_customer_name` (`first_name`,`last_name`);
+
+--
+-- Indexes for table `inventory_tb`
+--
+ALTER TABLE `inventory_tb`
+  ADD PRIMARY KEY (`inventory_id`),
+  ADD UNIQUE KEY `product_id` (`product_id`);
+
+--
+-- Indexes for table `order_item_tb`
+--
+ALTER TABLE `order_item_tb`
+  ADD PRIMARY KEY (`order_item_id`),
+  ADD KEY `idx_orderitem_order` (`order_id`),
+  ADD KEY `idx_orderitem_product` (`product_id`);
+
+--
+-- Indexes for table `order_tb`
+--
+ALTER TABLE `order_tb`
+  ADD PRIMARY KEY (`order_id`),
+  ADD KEY `idx_order_date` (`order_date`),
+  ADD KEY `idx_order_customer` (`customer_id`),
+  ADD KEY `idx_order_cashier` (`cashier_id`);
+
+--
+-- Indexes for table `product_tb`
+--
+ALTER TABLE `product_tb`
+  ADD PRIMARY KEY (`product_id`),
+  ADD KEY `idx_product_category` (`category`);
+
+--
+-- Indexes for table `sales_report_tb`
+--
+ALTER TABLE `sales_report_tb`
+  ADD PRIMARY KEY (`report_id`),
+  ADD KEY `product_id` (`product_id`),
+  ADD KEY `generated_by` (`generated_by`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `username` (`username`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `activity_log_report_tb`
+--
+ALTER TABLE `activity_log_report_tb`
+  MODIFY `report_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `activity_log_tb`
+--
+ALTER TABLE `activity_log_tb`
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=156;
+
+--
+-- AUTO_INCREMENT for table `cashier_tb`
+--
+ALTER TABLE `cashier_tb`
+  MODIFY `cashier_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `category_tb`
+--
+ALTER TABLE `category_tb`
+  MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `customer_tb`
+--
+ALTER TABLE `customer_tb`
+  MODIFY `customer_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `inventory_tb`
+--
+ALTER TABLE `inventory_tb`
+  MODIFY `inventory_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+
+--
+-- AUTO_INCREMENT for table `order_item_tb`
+--
+ALTER TABLE `order_item_tb`
+  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+
+--
+-- AUTO_INCREMENT for table `order_tb`
+--
+ALTER TABLE `order_tb`
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- AUTO_INCREMENT for table `product_tb`
+--
+ALTER TABLE `product_tb`
+  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+
+--
+-- AUTO_INCREMENT for table `sales_report_tb`
+--
+ALTER TABLE `sales_report_tb`
+  MODIFY `report_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `activity_log_report_tb`
+--
+ALTER TABLE `activity_log_report_tb`
+  ADD CONSTRAINT `activity_log_report_tb_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `activity_log_report_tb_ibfk_2` FOREIGN KEY (`generated_by`) REFERENCES `users` (`id`);
+
+--
+-- Constraints for table `activity_log_tb`
+--
+ALTER TABLE `activity_log_tb`
+  ADD CONSTRAINT `activity_log_tb_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `inventory_tb`
+--
+ALTER TABLE `inventory_tb`
+  ADD CONSTRAINT `inventory_tb_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product_tb` (`product_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `order_item_tb`
+--
+ALTER TABLE `order_item_tb`
+  ADD CONSTRAINT `fk_orderitem_order` FOREIGN KEY (`order_id`) REFERENCES `order_tb` (`order_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_orderitem_product` FOREIGN KEY (`product_id`) REFERENCES `product_tb` (`product_id`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `order_item_tb_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `order_tb` (`order_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `order_item_tb_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product_tb` (`product_id`);
+
+--
+-- Constraints for table `order_tb`
+--
+ALTER TABLE `order_tb`
+  ADD CONSTRAINT `order_tb_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer_tb` (`customer_id`),
+  ADD CONSTRAINT `order_tb_ibfk_2` FOREIGN KEY (`cashier_id`) REFERENCES `cashier_tb` (`cashier_id`);
+
+--
+-- Constraints for table `sales_report_tb`
+--
+ALTER TABLE `sales_report_tb`
+  ADD CONSTRAINT `sales_report_tb_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `product_tb` (`product_id`),
+  ADD CONSTRAINT `sales_report_tb_ibfk_2` FOREIGN KEY (`generated_by`) REFERENCES `users` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
