@@ -162,8 +162,6 @@ public class InventoryFrame extends javax.swing.JFrame {
 
         if (!userManagementTabExists) {
             System.out.println("User Management tab missing - readding it");
-            // You may need to recreate the tab here if it was previously removed
-            // This depends on how your tab structure is set up
         }
     }
     
@@ -185,7 +183,7 @@ public class InventoryFrame extends javax.swing.JFrame {
         SideBarPanel.repaint();
     }
     
-    // Update your initializeData method
+    // Update initializeData method
     private void initializeData() {
         // Load products
         currentProducts = ProductManager.getAllProducts();
@@ -223,7 +221,7 @@ public class InventoryFrame extends javax.swing.JFrame {
         for (String name : categoryNames) {
             CategoryChoice.add(name);
             CategoryChoiceUpdate.add(name);
-            // If you have an update choice dropdown, add it here too
+            // If have an update choice dropdown, add it here too
         }
     }
     
