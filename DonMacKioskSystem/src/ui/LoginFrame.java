@@ -251,7 +251,7 @@ public class LoginFrame extends javax.swing.JFrame {
         LoginButton = new javax.swing.JButton();
         SeePasswordToggleButton = new javax.swing.JToggleButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Login");
         setBackground(new java.awt.Color(201, 177, 158));
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));

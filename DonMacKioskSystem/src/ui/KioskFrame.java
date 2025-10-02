@@ -26,6 +26,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.Toolkit;
+
 
 public class KioskFrame extends javax.swing.JFrame {
 
@@ -1059,6 +1061,7 @@ public class KioskFrame extends javax.swing.JFrame {
         setTitle("Kiosk");
         setBackground(new java.awt.Color(201, 177, 158));
         setBounds(new java.awt.Rectangle(0, 0, 0, 0));
+        setIconImage(Toolkit.getDefaultToolkit().getImage(KioskFrame.class.getResource("/ui/Images/icons/cup_logo.png")));
         setPreferredSize(new java.awt.Dimension(1000, 600));
         setSize(new java.awt.Dimension(1000, 600));
 

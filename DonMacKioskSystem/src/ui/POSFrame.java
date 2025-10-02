@@ -1731,6 +1731,7 @@ public class POSFrame extends javax.swing.JFrame {
 
     private void BackToPOSButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BackToPOSButtonActionPerformed
         jTabbedPane1.setSelectedIndex(0);
+        resetPOS();
     }//GEN-LAST:event_BackToPOSButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
