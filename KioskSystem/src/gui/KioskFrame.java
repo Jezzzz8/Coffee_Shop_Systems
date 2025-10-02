@@ -1074,8 +1074,8 @@ private JLabel createImageLabel(Product product) {
         OrderingProgressBar.setForeground(new java.awt.Color(31, 40, 35));
         OrderingProgressBar.setValue(25);
         OrderingProgressBar.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
-        OrderingProgressBar.setPreferredSize(new java.awt.Dimension(800, 10));
-        ProgressBarHeaderPanel.add(OrderingProgressBar, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 30, -1, 10));
+        OrderingProgressBar.setPreferredSize(new java.awt.Dimension(800, 15));
+        ProgressBarHeaderPanel.add(OrderingProgressBar, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 30, -1, -1));
 
         new_order_progress_image.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         new_order_progress_image.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/icons/new_cup.png"))); // NOI18N
@@ -1131,11 +1131,12 @@ private JLabel createImageLabel(Product product) {
         NewOrder_box.setPreferredSize(new java.awt.Dimension(760, 400));
         NewOrder_box.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
+        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/logos/logo1.png"))); // NOI18N
         jLabel3.setText("jLabel1");
         jLabel3.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 5, true));
         jLabel3.setPreferredSize(new java.awt.Dimension(100, 100));
-        NewOrder_box.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, 400, 380));
+        NewOrder_box.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 10, 400, 380));
 
         NewOrderButton.setBackground(new java.awt.Color(249, 241, 240));
         NewOrderButton.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
@@ -1149,9 +1150,9 @@ private JLabel createImageLabel(Product product) {
                 NewOrderButtonActionPerformed(evt);
             }
         });
-        NewOrder_box.add(NewOrderButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 400, 260, 70));
+        NewOrder_box.add(NewOrderButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 400, 260, 70));
 
-        NewOrderContentPanel.add(NewOrder_box, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 10, 440, 480));
+        NewOrderContentPanel.add(NewOrder_box, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 10, 760, 480));
 
         NewOrderPanelTab.add(NewOrderContentPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 50, 1000, 500));
 
@@ -1888,7 +1889,7 @@ private JLabel createImageLabel(Product product) {
         GCashPaymentQRCodeImage.setForeground(new java.awt.Color(255, 255, 255));
         GCashPaymentQRCodeImage.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         GCashPaymentQRCodeImage.setText("QR CODE IMAGE");
-        GCashPaymentQRCodeImage.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(255, 255, 255), 5, true));
+        GCashPaymentQRCodeImage.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
         GCashPaymentQRCodeImage.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         GCashPaymentQRCodeImage.setPreferredSize(new java.awt.Dimension(100, 100));
         ConfirmGCashPayment_box.add(GCashPaymentQRCodeImage, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, 400, 380));
@@ -1952,8 +1953,7 @@ private JLabel createImageLabel(Product product) {
         GCashPaymentQRCodeImage1.setBackground(new java.awt.Color(31, 40, 35));
         GCashPaymentQRCodeImage1.setForeground(new java.awt.Color(255, 255, 255));
         GCashPaymentQRCodeImage1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        GCashPaymentQRCodeImage1.setText("PLEASE PROCEED TO CASHIER");
-        GCashPaymentQRCodeImage1.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(255, 255, 255), 5, true));
+        GCashPaymentQRCodeImage1.setText("PROCEED TO COUNTER");
         GCashPaymentQRCodeImage1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         GCashPaymentQRCodeImage1.setPreferredSize(new java.awt.Dimension(100, 100));
         ConfirmCashPayment_box.add(GCashPaymentQRCodeImage1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, 400, 380));
