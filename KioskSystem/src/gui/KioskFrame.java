@@ -254,7 +254,11 @@ private JLabel createImageLabel(Product product) {
         availabilityLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         availabilityLabel.setForeground(isAvailable ? new Color(42, 168, 83) : new Color(255, 0, 0));
         panel.add(availabilityLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 100, 260, 40));
-
+        
+        JLabel quantityLabel = new JLabel("Quantity:");
+        quantityLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+        quantityLabel.setForeground(new Color(66, 133, 244));
+        panel.add(quantityLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 120, 80, 60));
         
         JSpinner quantitySpinner = new JSpinner();
         quantitySpinner.setFont(new Font("Segoe UI", Font.BOLD, 24));
@@ -794,7 +798,6 @@ private JLabel createImageLabel(Product product) {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        buttonGroup1 = new javax.swing.ButtonGroup();
         jPanel2 = new javax.swing.JPanel();
         ProgressBarHeaderPanel = new javax.swing.JPanel();
         OrderingProgressBar = new javax.swing.JProgressBar();
@@ -2051,7 +2054,6 @@ private JLabel createImageLabel(Product product) {
     private javax.swing.JLabel SpecialsTabTitleLabel;
     private javax.swing.JLabel TotalPriceLabel;
     private javax.swing.JLabel TotalPriceNumberLabel;
-    private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JLabel confirm_payment_progress_image;
     private javax.swing.JPanel footer;
     private javax.swing.JPanel footer1;
