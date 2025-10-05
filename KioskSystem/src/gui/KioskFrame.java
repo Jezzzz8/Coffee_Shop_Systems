@@ -38,7 +38,8 @@ public class KioskFrame extends javax.swing.JFrame {
     private PrintService printService;
     private int lastOrderId = -1;
     private String selectedPaymentMethod = "Cash";
-
+    
+    
     public KioskFrame() {
         initComponents();
         cartItems = new HashMap<>();
@@ -46,6 +47,8 @@ public class KioskFrame extends javax.swing.JFrame {
         printService = new ConsolePrintService();
 
         customizeOptionPane();
+        
+        initializeLanguageChoice();
         
         menu_category_box.remove(MenuProductDetailBoxPanel);
         specials_category_box.remove(SpecialsProductDetailBoxPanel);
@@ -146,7 +149,41 @@ private void customizeOptionPane() {
         UIManager.put("Button.foreground", Color.WHITE);
         UIManager.put("Button.focus", new Color(51, 60, 55));
 }
-    
+
+private void initializeLanguageChoice() {
+        // Clear existing items and add available languages
+        LanguageChoice.removeAll();
+        String[] languages = LanguageContent.getAvailableLanguages();
+        for (String language : languages) {
+            LanguageChoice.add(language);
+        }
+        
+        // Set default to English
+        LanguageChoice.select(0);
+        
+        // Add item listener to handle language changes
+        LanguageChoice.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                languageChoiceItemStateChanged(evt);
+            }
+        });
+}
+
+private void languageChoiceItemStateChanged(java.awt.event.ItemEvent evt) {
+        if (evt.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
+            String selectedLanguage = LanguageChoice.getSelectedItem();
+            updateHelpContent(selectedLanguage);
+        }
+}
+
+private void updateHelpContent(String language) {
+        String helpContent = LanguageContent.getHelpContent(language);
+        ContentsJTextArea.setText(helpContent);
+        
+        // Scroll to top when language changes
+        ContentsJTextArea.setCaretPosition(0);
+    }
+
 private JLabel createImageLabel(Product product) {
     JLabel imageLabel = new JLabel();
     String fullImagePath = loadProductImage(product);
@@ -839,8 +876,9 @@ private JLabel createImageLabel(Product product) {
         header3 = new javax.swing.JPanel();
         GetHelpTitleLabel = new javax.swing.JLabel();
         GetHelpContentPanel = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
+        LanguageChoice = new java.awt.Choice();
+        ContentScrollPane = new javax.swing.JScrollPane();
+        ContentsJTextArea = new javax.swing.JTextArea();
         footer3 = new javax.swing.JPanel();
         GetHelpSideBarPanel = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
@@ -1507,20 +1545,28 @@ private JLabel createImageLabel(Product product) {
         GetHelpContentPanel.setRequestFocusEnabled(false);
         GetHelpContentPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jTextArea1.setEditable(false);
-        jTextArea1.setBackground(new java.awt.Color(249, 241, 240));
-        jTextArea1.setColumns(20);
-        jTextArea1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jTextArea1.setForeground(new java.awt.Color(31, 40, 35));
-        jTextArea1.setLineWrap(true);
-        jTextArea1.setRows(5);
-        jTextArea1.setText("HELP & FREQUENTLY ASKED QUESTIONS\n\nHOW TO PLACE AN ORDER:\n1. Click 'NEW ORDER' on the main screen\n2. Browse our MENU or BEST SELLING items\n3. Select quantity and click 'ADD TO CART'\n4. Review your cart and click 'CHECKOUT'\n5. Choose your payment method\n6. Receive your order slip\n\nPAYMENT METHODS:\n• CASH - Pay with cash at the counter\n• GCASH - Digital payment via QR code\n\nPRODUCT AVAILABILITY:\n• Green 'Available' = Product is in stock\n• Red 'Not Available' = Temporarily out of stock\n\nFREQUENTLY ASKED QUESTIONS:\nQ: Can I customize my drink (extra sugar, less ice, etc.)?\nA: We're sorry, but our kiosk does not support drink customizations.\nAll our beverages are prepared as signature drinks with carefully crafted recipes to ensure consistent quality and taste.\n\nQ: Can I modify my order after payment?\nA: Please speak with our staff for modifications.\n\nQ: What if a product is out of stock?\nA: Unavailable items cannot be added to cart.\n\nNEED MORE HELP?\nPlease approach our staff for assistance.\nWe're here to make your experience great!");
-        jTextArea1.setWrapStyleWord(true);
-        jTextArea1.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        jTextArea1.setMargin(new java.awt.Insets(10, 10, 10, 10));
-        jScrollPane1.setViewportView(jTextArea1);
+        LanguageChoice.setBackground(new java.awt.Color(249, 241, 240));
+        LanguageChoice.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        LanguageChoice.setFont(new java.awt.Font("Segoe UI", 0, 12)); // NOI18N
+        LanguageChoice.setForeground(new java.awt.Color(31, 40, 35));
+        LanguageChoice.setName("language"); // NOI18N
+        LanguageChoice.setPreferredSize(new java.awt.Dimension(100, 20));
+        GetHelpContentPanel.add(LanguageChoice, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 10, -1, -1));
 
-        GetHelpContentPanel.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 850, 500));
+        ContentsJTextArea.setEditable(false);
+        ContentsJTextArea.setBackground(new java.awt.Color(249, 241, 240));
+        ContentsJTextArea.setColumns(20);
+        ContentsJTextArea.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        ContentsJTextArea.setForeground(new java.awt.Color(31, 40, 35));
+        ContentsJTextArea.setLineWrap(true);
+        ContentsJTextArea.setRows(5);
+        ContentsJTextArea.setText("HELP & FREQUENTLY ASKED QUESTIONS\n\nHOW TO PLACE AN ORDER:\n1. Click 'NEW ORDER' on the main screen\n2. Browse our MENU or BEST SELLING items\n3. Select quantity and click 'ADD TO CART'\n4. Review your cart and click 'CHECKOUT'\n5. Choose your payment method\n6. Receive your order slip\n\nPAYMENT METHODS:\n• CASH - Pay with cash at the counter\n• GCASH - Digital payment via QR code\n\nPRODUCT AVAILABILITY:\n• Green 'Available' = Product is in stock\n• Red 'Not Available' = Temporarily out of stock\n\nFREQUENTLY ASKED QUESTIONS:\nQ: Can I customize my drink (extra sugar, less ice, etc.)?\nA: We're sorry, but our kiosk does not support drink customizations.\nAll our beverages are prepared as signature drinks with carefully crafted recipes to ensure consistent quality and taste.\n\nQ: Can I modify my order after payment?\nA: Please speak with our staff for modifications.\n\nQ: What if a product is out of stock?\nA: Unavailable items cannot be added to cart.\n\nNEED MORE HELP?\nPlease approach our staff for assistance.\nWe're here to make your experience great!");
+        ContentsJTextArea.setWrapStyleWord(true);
+        ContentsJTextArea.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        ContentsJTextArea.setMargin(new java.awt.Insets(10, 10, 10, 10));
+        ContentScrollPane.setViewportView(ContentsJTextArea);
+
+        GetHelpContentPanel.add(ContentScrollPane, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 850, 500));
 
         GetHelpPanelTab.add(GetHelpContentPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 50, 850, 500));
 
@@ -1837,6 +1883,9 @@ private JLabel createImageLabel(Product product) {
     private void GetHelpButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_GetHelpButton1ActionPerformed
         PlaceOrderTabbedPane.setSelectedIndex(3);
         updateProductDisplays();
+        
+        String selectedLanguage = LanguageChoice.getSelectedItem();
+        updateHelpContent(selectedLanguage);
     }//GEN-LAST:event_GetHelpButton1ActionPerformed
 
     private void CartButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CartButtonActionPerformed
@@ -1946,6 +1995,8 @@ private JLabel createImageLabel(Product product) {
     private javax.swing.JPanel ConfirmGCashPaymentPanelTab;
     private javax.swing.JPanel ConfirmGCashPayment_box;
     private javax.swing.JLabel ConfirmPaymentTitleLabel;
+    private javax.swing.JScrollPane ContentScrollPane;
+    private javax.swing.JTextArea ContentsJTextArea;
     private javax.swing.JButton GCashButton;
     private javax.swing.JLabel GCashPaymentQRCodeImage;
     private javax.swing.JLabel GCashPaymentQRCodeImage1;
@@ -1956,6 +2007,7 @@ private JLabel createImageLabel(Product product) {
     private javax.swing.JPanel GetHelpPanelTab;
     private javax.swing.JPanel GetHelpSideBarPanel;
     private javax.swing.JLabel GetHelpTitleLabel;
+    private java.awt.Choice LanguageChoice;
     private javax.swing.JLabel MainProductImageLabel;
     private javax.swing.JLabel MainTabTitleLabel1;
     private javax.swing.JTabbedPane MainTabbedPane;
@@ -2024,8 +2076,6 @@ private JLabel createImageLabel(Product product) {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextArea jTextArea1;
     private javax.swing.JPanel menu_category_box;
     private javax.swing.JScrollPane menu_category_scroll_pane1;
     private javax.swing.JLabel new_order_progress_image;
