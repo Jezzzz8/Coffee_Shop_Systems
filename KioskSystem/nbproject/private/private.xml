@@ -5,6 +5,13 @@
         <group>
             <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/main/KioskSystemMain.java</file>
             <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/gui/KioskFrame.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/services/PrintService.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/objects/OrderSlip.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/objects/OrderItem.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/objects/Order.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/objects/Product.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/services/ConsolePrintService.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/gui/LanguageContent.java</file>
         </group>
     </open-files>
 </project-private>
