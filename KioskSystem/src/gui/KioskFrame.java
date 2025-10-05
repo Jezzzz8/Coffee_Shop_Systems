@@ -17,15 +17,8 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.SoftBevelBorder;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import objects.OrderSlip;
 import objects.Product;
 import services.ConsolePrintService;
@@ -33,6 +26,7 @@ import services.OrderManager;
 import services.OrderSlipManager;
 import services.PrintService;
 import services.ProductManager;
+import services.QueueManager;
 
 
 public class KioskFrame extends javax.swing.JFrame {
@@ -51,6 +45,8 @@ public class KioskFrame extends javax.swing.JFrame {
         totalPrice = 0.0;
         printService = new ConsolePrintService();
 
+        customizeOptionPane();
+        
         menu_category_box.remove(MenuProductDetailBoxPanel);
         specials_category_box.remove(SpecialsProductDetailBoxPanel);
         CartItemsPanel.remove(CartProductDetailBoxPanel);
@@ -71,87 +67,12 @@ public class KioskFrame extends javax.swing.JFrame {
             }
         });
 
-        
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                saveCartToFile();
-            }
-
-            @Override
-            public void windowOpened(WindowEvent e) {
-                loadCartFromFile();
-                updateCartDisplay();
-                updateCartAnnouncement();
-                updateProgressBar(); 
-            }
-        });
-
-        initializeProducts();
-        setupHelpContent();
-        
-        
-        loadCartFromFile();
         updateCartDisplay();
         updateCartAnnouncement();
         updateProgressBar();
 
-        
+        initializeProducts();
         updatePaymentButtonAvailability();
-    }
-    
-    private void setupHelpContent() {
-        GetHelpContentPanel.removeAll();
-        GetHelpContentPanel.setLayout(new BorderLayout());
-
-        
-        JTextArea helpTextArea = new JTextArea();
-        helpTextArea.setEditable(false);
-        helpTextArea.setLineWrap(true);
-        helpTextArea.setWrapStyleWord(true);
-        helpTextArea.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        helpTextArea.setBackground(new Color(249, 241, 240));
-        helpTextArea.setMargin(new Insets(10, 10, 10, 10));
-
-        
-        StringBuilder helpContent = new StringBuilder();
-        helpContent.append("HELP & FREQUENTLY ASKED QUESTIONS\n\n");
-
-        helpContent.append("HOW TO PLACE AN ORDER:\n");
-        helpContent.append("1. Click 'NEW ORDER' on the main screen\n");
-        helpContent.append("2. Browse our MENU or BEST SELLING items\n");
-        helpContent.append("3. Select quantity and click 'ADD TO CART'\n");
-        helpContent.append("4. Review your cart and click 'CHECKOUT'\n");
-        helpContent.append("5. Choose your payment method\n");
-        helpContent.append("6. Receive your order slip\n\n");
-
-        helpContent.append("PAYMENT METHODS:\n");
-        helpContent.append("• CASH - Pay with cash at the counter\n");
-        helpContent.append("• GCASH - Digital payment via QR code\n\n");
-
-        helpContent.append("PRODUCT AVAILABILITY:\n");
-        helpContent.append("• Green 'Available' = Product is in stock\n");
-        helpContent.append("• Red 'Not Available' = Temporarily out of stock\n\n");
-
-        helpContent.append("FREQUENTLY ASKED QUESTIONS:\n");
-        helpContent.append("Q: Can I modify my order after payment?\n");
-        helpContent.append("A: Please speak with our staff for modifications.\n\n");
-
-        helpContent.append("Q: What if a product is out of stock?\n");
-        helpContent.append("A: Unavailable items cannot be added to cart.\n\n");
-
-        helpContent.append("NEED MORE HELP?\n");
-        helpContent.append("Please approach our staff for assistance.\n");
-        helpContent.append("We're here to make your experience great!");
-
-        helpTextArea.setText(helpContent.toString());
-
-        JScrollPane scrollPane = new JScrollPane(helpTextArea);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        GetHelpContentPanel.add(scrollPane, BorderLayout.CENTER);
-
-        GetHelpContentPanel.revalidate();
-        GetHelpContentPanel.repaint();
     }
     
     private void updateProgressBar() {
@@ -211,6 +132,21 @@ public class KioskFrame extends javax.swing.JFrame {
     return imageDirectory + imageFilename;
 }
 
+private void customizeOptionPane() {
+        UIManager.put("OptionPane.background", new Color(249, 241, 240));
+        UIManager.put("Panel.background", new Color(249, 241, 240));
+        UIManager.put("OptionPane.messageForeground", new Color(31, 40, 35));
+        UIManager.put("OptionPane.messageFont", new Font("Segoe UI", Font.PLAIN, 14));
+        UIManager.put("OptionPane.buttonFont", new Font("Segoe UI", Font.BOLD, 12));
+        
+        UIManager.put("Button.margin", new Insets(10, 20, 10, 20));
+        UIManager.put("Button.padding", new Insets(8, 15, 8, 15));
+
+        UIManager.put("Button.background", new Color(31, 40, 35));
+        UIManager.put("Button.foreground", Color.WHITE);
+        UIManager.put("Button.focus", new Color(51, 60, 55));
+}
+    
 private JLabel createImageLabel(Product product) {
     JLabel imageLabel = new JLabel();
     String fullImagePath = loadProductImage(product);
@@ -442,49 +378,41 @@ private JLabel createImageLabel(Product product) {
 
         
         updateCartAnnouncement();
-
         
-        saveCartToFile();
     }
     
     private void updateCartDisplay() {
-        
-        
         CartItemsPanel.removeAll();
 
         if (cartItems.isEmpty()) {
-            
             JLabel emptyLabel = new JLabel("Your cart is empty");
             emptyLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
             emptyLabel.setHorizontalAlignment(SwingConstants.CENTER);
             emptyLabel.setForeground(new Color(100, 100, 100));
             emptyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             CartItemsPanel.add(emptyLabel);
-
             
             CheckOutButton.setEnabled(false);
         } else {
-            
-            CheckOutButton.setEnabled(true);
-
+            boolean hasItems = cartItems.values().stream().anyMatch(qty -> qty > 0);
+            CheckOutButton.setEnabled(hasItems && totalPrice > 0);
             
             for (Map.Entry<Product, Integer> entry : cartItems.entrySet()) {
                 Product product = entry.getKey();
                 int quantity = entry.getValue();
-
-                JPanel cartItemPanel = createCartItemPanel(product, quantity);
-                cartItemPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-                CartItemsPanel.add(cartItemPanel);
-                CartItemsPanel.add(Box.createRigidArea(new Dimension(0, 10))); 
+                
+                if (quantity > 0) {
+                    JPanel cartItemPanel = createCartItemPanel(product, quantity);
+                    cartItemPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+                    CartItemsPanel.add(cartItemPanel);
+                    CartItemsPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+                }
             }
         }
-
         
         TotalPriceNumberLabel.setText(String.format("₱%.2f", totalPrice));
-
         
         adjustCartPanelHeight();
-
         
         CartItemsPanel.revalidate();
         CartItemsPanel.repaint();
@@ -526,7 +454,6 @@ private JLabel createImageLabel(Product product) {
         panel.setPreferredSize(new Dimension(700, 200));
         panel.setMaximumSize(new Dimension(700, 200));
 
-        
         if (product == null) {
             return new JPanel(); 
         }
@@ -534,47 +461,39 @@ private JLabel createImageLabel(Product product) {
         JLabel imageLabel = createImageLabel(product);
         panel.add(imageLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, -1, -1));
 
-
         imageLabel.setBorder(BorderFactory.createLineBorder(new Color(31, 40, 35), 2));
         imageLabel.setPreferredSize(new Dimension(150, 150));
         panel.add(imageLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, -1, -1));
 
-        
         JLabel nameLabel = new JLabel(product.getName());
         nameLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
         nameLabel.setForeground(new Color(31, 40, 35));
         panel.add(nameLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 20, 500, 30));
 
-        
         JLabel priceLabel = new JLabel(String.format("₱%.2f", product.getPrice()));
         priceLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
         priceLabel.setForeground(new Color(100, 100, 100));
         panel.add(priceLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 60, 260, 40));
 
-        
         boolean isAvailable = product.isAvailable();
         JLabel availabilityLabel = new JLabel(isAvailable ? "Available" : "Not Available");
         availabilityLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         availabilityLabel.setForeground(isAvailable ? new Color(42, 168, 83) : new Color(255, 0, 0));
         panel.add(availabilityLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 100, 260, 40));
 
-        
         JLabel itemTotalLabel = new JLabel(String.format("Total: ₱%.2f", product.getPrice() * quantity));
         itemTotalLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         itemTotalLabel.setForeground(new Color(31, 40, 35));
         panel.add(itemTotalLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 140, 260, 30));
 
-        
         JLabel quantityLabel = new JLabel("Quantity:");
         quantityLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
         quantityLabel.setForeground(new Color(66, 133, 244));
         panel.add(quantityLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 120, 80, 60));
 
-        
         JSpinner quantitySpinner = new JSpinner();
         quantitySpinner.setFont(new Font("Segoe UI", Font.BOLD, 24));
 
-        
         quantitySpinner.setModel(new SpinnerNumberModel(quantity, 0, 100, 1));
 
         quantitySpinner.setBorder(new SoftBevelBorder(BevelBorder.RAISED));
@@ -590,18 +509,23 @@ private JLabel createImageLabel(Product product) {
                 if (newQuantity != oldQuantity) {
                     
                     totalPrice += product.getPrice() * (newQuantity - oldQuantity);
-                    cartItems.put(product, newQuantity);
+
+                    if (newQuantity == 0) {
+                        
+                        cartItems.remove(product);
+                    } else {
+                        cartItems.put(product, newQuantity);
+                    }
+
                     itemTotalLabel.setText(String.format("Total: ₱%.2f", product.getPrice() * newQuantity));
                     TotalPriceNumberLabel.setText(String.format("₱%.2f", totalPrice));
                     updateCartAnnouncement();
-
                     
-                    saveCartToFile();
+                    updateCartDisplay();
                 }
             }
         });
 
-        
         JButton deleteButton = new JButton();
         deleteButton.setIcon(new ImageIcon(getClass().getResource("/gui/Images/icons/delete.png")));
         deleteButton.setFont(new Font("Segoe UI", Font.PLAIN, 12));
@@ -620,9 +544,6 @@ private JLabel createImageLabel(Product product) {
 
                 updateCartDisplay();
                 updateCartAnnouncement();
-
-                
-                saveCartToFile();
             }
         });
         panel.add(deleteButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 120, -1, -1));
@@ -632,6 +553,7 @@ private JLabel createImageLabel(Product product) {
     
     private void updatePaymentButtonAvailability() {
         boolean isGCashAvailable = OrderManager.isPaymentMethodAvailable("GCash");
+        boolean isCashAvailable = OrderManager.isPaymentMethodAvailable("Cash");
 
         
         GCashButton.setEnabled(isGCashAvailable);
@@ -644,54 +566,73 @@ private JLabel createImageLabel(Product product) {
             GCashButton.setBackground(new Color(249, 241, 240)); 
             GCashButton.setToolTipText("Pay with GCash");
         }
-    }
-    
-    private String[] getPaymentOptions() {
-        List<String> paymentMethods = OrderManager.getAvailablePaymentMethods();
-        return paymentMethods.toArray(new String[0]);
+        
+        CashButton.setEnabled(isGCashAvailable);
+
+        
+        if (!isCashAvailable) {
+            CashButton.setBackground(new Color(200, 200, 200)); 
+            CashButton.setToolTipText("Cash payment is currently unavailable");
+        } else {
+            CashButton.setBackground(new Color(249, 241, 240)); 
+            CashButton.setToolTipText("Pay with Cash");
+        }
     }
     
     private void checkout() {
         System.out.println("Checkout started. Cart items: " + cartItems.size());
-
         
         if (cartItems.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Cart is empty!", "Checkout Error", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
         
-        boolean hasUnavailableItems = false;
-        StringBuilder unavailableMessage = new StringBuilder();
-
-        for (Map.Entry<Product, Integer> entry : cartItems.entrySet()) {
-            Product product = entry.getKey();
-            if (!product.isAvailable()) {
-                hasUnavailableItems = true;
-                unavailableMessage.append("- ")
-                                .append(product.getName())
-                                .append(" is no longer available\n");
-            }
-        }
-
-        if (hasUnavailableItems) {
-            
-            int result = JOptionPane.showConfirmDialog(this,
-                "Warning: Some items in your cart are no longer available:\n\n" +
-                unavailableMessage.toString() + "\n" +
-                "Do you still want to proceed with checkout? These items will be removed.",
-                "Availability Warning",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.WARNING_MESSAGE);
-
-            
-            if (result != JOptionPane.YES_OPTION) {
-                return;
-            }
-        }
-
+        int confirmation = JOptionPane.showConfirmDialog(
+            this,
+            "Are you sure you want to proceed with checkout?\n\nTotal Items: " + getTotalItemCount() + "\nTotal Price: " + String.format("₱%.2f", totalPrice),
+            "Confirm Checkout",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE
+        );
         
-        MainTabbedPane.setSelectedIndex(2); 
+        if (confirmation == JOptionPane.YES_OPTION) {
+            // Check for unavailable items
+            boolean hasUnavailableItems = false;
+            StringBuilder unavailableMessage = new StringBuilder();
+
+            for (Map.Entry<Product, Integer> entry : cartItems.entrySet()) {
+                Product product = entry.getKey();
+                if (!product.isAvailable()) {
+                    hasUnavailableItems = true;
+                    unavailableMessage.append("- ")
+                                    .append(product.getName())
+                                    .append(" is no longer available\n");
+                }
+            }
+
+            if (hasUnavailableItems) {
+                // Show warning about unavailable items
+                int result = JOptionPane.showConfirmDialog(this,
+                    "Warning: Some items in your cart are no longer available:\n\n" +
+                    unavailableMessage.toString() + "\n" +
+                    "Do you still want to proceed with checkout? These items will be removed.",
+                    "Availability Warning",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE);
+
+                // If user doesn't want to proceed, return
+                if (result != JOptionPane.YES_OPTION) {
+                    return;
+                }
+            }
+
+            // Proceed to payment selection
+            MainTabbedPane.setSelectedIndex(2);
+        }
+    }
+
+    private int getTotalItemCount() {
+        return cartItems.values().stream().mapToInt(Integer::intValue).sum();
     }
     
     private void checkoutWithPayment(String paymentMethod) {
@@ -761,53 +702,12 @@ private JLabel createImageLabel(Product product) {
         }
     }
     
-    private int processOrder() {
-        int orderId = -1;
-        try {
-            System.out.println("Creating order...");
-
-            
-            orderId = OrderManager.createNewOrder(totalPrice, "Cash");
-
-            System.out.println("Order creation result: " + orderId);
-
-            if (orderId == -1) {
-                JOptionPane.showMessageDialog(this, "Failed to create order in database", "Order Error", JOptionPane.ERROR_MESSAGE);
-                return -1;
-            }
-            
-            
-            for (Map.Entry<Product, Integer> entry : cartItems.entrySet()) {
-                Product product = entry.getKey();
-                int quantity = entry.getValue();
-
-                System.out.println("Adding item to order: " + product.getName() + " x " + quantity);
-
-                boolean itemAdded = OrderManager.addOrderItem(orderId, product.getId(), quantity);
-
-                if (!itemAdded) {
-                    JOptionPane.showMessageDialog(this, "Failed to add item: " + product.getName(), "Order Error", JOptionPane.ERROR_MESSAGE);
-                    
-                }
-            }
-
-            System.out.println("Order processed successfully: " + orderId);
-            return orderId;
-
-        } catch (Exception e) {
-            System.out.println("Error processing order: " + e.getMessage());
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error processing order: " + e.getMessage(), "Order Error", JOptionPane.ERROR_MESSAGE);
-            return -1;
-        }
-    }
-    
     private int processOrderWithPayment(String paymentMethod) {
         int orderId = -1;
         try {
             System.out.println("Creating order with payment method: " + paymentMethod);
 
-            
+            // Create order
             orderId = OrderManager.createNewOrder(totalPrice, paymentMethod);
 
             System.out.println("Order creation result: " + orderId);
@@ -816,21 +716,23 @@ private JLabel createImageLabel(Product product) {
                 JOptionPane.showMessageDialog(this, "Failed to create order in database", "Order Error", JOptionPane.ERROR_MESSAGE);
                 return -1;
             }
-            
-            
+
+            // Add order items
             for (Map.Entry<Product, Integer> entry : cartItems.entrySet()) {
                 Product product = entry.getKey();
                 int quantity = entry.getValue();
 
                 System.out.println("Adding item to order: " + product.getName() + " x " + quantity);
-
                 boolean itemAdded = OrderManager.addOrderItem(orderId, product.getId(), quantity);
 
                 if (!itemAdded) {
                     JOptionPane.showMessageDialog(this, "Failed to add item: " + product.getName(), "Order Error", JOptionPane.ERROR_MESSAGE);
-                    
                 }
             }
+
+            // ADD THIS: Add order to queue
+            QueueManager.addToQueue(orderId);
+            System.out.println("Order " + orderId + " added to queue. Queue size: " + QueueManager.getQueueSize());
 
             System.out.println("Order processed successfully: " + orderId);
             return orderId;
@@ -843,92 +745,12 @@ private JLabel createImageLabel(Product product) {
         }
     }
     
-    private void saveCartToFile() {
-        try {
-            File file = new File("cart_data.ser");
-            try (FileOutputStream fileOut = new FileOutputStream(file); 
-                 ObjectOutputStream out = new ObjectOutputStream(fileOut)) {
-                
-                
-                CartData cartData = new CartData(cartItems, totalPrice);
-                out.writeObject(cartData);
-            }
-        } catch (Exception e) {
-            System.out.println("Error saving cart: " + e.getMessage());
-        }
-    }
-
-    private void loadCartFromFile() {
-        try {
-            File file = new File("cart_data.ser");
-            if (file.exists()) {
-                try (FileInputStream fileIn = new FileInputStream(file); 
-                     ObjectInputStream in = new ObjectInputStream(fileIn)) {
-                    
-                    CartData cartData = (CartData) in.readObject();
-                    this.cartItems = cartData.getCartItems();
-                    this.totalPrice = cartData.getTotalPrice();
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("Error loading cart: " + e.getMessage());
-            
-            cartItems = new HashMap<>();
-            totalPrice = 0.0;
-        }
-    }
-    
-    private void cleanupOldCartFile() {
-        File cartFile = new File("cart_data.dat");
-        if (cartFile.exists()) {
-            
-            long lastModified = cartFile.lastModified();
-            long twentyFourHoursAgo = System.currentTimeMillis() - (24 * 60 * 60 * 1000);
-
-            if (lastModified < twentyFourHoursAgo) {
-                if (cartFile.delete()) {
-                    System.out.println("Deleted old cart file");
-                }
-            }
-        }
-    }
-    
-    private void deleteCartFile() {
-        try {
-            File file = new File("cart_data.ser");
-            if (file.exists()) {
-                file.delete();
-            }
-        } catch (Exception e) {
-            System.out.println("Error deleting cart file: " + e.getMessage());
-        }
-    }
-    
     private void clearCart() {
         cartItems.clear();
         totalPrice = 0.0;
         updateCartDisplay();
         updateCartAnnouncement();
-        deleteCartFile(); 
         CheckOutButton.setEnabled(false); 
-    }
-    
-    private static class CartData implements java.io.Serializable {
-        private Map<Product, Integer> cartItems;
-        private double totalPrice;
-
-        public CartData(Map<Product, Integer> cartItems, double totalPrice) {
-            this.cartItems = new HashMap<>(cartItems);
-            this.totalPrice = totalPrice;
-        }
-
-        public Map<Product, Integer> getCartItems() {
-            return cartItems;
-        }
-
-        public double getTotalPrice() {
-            return totalPrice;
-        }
     }
     
     @SuppressWarnings("unchecked")
@@ -1017,6 +839,8 @@ private JLabel createImageLabel(Product product) {
         header3 = new javax.swing.JPanel();
         GetHelpTitleLabel = new javax.swing.JLabel();
         GetHelpContentPanel = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
         footer3 = new javax.swing.JPanel();
         GetHelpSideBarPanel = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
@@ -1115,7 +939,7 @@ private JLabel createImageLabel(Product product) {
         NewOrderTitleLabel.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         NewOrderTitleLabel.setForeground(new java.awt.Color(255, 255, 255));
         NewOrderTitleLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        NewOrderTitleLabel.setText("NEW ORDER");
+        NewOrderTitleLabel.setText("ORDER YOUR DRINKS HERE!");
         NewOrderTitleLabel.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         header4.add(NewOrderTitleLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1000, 50));
 
@@ -1339,6 +1163,7 @@ private JLabel createImageLabel(Product product) {
         MenuProductDetailBoxPanel.add(ProductAddToCartButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 120, -1, -1));
 
         ProductQuantitySpinner.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        ProductQuantitySpinner.setModel(new javax.swing.SpinnerNumberModel(0, 0, null, 1));
         ProductQuantitySpinner.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         ProductQuantitySpinner.setPreferredSize(new java.awt.Dimension(128, 64));
         MenuProductDetailBoxPanel.add(ProductQuantitySpinner, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 120, -1, -1));
@@ -1459,6 +1284,7 @@ private JLabel createImageLabel(Product product) {
         SpecialsProductDetailBoxPanel.add(SpecialsProductAddToCartButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 120, -1, -1));
 
         SpecialsProductQuantitySpinner.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        SpecialsProductQuantitySpinner.setModel(new javax.swing.SpinnerNumberModel(0, 0, null, 1));
         SpecialsProductQuantitySpinner.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         SpecialsProductQuantitySpinner.setPreferredSize(new java.awt.Dimension(128, 64));
         SpecialsProductDetailBoxPanel.add(SpecialsProductQuantitySpinner, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 120, -1, -1));
@@ -1590,6 +1416,7 @@ private JLabel createImageLabel(Product product) {
         CartProductDetailBoxPanel.add(CartProductDeleteToCartButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 120, -1, -1));
 
         CartProductQuantitySpinner.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        CartProductQuantitySpinner.setModel(new javax.swing.SpinnerNumberModel(1, 1, null, 1));
         CartProductQuantitySpinner.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         CartProductQuantitySpinner.setPreferredSize(new java.awt.Dimension(128, 64));
         CartProductDetailBoxPanel.add(CartProductQuantitySpinner, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 120, -1, -1));
@@ -1679,6 +1506,22 @@ private JLabel createImageLabel(Product product) {
         GetHelpContentPanel.setForeground(new java.awt.Color(31, 40, 35));
         GetHelpContentPanel.setRequestFocusEnabled(false);
         GetHelpContentPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jTextArea1.setEditable(false);
+        jTextArea1.setBackground(new java.awt.Color(249, 241, 240));
+        jTextArea1.setColumns(20);
+        jTextArea1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jTextArea1.setForeground(new java.awt.Color(31, 40, 35));
+        jTextArea1.setLineWrap(true);
+        jTextArea1.setRows(5);
+        jTextArea1.setText("HELP & FREQUENTLY ASKED QUESTIONS\n\nHOW TO PLACE AN ORDER:\n1. Click 'NEW ORDER' on the main screen\n2. Browse our MENU or BEST SELLING items\n3. Select quantity and click 'ADD TO CART'\n4. Review your cart and click 'CHECKOUT'\n5. Choose your payment method\n6. Receive your order slip\n\nPAYMENT METHODS:\n• CASH - Pay with cash at the counter\n• GCASH - Digital payment via QR code\n\nPRODUCT AVAILABILITY:\n• Green 'Available' = Product is in stock\n• Red 'Not Available' = Temporarily out of stock\n\nFREQUENTLY ASKED QUESTIONS:\nQ: Can I customize my drink (extra sugar, less ice, etc.)?\nA: We're sorry, but our kiosk does not support drink customizations.\nAll our beverages are prepared as signature drinks with carefully crafted recipes to ensure consistent quality and taste.\n\nQ: Can I modify my order after payment?\nA: Please speak with our staff for modifications.\n\nQ: What if a product is out of stock?\nA: Unavailable items cannot be added to cart.\n\nNEED MORE HELP?\nPlease approach our staff for assistance.\nWe're here to make your experience great!");
+        jTextArea1.setWrapStyleWord(true);
+        jTextArea1.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        jTextArea1.setMargin(new java.awt.Insets(10, 10, 10, 10));
+        jScrollPane1.setViewportView(jTextArea1);
+
+        GetHelpContentPanel.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 850, 500));
+
         GetHelpPanelTab.add(GetHelpContentPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 50, 850, 500));
 
         footer3.setBackground(new java.awt.Color(31, 40, 35));
@@ -2181,6 +2024,8 @@ private JLabel createImageLabel(Product product) {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextArea jTextArea1;
     private javax.swing.JPanel menu_category_box;
     private javax.swing.JScrollPane menu_category_scroll_pane1;
     private javax.swing.JLabel new_order_progress_image;

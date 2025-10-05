@@ -27,31 +27,33 @@ public class QueueManager {
         }
     }
     
-    
     public static void addToQueue(int orderId) {
         orderQueue.add(orderId);
     }
     
+    public static boolean removeFromQueue(int orderId) {
+        return orderQueue.remove(orderId);
+    }
+
+    public static boolean containsOrder(int orderId) {
+        return orderQueue.contains(orderId);
+    }
     
     public static Integer getNextOrder() {
         return orderQueue.poll(); 
     }
     
-    
     public static Integer peekNextOrder() {
         return orderQueue.peek();
     }
-    
     
     public static int getQueueSize() {
         return orderQueue.size();
     }
     
-    
     public static boolean isQueueEmpty() {
         return orderQueue.isEmpty();
     }
-    
     
     public static Queue<Integer> getQueue() {
         return new LinkedList<>(orderQueue); 

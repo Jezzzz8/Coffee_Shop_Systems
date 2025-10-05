@@ -6,11 +6,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.List;
 import objects.OrderItem;
 import objects.OrderSlip;
-import objects.Receipt;
 
 public class OrderSlipManager {
     
@@ -46,23 +44,5 @@ public class OrderSlipManager {
             System.err.println("Error generating order slip: " + e.getMessage());
         }
         return null;
-    }
-    
-    
-    
-    public static Receipt generateReceipt(int orderId, double paymentReceived, double change) {
-        OrderSlip orderSlip = generateOrderSlip(orderId);
-        if (orderSlip == null) return null;
-        
-        return new Receipt(
-            orderId,
-            orderSlip.getOrderDateTime().toLocalDateTime(),
-            LocalDateTime.now(),
-            orderSlip.getItems(),
-            orderSlip.getTotalAmount(),
-            paymentReceived,
-            change,
-            orderSlip.getPaymentMethod()
-        );
     }
 }
