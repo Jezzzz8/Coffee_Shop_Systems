@@ -7,8 +7,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import objects.Order;
 import objects.OrderItem;
+import objects.Payment;
+import services.PaymentManager;
 
 public class OrderManager {
     
@@ -23,7 +24,7 @@ public class OrderManager {
 
             pstmt.setDouble(1, totalAmount);
             
-            
+            // Use PaymentManager to get payment method ID
             int paymentMethodId = getPaymentMethodId(paymentMethod);
             pstmt.setInt(2, paymentMethodId);
 
@@ -53,7 +54,12 @@ public class OrderManager {
     }
     
     private static int getPaymentMethodId(String paymentMethod) {
+        Payment payment = PaymentManager.getPaymentMethodByName(paymentMethod);
+        if (payment != null) {
+            return payment.getPaymentMethodId();
+        }
         
+        // Fallback if payment method not found
         switch (paymentMethod.toLowerCase()) {
             case "cash": 
                 return 1;
@@ -63,78 +69,6 @@ public class OrderManager {
             default: 
                 return 1; 
         }
-    }
-    
-    public static String getPaymentMethodName(int paymentMethodId) {
-        
-        switch (paymentMethodId) {
-            case 1: 
-                return "Cash";
-            case 2: 
-                return "GCash";
-            default: 
-                return "Cash";
-        }
-    }
-    
-    
-    public static String getPaymentMethodFromDB(int paymentMethodId) {
-        Connection conn = DatabaseConnection.getConnection();
-        String sql = "SELECT method_name FROM payment_method_tb WHERE payment_method_id = ? AND is_available = 1";
-        
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, paymentMethodId);
-            ResultSet rs = pstmt.executeQuery();
-            
-            if (rs.next()) {
-                return rs.getString("method_name");
-            }
-        } catch (SQLException e) {
-            System.err.println("Error getting payment method from DB: " + e.getMessage());
-        }
-        
-        
-        return getPaymentMethodName(paymentMethodId);
-    }
-    
-    
-    public static List<String> getAvailablePaymentMethods() {
-        List<String> paymentMethods = new ArrayList<>();
-        Connection conn = DatabaseConnection.getConnection();
-        String sql = "SELECT method_name FROM payment_method_tb WHERE is_available = 1 ORDER BY payment_method_id";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            ResultSet rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                paymentMethods.add(rs.getString("method_name"));
-            }
-        } catch (SQLException e) {
-            System.err.println("Error getting available payment methods: " + e.getMessage());
-            
-            paymentMethods.add("Cash");
-            paymentMethods.add("GCash");
-        }
-        return paymentMethods;
-    }
-    
-    public static boolean isPaymentMethodAvailable(String paymentMethod) {
-        Connection conn = DatabaseConnection.getConnection();
-        String sql = "SELECT is_available FROM payment_method_tb WHERE method_name = ?";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, paymentMethod);
-            ResultSet rs = pstmt.executeQuery();
-
-            if (rs.next()) {
-                return rs.getBoolean("is_available");
-            }
-        } catch (SQLException e) {
-            System.err.println("Error checking payment method availability: " + e.getMessage());
-        }
-
-        
-        return true;
     }
     
     public static boolean addOrderItem(int orderId, int productId, int quantity) {

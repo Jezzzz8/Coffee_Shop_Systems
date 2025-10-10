@@ -26,8 +26,8 @@ public class OrderSlipManager {
                 double totalAmount = rs.getDouble("total_amount");
                 int paymentMethodId = rs.getInt("payment_method_id");
                 
-                
-                String paymentMethod = OrderManager.getPaymentMethodFromDB(paymentMethodId);
+                // Use PaymentManager instead of OrderManager
+                String paymentMethod = PaymentManager.getPaymentMethodName(paymentMethodId);
                 
                 List<OrderItem> items = OrderManager.getOrderItems(orderId);
                 

@@ -1,6 +1,5 @@
 package gui;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
@@ -24,6 +23,7 @@ import objects.Product;
 import services.ConsolePrintService;
 import services.OrderManager;
 import services.OrderSlipManager;
+import services.PaymentManager;
 import services.PrintService;
 import services.ProductManager;
 import services.QueueManager;
@@ -39,13 +39,14 @@ public class KioskFrame extends javax.swing.JFrame {
     private int lastOrderId = -1;
     private String selectedPaymentMethod = "Cash";
     
-    
     public KioskFrame() {
         initComponents();
         cartItems = new HashMap<>();
         totalPrice = 0.0;
         printService = new ConsolePrintService();
-
+        
+        QueueManager.initializeQueue();
+        
         customizeOptionPane();
         
         initializeLanguageChoice();
@@ -222,9 +223,8 @@ private JLabel createImageLabel(Product product) {
             new SoftBevelBorder(BevelBorder.RAISED),
             BorderFactory.createEmptyBorder(10, 10, 10, 10)
         ));
-        panel.setPreferredSize(new Dimension(700, 200));
+        panel.setPreferredSize(new Dimension(700, 250));
 
-        
         if (product == null) {
             return new JPanel(); 
         }
@@ -234,36 +234,44 @@ private JLabel createImageLabel(Product product) {
 
         imageLabel.setBorder(BorderFactory.createLineBorder(new Color(31, 40, 35), 2));
         imageLabel.setPreferredSize(new Dimension(150, 150));
-        panel.add(imageLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, -1, -1));
+        panel.add(imageLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 50, -1, -1));
 
-        
+        // Product Name
         JLabel nameLabel = new JLabel(product.getName());
         nameLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
         nameLabel.setForeground(new Color(31, 40, 35));
-        panel.add(nameLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 20, 500, 30));
+        panel.add(nameLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 50, 500, 30));
 
-        
+        // Product Price
         JLabel priceLabel = new JLabel(String.format("₱%.2f", product.getPrice()));
         priceLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
         priceLabel.setForeground(new Color(100, 100, 100));
-        panel.add(priceLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 60, 260, 40));
+        panel.add(priceLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 80, 260, 25));
 
-        
+        // Product Description
+        JLabel descriptionLabel = new JLabel(product.getDescription());
+        descriptionLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        descriptionLabel.setForeground(new Color(80, 80, 80));
+        descriptionLabel.setVerticalAlignment(SwingConstants.TOP);
+        panel.add(descriptionLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 120, 500, 45));
+
+        // Availability
         boolean isAvailable = product.isAvailable();
         JLabel availabilityLabel = new JLabel(isAvailable ? "Available" : "Not Available");
         availabilityLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         availabilityLabel.setForeground(isAvailable ? new Color(42, 168, 83) : new Color(255, 0, 0));
-        panel.add(availabilityLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 100, 260, 40));
+        panel.add(availabilityLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 170, 260, 20));
         
+        // Quantity Label
         JLabel quantityLabel = new JLabel("Quantity:");
         quantityLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
         quantityLabel.setForeground(new Color(66, 133, 244));
-        panel.add(quantityLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 120, 80, 60));
+        panel.add(quantityLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 155, 80, 40));
         
+        // Quantity Spinner
         JSpinner quantitySpinner = new JSpinner();
         quantitySpinner.setFont(new Font("Segoe UI", Font.BOLD, 24));
 
-        
         int maxQuantity = isAvailable ? 100 : 0;
         quantitySpinner.setModel(new SpinnerNumberModel(0, 0, maxQuantity, 1));
 
@@ -271,14 +279,13 @@ private JLabel createImageLabel(Product product) {
         quantitySpinner.setPreferredSize(new Dimension(128, 64));
         quantitySpinner.setEnabled(isAvailable); 
 
-        
         if (!isAvailable) {
             quantitySpinner.setBackground(new Color(240, 240, 240));
         }
 
-        panel.add(quantitySpinner, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 120, -1, -1));
+        panel.add(quantitySpinner, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 150, -1, -1));
 
-        
+        // Add Button
         JButton addButton = new JButton();
         addButton.setIcon(new ImageIcon(getClass().getResource("/gui/Images/icons/add.png")));
         addButton.setFont(new Font("Segoe UI", Font.PLAIN, 14));
@@ -295,7 +302,7 @@ private JLabel createImageLabel(Product product) {
                 quantitySpinner.setValue(0); 
             }
         });
-        panel.add(addButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 120, 64, 64));
+        panel.add(addButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 150, 64, 64));
 
         return panel;
     }
@@ -320,6 +327,7 @@ private JLabel createImageLabel(Product product) {
 
         
         adjustMenuCategoryBoxHeight();
+        adjustSpecialsCategoryBoxHeight();
 
         
         menu_category_box.revalidate();
@@ -373,22 +381,28 @@ private JLabel createImageLabel(Product product) {
                 Product product = new Product(productId, productName, price, 
                                             description, imageFilename, isAvailable);
 
-                
+
                 bestProducts.add(product);
             }
 
             rs.close();
             pstmt.close();
 
+            // Update the specialsProducts field
+            specialsProducts = bestProducts;
+
         } catch (Exception e) {
             System.out.println("Error loading best selling products: " + e.getMessage());
             e.printStackTrace();
 
-            
+
             for (Product product : menuProducts) {
                 if (bestProducts.size() >= 8) break;
                 bestProducts.add(product);
             }
+
+            // Update the specialsProducts field even in case of error
+            specialsProducts = bestProducts;
         }
 
         return bestProducts;
@@ -398,7 +412,6 @@ private JLabel createImageLabel(Product product) {
         if (quantity <= 0) {
             return;
         }
-
         
         if (!product.isAvailable()) {
             JOptionPane.showMessageDialog(this, 
@@ -406,20 +419,29 @@ private JLabel createImageLabel(Product product) {
                 "Product Not Available", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
         
-        int alreadyInCart = cartItems.getOrDefault(product, 0);
-        cartItems.put(product, alreadyInCart + quantity);
+        Product existingProduct = findProductInCart(product.getId());
 
+        if (existingProduct != null) {
+            int currentQuantity = cartItems.get(existingProduct);
+            cartItems.put(existingProduct, currentQuantity + quantity);
+        } else {
+            cartItems.put(product, quantity);
+        }
         
         totalPrice += product.getPrice() * quantity;
-
         
         updateCartDisplay();
-
-        
         updateCartAnnouncement();
-        
+    }
+
+    private Product findProductInCart(int productId) {
+        for (Product cartProduct : cartItems.keySet()) {
+            if (cartProduct.getId() == productId) {
+                return cartProduct;
+            }
+        }
+        return null;
     }
     
     private void updateCartDisplay() {
@@ -463,25 +485,42 @@ private JLabel createImageLabel(Product product) {
         int productCount = menuProducts.size();
         int preferredHeight;
 
-        if (productCount > 2) {
-            
+        if (productCount >= 2) {
             int rows = (int) Math.ceil(productCount / 2.0); 
-            preferredHeight = rows * 440 + 40; 
+            preferredHeight = rows * 470 + 40;
         } else {
-            preferredHeight = 400; 
+            preferredHeight = 400;
         }
 
         menu_category_box.setPreferredSize(new Dimension(760, preferredHeight));
     }
     
-    private void adjustCartPanelHeight() {
-        if (!cartItems.isEmpty()) {
-            int itemCount = cartItems.size();
-            int preferredHeight = Math.max(400, itemCount * 440 + 40); 
-            CartItemsPanel.setPreferredSize(new Dimension(730, preferredHeight));
+    private void adjustSpecialsCategoryBoxHeight() {
+        int productCount = specialsProducts.size();
+        int preferredHeight;
+
+        if (productCount >= 2) {
+            int rows = (int) Math.ceil(productCount / 2.0); 
+            preferredHeight = rows * 500 + 60;
         } else {
-            CartItemsPanel.setPreferredSize(new Dimension(730, 400));
+            preferredHeight = 400;
         }
+
+        specials_category_box.setPreferredSize(new Dimension(760, preferredHeight));
+    }
+    
+    private void adjustCartPanelHeight() {
+        int cartCount = cartItems.size();
+        int preferredHeight;
+        
+        if (cartCount >= 2) {
+            int rows = (int) Math.ceil(cartCount / 2.0);
+            preferredHeight = rows * 500 + 40;
+        } else {
+            preferredHeight = 400;
+        }
+        
+        CartItemsPanel.setPreferredSize(new Dimension(760, preferredHeight));
     }
     
     private JPanel createCartItemPanel(Product product, int quantity) {
@@ -492,8 +531,8 @@ private JLabel createImageLabel(Product product) {
             new SoftBevelBorder(BevelBorder.RAISED),
             BorderFactory.createEmptyBorder(10, 10, 10, 10)
         ));
-        panel.setPreferredSize(new Dimension(700, 200));
-        panel.setMaximumSize(new Dimension(700, 200));
+        panel.setPreferredSize(new Dimension(700, 250));
+        panel.setMaximumSize(new Dimension(700, 250));
 
         if (product == null) {
             return new JPanel(); 
@@ -504,34 +543,47 @@ private JLabel createImageLabel(Product product) {
 
         imageLabel.setBorder(BorderFactory.createLineBorder(new Color(31, 40, 35), 2));
         imageLabel.setPreferredSize(new Dimension(150, 150));
-        panel.add(imageLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, -1, -1));
+        panel.add(imageLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 50, -1, -1));
 
+        // Product Name
         JLabel nameLabel = new JLabel(product.getName());
         nameLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
         nameLabel.setForeground(new Color(31, 40, 35));
-        panel.add(nameLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 20, 500, 30));
+        panel.add(nameLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 50, 500, 30));
 
+        // Product Price
         JLabel priceLabel = new JLabel(String.format("₱%.2f", product.getPrice()));
         priceLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
         priceLabel.setForeground(new Color(100, 100, 100));
-        panel.add(priceLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 60, 260, 40));
+        panel.add(priceLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 80, 260, 25));
 
+        // Product Description
+        JLabel descriptionLabel = new JLabel(product.getDescription());
+        descriptionLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        descriptionLabel.setForeground(new Color(80, 80, 80));
+        descriptionLabel.setVerticalAlignment(SwingConstants.TOP);
+        panel.add(descriptionLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 120, 500, 45));
+
+        // Availability
         boolean isAvailable = product.isAvailable();
         JLabel availabilityLabel = new JLabel(isAvailable ? "Available" : "Not Available");
         availabilityLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         availabilityLabel.setForeground(isAvailable ? new Color(42, 168, 83) : new Color(255, 0, 0));
-        panel.add(availabilityLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 100, 260, 40));
+        panel.add(availabilityLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 170, 260, 20));
 
+        // Item Total
         JLabel itemTotalLabel = new JLabel(String.format("Total: ₱%.2f", product.getPrice() * quantity));
         itemTotalLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         itemTotalLabel.setForeground(new Color(31, 40, 35));
-        panel.add(itemTotalLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 140, 260, 30));
+        panel.add(itemTotalLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 120, 260, 25));
 
+        // Quantity Label
         JLabel quantityLabel = new JLabel("Quantity:");
         quantityLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
         quantityLabel.setForeground(new Color(66, 133, 244));
-        panel.add(quantityLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 120, 80, 60));
+        panel.add(quantityLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 155, 80, 40));
 
+        // Quantity Spinner
         JSpinner quantitySpinner = new JSpinner();
         quantitySpinner.setFont(new Font("Segoe UI", Font.BOLD, 24));
 
@@ -539,7 +591,7 @@ private JLabel createImageLabel(Product product) {
 
         quantitySpinner.setBorder(new SoftBevelBorder(BevelBorder.RAISED));
         quantitySpinner.setPreferredSize(new Dimension(128, 64));
-        panel.add(quantitySpinner, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 120, -1, -1));
+        panel.add(quantitySpinner, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 150, -1, -1));
 
         quantitySpinner.addChangeListener(new ChangeListener() {
             @Override
@@ -548,11 +600,9 @@ private JLabel createImageLabel(Product product) {
                 int oldQuantity = cartItems.get(product);
 
                 if (newQuantity != oldQuantity) {
-                    
                     totalPrice += product.getPrice() * (newQuantity - oldQuantity);
 
                     if (newQuantity == 0) {
-                        
                         cartItems.remove(product);
                     } else {
                         cartItems.put(product, newQuantity);
@@ -561,12 +611,12 @@ private JLabel createImageLabel(Product product) {
                     itemTotalLabel.setText(String.format("Total: ₱%.2f", product.getPrice() * newQuantity));
                     TotalPriceNumberLabel.setText(String.format("₱%.2f", totalPrice));
                     updateCartAnnouncement();
-                    
                     updateCartDisplay();
                 }
             }
         });
 
+        // Delete Button
         JButton deleteButton = new JButton();
         deleteButton.setIcon(new ImageIcon(getClass().getResource("/gui/Images/icons/delete.png")));
         deleteButton.setFont(new Font("Segoe UI", Font.PLAIN, 12));
@@ -587,19 +637,19 @@ private JLabel createImageLabel(Product product) {
                 updateCartAnnouncement();
             }
         });
-        panel.add(deleteButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 120, -1, -1));
+        panel.add(deleteButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 150, -1, -1));
 
         return panel;
     }
     
     private void updatePaymentButtonAvailability() {
-        boolean isGCashAvailable = OrderManager.isPaymentMethodAvailable("GCash");
-        boolean isCashAvailable = OrderManager.isPaymentMethodAvailable("Cash");
+        boolean isGCashAvailable = PaymentManager.isPaymentMethodAvailable("GCash");
+        boolean isCashAvailable = PaymentManager.isPaymentMethodAvailable("Cash");
 
-        
         GCashButton.setEnabled(isGCashAvailable);
+        CashButton.setEnabled(isCashAvailable);
 
-        
+        // Update button appearance based on availability
         if (!isGCashAvailable) {
             GCashButton.setBackground(new Color(200, 200, 200)); 
             GCashButton.setToolTipText("GCash payment is currently unavailable");
@@ -607,9 +657,6 @@ private JLabel createImageLabel(Product product) {
             GCashButton.setBackground(new Color(249, 241, 240)); 
             GCashButton.setToolTipText("Pay with GCash");
         }
-        
-        CashButton.setEnabled(isGCashAvailable);
-
         
         if (!isCashAvailable) {
             CashButton.setBackground(new Color(200, 200, 200)); 
@@ -680,13 +727,21 @@ private JLabel createImageLabel(Product product) {
         System.out.println("Checkout started with payment: " + paymentMethod);
         this.selectedPaymentMethod = paymentMethod;
 
-        
         if (cartItems.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Cart is empty!", "Checkout Error", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        
+        // Check if payment method is available using PaymentManager
+        if (!PaymentManager.isPaymentMethodAvailable(paymentMethod)) {
+            JOptionPane.showMessageDialog(this, 
+                paymentMethod + " payment is currently unavailable. Please choose another payment method.", 
+                "Payment Unavailable", 
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // ... rest of the checkoutWithPayment method remains the same ...
         boolean hasUnavailableItems = false;
         StringBuilder unavailableMessage = new StringBuilder();
 
@@ -701,7 +756,6 @@ private JLabel createImageLabel(Product product) {
         }
 
         if (hasUnavailableItems) {
-            
             int result = JOptionPane.showConfirmDialog(this,
                 "Warning: Some items in your cart are no longer available:\n\n" +
                 unavailableMessage.toString() + "\n" +
@@ -710,21 +764,17 @@ private JLabel createImageLabel(Product product) {
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.WARNING_MESSAGE);
 
-            
             if (result != JOptionPane.YES_OPTION) {
                 return;
             }
         }
 
-        
         int orderId = processOrderWithPayment(paymentMethod);
         System.out.println("Process order returned: " + orderId);
 
         if (orderId != -1) {
-            
             lastOrderId = orderId;
 
-            
             OrderSlip orderSlip = OrderSlipManager.generateOrderSlip(orderId);
             if (orderSlip != null) {
                 printService.displayOrderSlip(orderSlip);
@@ -770,8 +820,7 @@ private JLabel createImageLabel(Product product) {
                     JOptionPane.showMessageDialog(this, "Failed to add item: " + product.getName(), "Order Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
-
-            // ADD THIS: Add order to queue
+            
             QueueManager.addToQueue(orderId);
             System.out.println("Order " + orderId + " added to queue. Queue size: " + QueueManager.getQueueSize());
 
@@ -780,7 +829,6 @@ private JLabel createImageLabel(Product product) {
 
         } catch (Exception e) {
             System.out.println("Error processing order: " + e.getMessage());
-            e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error processing order: " + e.getMessage(), "Order Error", JOptionPane.ERROR_MESSAGE);
             return -1;
         }
@@ -836,6 +884,7 @@ private JLabel createImageLabel(Product product) {
         ProductQuantitySpinner = new javax.swing.JSpinner();
         ProductPriceDetailLabel = new javax.swing.JLabel();
         ProductAvailabilityDetailLabel = new javax.swing.JLabel();
+        ProductDescriptionDetailLabel = new javax.swing.JLabel();
         CartUpdateAnnouncementOffscreenLabel1 = new javax.swing.JLabel();
         footer = new javax.swing.JPanel();
         SpecialsPanelTab = new javax.swing.JPanel();
@@ -852,6 +901,7 @@ private JLabel createImageLabel(Product product) {
         SpecialsProductQuantitySpinner = new javax.swing.JSpinner();
         SpecialsProductPriceDetailLabel = new javax.swing.JLabel();
         SpecialsAvailabilityDetailLabel1 = new javax.swing.JLabel();
+        SpecialsDescriptionDetailLabel1 = new javax.swing.JLabel();
         footer4 = new javax.swing.JPanel();
         CartUpdateAnnouncementOffscreenLabel2 = new javax.swing.JLabel();
         footer1 = new javax.swing.JPanel();
@@ -871,6 +921,7 @@ private JLabel createImageLabel(Product product) {
         CartProductPriceDetailLabel = new javax.swing.JLabel();
         CartItemTotalAmountLabel = new javax.swing.JLabel();
         CartItemAvailabilityDetailLabel = new javax.swing.JLabel();
+        CartProductDescriptionDetailLabel = new javax.swing.JLabel();
         CheckOutButton = new javax.swing.JButton();
         TotalPriceLabel = new javax.swing.JLabel();
         TotalPriceNumberLabel = new javax.swing.JLabel();
@@ -1159,19 +1210,19 @@ private JLabel createImageLabel(Product product) {
         MenuProductDetailBoxPanel.setBackground(new java.awt.Color(249, 241, 240));
         MenuProductDetailBoxPanel.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.LOWERED));
         MenuProductDetailBoxPanel.setForeground(new java.awt.Color(31, 40, 35));
-        MenuProductDetailBoxPanel.setPreferredSize(new java.awt.Dimension(700, 200));
+        MenuProductDetailBoxPanel.setPreferredSize(new java.awt.Dimension(700, 250));
         MenuProductDetailBoxPanel.setRequestFocusEnabled(false);
         MenuProductDetailBoxPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         ProductQuantityDetailLabel.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         ProductQuantityDetailLabel.setForeground(new java.awt.Color(66, 133, 244));
         ProductQuantityDetailLabel.setText("Quantity:");
-        MenuProductDetailBoxPanel.add(ProductQuantityDetailLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 120, 80, 60));
+        MenuProductDetailBoxPanel.add(ProductQuantityDetailLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 155, 80, 60));
 
         ProductNameLabel.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         ProductNameLabel.setForeground(new java.awt.Color(31, 40, 35));
         ProductNameLabel.setText("Name: ");
-        MenuProductDetailBoxPanel.add(ProductNameLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 20, 500, 30));
+        MenuProductDetailBoxPanel.add(ProductNameLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 50, 500, 30));
 
         MainProductImageLabel.setBackground(new java.awt.Color(249, 241, 240));
         MainProductImageLabel.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
@@ -1185,7 +1236,7 @@ private JLabel createImageLabel(Product product) {
         MainProductImageLabel.setMinimumSize(new java.awt.Dimension(150, 150));
         MainProductImageLabel.setName(""); // NOI18N
         MainProductImageLabel.setPreferredSize(new java.awt.Dimension(150, 150));
-        MenuProductDetailBoxPanel.add(MainProductImageLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, -1, -1));
+        MenuProductDetailBoxPanel.add(MainProductImageLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 50, -1, -1));
 
         ProductAddToCartButton.setBackground(new java.awt.Color(249, 241, 240));
         ProductAddToCartButton.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
@@ -1201,24 +1252,29 @@ private JLabel createImageLabel(Product product) {
                 ProductAddToCartButtonActionPerformed(evt);
             }
         });
-        MenuProductDetailBoxPanel.add(ProductAddToCartButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 120, -1, -1));
+        MenuProductDetailBoxPanel.add(ProductAddToCartButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 155, -1, -1));
 
         ProductQuantitySpinner.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         ProductQuantitySpinner.setModel(new javax.swing.SpinnerNumberModel(0, 0, null, 1));
         ProductQuantitySpinner.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         ProductQuantitySpinner.setPreferredSize(new java.awt.Dimension(128, 64));
-        MenuProductDetailBoxPanel.add(ProductQuantitySpinner, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 120, -1, -1));
+        MenuProductDetailBoxPanel.add(ProductQuantitySpinner, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 155, -1, -1));
 
         ProductPriceDetailLabel.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         ProductPriceDetailLabel.setForeground(new java.awt.Color(102, 102, 102));
         ProductPriceDetailLabel.setText("Price:");
-        MenuProductDetailBoxPanel.add(ProductPriceDetailLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 60, 260, 40));
+        MenuProductDetailBoxPanel.add(ProductPriceDetailLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 80, 260, 40));
 
         ProductAvailabilityDetailLabel.setBackground(new java.awt.Color(42, 168, 83));
         ProductAvailabilityDetailLabel.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         ProductAvailabilityDetailLabel.setForeground(new java.awt.Color(42, 168, 83));
         ProductAvailabilityDetailLabel.setText("Available");
-        MenuProductDetailBoxPanel.add(ProductAvailabilityDetailLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 110, 80, 60));
+        MenuProductDetailBoxPanel.add(ProductAvailabilityDetailLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 170, 80, 30));
+
+        ProductDescriptionDetailLabel.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        ProductDescriptionDetailLabel.setForeground(new java.awt.Color(102, 102, 102));
+        ProductDescriptionDetailLabel.setText("Description");
+        MenuProductDetailBoxPanel.add(ProductDescriptionDetailLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 120, 260, 30));
 
         menu_category_box.add(MenuProductDetailBoxPanel);
 
@@ -1281,19 +1337,19 @@ private JLabel createImageLabel(Product product) {
         SpecialsProductDetailBoxPanel.setBackground(new java.awt.Color(249, 241, 240));
         SpecialsProductDetailBoxPanel.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.LOWERED));
         SpecialsProductDetailBoxPanel.setForeground(new java.awt.Color(31, 40, 35));
-        SpecialsProductDetailBoxPanel.setPreferredSize(new java.awt.Dimension(700, 200));
+        SpecialsProductDetailBoxPanel.setPreferredSize(new java.awt.Dimension(700, 250));
         SpecialsProductDetailBoxPanel.setRequestFocusEnabled(false);
         SpecialsProductDetailBoxPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         SpecialsProductQuantityDetailLabel.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         SpecialsProductQuantityDetailLabel.setForeground(new java.awt.Color(66, 133, 244));
         SpecialsProductQuantityDetailLabel.setText("Quantity:");
-        SpecialsProductDetailBoxPanel.add(SpecialsProductQuantityDetailLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 120, 80, 60));
+        SpecialsProductDetailBoxPanel.add(SpecialsProductQuantityDetailLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 155, 80, 60));
 
         SpecialsProductNameLabel.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         SpecialsProductNameLabel.setForeground(new java.awt.Color(31, 40, 35));
         SpecialsProductNameLabel.setText("Name: ");
-        SpecialsProductDetailBoxPanel.add(SpecialsProductNameLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 20, 500, 30));
+        SpecialsProductDetailBoxPanel.add(SpecialsProductNameLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 50, 500, 30));
 
         SpecialsProductImageLabel.setBackground(new java.awt.Color(249, 241, 240));
         SpecialsProductImageLabel.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
@@ -1306,7 +1362,7 @@ private JLabel createImageLabel(Product product) {
         SpecialsProductImageLabel.setMaximumSize(new java.awt.Dimension(150, 150));
         SpecialsProductImageLabel.setMinimumSize(new java.awt.Dimension(150, 150));
         SpecialsProductImageLabel.setPreferredSize(new java.awt.Dimension(150, 150));
-        SpecialsProductDetailBoxPanel.add(SpecialsProductImageLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, -1, -1));
+        SpecialsProductDetailBoxPanel.add(SpecialsProductImageLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 50, -1, -1));
 
         SpecialsProductAddToCartButton.setBackground(new java.awt.Color(249, 241, 240));
         SpecialsProductAddToCartButton.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
@@ -1322,24 +1378,29 @@ private JLabel createImageLabel(Product product) {
                 SpecialsProductAddToCartButtonActionPerformed(evt);
             }
         });
-        SpecialsProductDetailBoxPanel.add(SpecialsProductAddToCartButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 120, -1, -1));
+        SpecialsProductDetailBoxPanel.add(SpecialsProductAddToCartButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 155, -1, -1));
 
         SpecialsProductQuantitySpinner.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         SpecialsProductQuantitySpinner.setModel(new javax.swing.SpinnerNumberModel(0, 0, null, 1));
         SpecialsProductQuantitySpinner.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         SpecialsProductQuantitySpinner.setPreferredSize(new java.awt.Dimension(128, 64));
-        SpecialsProductDetailBoxPanel.add(SpecialsProductQuantitySpinner, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 120, -1, -1));
+        SpecialsProductDetailBoxPanel.add(SpecialsProductQuantitySpinner, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 155, -1, -1));
 
         SpecialsProductPriceDetailLabel.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         SpecialsProductPriceDetailLabel.setForeground(new java.awt.Color(102, 102, 102));
         SpecialsProductPriceDetailLabel.setText("Price:");
-        SpecialsProductDetailBoxPanel.add(SpecialsProductPriceDetailLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 60, 260, 40));
+        SpecialsProductDetailBoxPanel.add(SpecialsProductPriceDetailLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 80, 260, 30));
 
         SpecialsAvailabilityDetailLabel1.setBackground(new java.awt.Color(42, 168, 83));
         SpecialsAvailabilityDetailLabel1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         SpecialsAvailabilityDetailLabel1.setForeground(new java.awt.Color(42, 168, 83));
         SpecialsAvailabilityDetailLabel1.setText("Available");
-        SpecialsProductDetailBoxPanel.add(SpecialsAvailabilityDetailLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 110, 80, 60));
+        SpecialsProductDetailBoxPanel.add(SpecialsAvailabilityDetailLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 165, 80, 30));
+
+        SpecialsDescriptionDetailLabel1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        SpecialsDescriptionDetailLabel1.setForeground(new java.awt.Color(102, 102, 102));
+        SpecialsDescriptionDetailLabel1.setText("Description");
+        SpecialsProductDetailBoxPanel.add(SpecialsDescriptionDetailLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 120, 260, 30));
 
         specials_category_box.add(SpecialsProductDetailBoxPanel);
 
@@ -1413,19 +1474,19 @@ private JLabel createImageLabel(Product product) {
         CartProductDetailBoxPanel.setBackground(new java.awt.Color(249, 241, 240));
         CartProductDetailBoxPanel.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.LOWERED));
         CartProductDetailBoxPanel.setForeground(new java.awt.Color(31, 40, 35));
-        CartProductDetailBoxPanel.setPreferredSize(new java.awt.Dimension(700, 200));
+        CartProductDetailBoxPanel.setPreferredSize(new java.awt.Dimension(700, 250));
         CartProductDetailBoxPanel.setRequestFocusEnabled(false);
         CartProductDetailBoxPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         CartProductQuantityDetailLabel.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         CartProductQuantityDetailLabel.setForeground(new java.awt.Color(66, 133, 244));
         CartProductQuantityDetailLabel.setText("Quantity:");
-        CartProductDetailBoxPanel.add(CartProductQuantityDetailLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 120, 80, 60));
+        CartProductDetailBoxPanel.add(CartProductQuantityDetailLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 155, 80, 60));
 
         CartProductNameLabel.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         CartProductNameLabel.setForeground(new java.awt.Color(31, 40, 35));
         CartProductNameLabel.setText("Name: ");
-        CartProductDetailBoxPanel.add(CartProductNameLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 20, 500, 40));
+        CartProductDetailBoxPanel.add(CartProductNameLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 50, 500, 30));
 
         CartMainProductImageLabel.setBackground(new java.awt.Color(249, 241, 240));
         CartMainProductImageLabel.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
@@ -1438,7 +1499,7 @@ private JLabel createImageLabel(Product product) {
         CartMainProductImageLabel.setMaximumSize(new java.awt.Dimension(150, 150));
         CartMainProductImageLabel.setMinimumSize(new java.awt.Dimension(150, 150));
         CartMainProductImageLabel.setPreferredSize(new java.awt.Dimension(150, 150));
-        CartProductDetailBoxPanel.add(CartMainProductImageLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, -1, -1));
+        CartProductDetailBoxPanel.add(CartMainProductImageLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 50, -1, -1));
 
         CartProductDeleteToCartButton.setBackground(new java.awt.Color(249, 241, 240));
         CartProductDeleteToCartButton.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
@@ -1454,29 +1515,34 @@ private JLabel createImageLabel(Product product) {
                 CartProductDeleteToCartButtonActionPerformed(evt);
             }
         });
-        CartProductDetailBoxPanel.add(CartProductDeleteToCartButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 120, -1, -1));
+        CartProductDetailBoxPanel.add(CartProductDeleteToCartButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 155, -1, -1));
 
         CartProductQuantitySpinner.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         CartProductQuantitySpinner.setModel(new javax.swing.SpinnerNumberModel(1, 1, null, 1));
         CartProductQuantitySpinner.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         CartProductQuantitySpinner.setPreferredSize(new java.awt.Dimension(128, 64));
-        CartProductDetailBoxPanel.add(CartProductQuantitySpinner, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 120, -1, -1));
+        CartProductDetailBoxPanel.add(CartProductQuantitySpinner, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 155, -1, -1));
 
         CartProductPriceDetailLabel.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         CartProductPriceDetailLabel.setForeground(new java.awt.Color(102, 102, 102));
         CartProductPriceDetailLabel.setText("Price:");
-        CartProductDetailBoxPanel.add(CartProductPriceDetailLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 60, 260, 40));
+        CartProductDetailBoxPanel.add(CartProductPriceDetailLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 80, 260, 30));
 
         CartItemTotalAmountLabel.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         CartItemTotalAmountLabel.setForeground(new java.awt.Color(31, 40, 35));
         CartItemTotalAmountLabel.setText("Total: ");
-        CartProductDetailBoxPanel.add(CartItemTotalAmountLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 140, 130, 30));
+        CartProductDetailBoxPanel.add(CartItemTotalAmountLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 120, 130, 30));
 
         CartItemAvailabilityDetailLabel.setBackground(new java.awt.Color(42, 168, 83));
         CartItemAvailabilityDetailLabel.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         CartItemAvailabilityDetailLabel.setForeground(new java.awt.Color(42, 168, 83));
         CartItemAvailabilityDetailLabel.setText("Available");
-        CartProductDetailBoxPanel.add(CartItemAvailabilityDetailLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 90, 80, 60));
+        CartProductDetailBoxPanel.add(CartItemAvailabilityDetailLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 170, 80, 30));
+
+        CartProductDescriptionDetailLabel.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        CartProductDescriptionDetailLabel.setForeground(new java.awt.Color(102, 102, 102));
+        CartProductDescriptionDetailLabel.setText("Description");
+        CartProductDetailBoxPanel.add(CartProductDescriptionDetailLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 120, 260, 30));
 
         CartItemsPanel.add(CartProductDetailBoxPanel);
 
@@ -1956,12 +2022,14 @@ private JLabel createImageLabel(Product product) {
     private void ConfirmGCashPaymentButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ConfirmGCashPaymentButtonActionPerformed
         checkoutWithPayment("GCash");
         MainTabbedPane.setSelectedIndex(0);
+        PlaceOrderTabbedPane.setSelectedIndex(0);
         updateProductDisplays();
     }//GEN-LAST:event_ConfirmGCashPaymentButtonActionPerformed
 
     private void ConfirmCashPaymentButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ConfirmCashPaymentButtonActionPerformed
         checkoutWithPayment("Cash");
         MainTabbedPane.setSelectedIndex(0);
+        PlaceOrderTabbedPane.setSelectedIndex(0);
         updateProductDisplays();
     }//GEN-LAST:event_ConfirmCashPaymentButtonActionPerformed
 
@@ -1975,6 +2043,7 @@ private JLabel createImageLabel(Product product) {
     private javax.swing.JLabel CartMainProductImageLabel;
     private javax.swing.JPanel CartPanelTab;
     private javax.swing.JButton CartProductDeleteToCartButton;
+    private javax.swing.JLabel CartProductDescriptionDetailLabel;
     private javax.swing.JPanel CartProductDetailBoxPanel;
     private javax.swing.JLabel CartProductNameLabel;
     private javax.swing.JLabel CartProductPriceDetailLabel;
@@ -2032,6 +2101,7 @@ private JLabel createImageLabel(Product product) {
     private javax.swing.JTabbedPane PlaceOrderTabbedPane;
     private javax.swing.JButton ProductAddToCartButton;
     private javax.swing.JLabel ProductAvailabilityDetailLabel;
+    private javax.swing.JLabel ProductDescriptionDetailLabel;
     private javax.swing.JLabel ProductNameLabel;
     private javax.swing.JLabel ProductPriceDetailLabel;
     private javax.swing.JLabel ProductQuantityDetailLabel;
@@ -2043,6 +2113,7 @@ private JLabel createImageLabel(Product product) {
     private javax.swing.JButton SpecialsButton;
     private javax.swing.JButton SpecialsButton3;
     private javax.swing.JPanel SpecialsContentPanel;
+    private javax.swing.JLabel SpecialsDescriptionDetailLabel1;
     private javax.swing.JPanel SpecialsPanelTab;
     private javax.swing.JButton SpecialsProductAddToCartButton;
     private javax.swing.JPanel SpecialsProductDetailBoxPanel;
