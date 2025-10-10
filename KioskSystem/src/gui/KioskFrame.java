@@ -366,7 +366,7 @@ private JLabel createImageLabel(Product product) {
             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
             java.sql.ResultSet rs = pstmt.executeQuery();
 
-            while (rs.next() && bestProducts.size() < 8) {
+            while (rs.next() && bestProducts.size() < 4) {
                 int productId = rs.getInt("product_id");
                 String productName = rs.getString("product_name");
                 double price = rs.getDouble("price");
