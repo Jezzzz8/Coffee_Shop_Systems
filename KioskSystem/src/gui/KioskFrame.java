@@ -152,17 +152,14 @@ private void customizeOptionPane() {
 }
 
 private void initializeLanguageChoice() {
-        // Clear existing items and add available languages
         LanguageChoice.removeAll();
         String[] languages = LanguageContent.getAvailableLanguages();
         for (String language : languages) {
             LanguageChoice.add(language);
         }
         
-        // Set default to English
         LanguageChoice.select(0);
         
-        // Add item listener to handle language changes
         LanguageChoice.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 languageChoiceItemStateChanged(evt);
@@ -181,7 +178,6 @@ private void updateHelpContent(String language) {
         String helpContent = LanguageContent.getHelpContent(language);
         ContentsJTextArea.setText(helpContent);
         
-        // Scroll to top when language changes
         ContentsJTextArea.setCaretPosition(0);
     }
 
@@ -387,8 +383,7 @@ private JLabel createImageLabel(Product product) {
 
             rs.close();
             pstmt.close();
-
-            // Update the specialsProducts field
+            
             specialsProducts = bestProducts;
 
         } catch (Exception e) {
@@ -400,8 +395,7 @@ private JLabel createImageLabel(Product product) {
                 if (bestProducts.size() >= 8) break;
                 bestProducts.add(product);
             }
-
-            // Update the specialsProducts field even in case of error
+            
             specialsProducts = bestProducts;
         }
 
@@ -740,8 +734,7 @@ private JLabel createImageLabel(Product product) {
                 JOptionPane.WARNING_MESSAGE);
             return;
         }
-
-        // ... rest of the checkoutWithPayment method remains the same ...
+        
         boolean hasUnavailableItems = false;
         StringBuilder unavailableMessage = new StringBuilder();
 
