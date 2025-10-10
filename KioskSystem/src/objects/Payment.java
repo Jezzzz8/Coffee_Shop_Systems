@@ -11,7 +11,6 @@ public class Payment {
         this.isAvailable = isAvailable;
     }
     
-    // Getters and setters
     public int getPaymentMethodId() { return paymentMethodId; }
     public void setPaymentMethodId(int paymentMethodId) { this.paymentMethodId = paymentMethodId; }
     
