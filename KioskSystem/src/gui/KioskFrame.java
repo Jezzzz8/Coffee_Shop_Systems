@@ -350,6 +350,7 @@ private JLabel createImageLabel(Product product) {
     
     private List<Product> getActualBestSellingProducts() {
         List<Product> bestProducts = new ArrayList<>();
+        int totalProduct = 4;
 
         try {
             String sql = "SELECT p.product_id, p.product_name, p.price, p.description, " +
@@ -366,7 +367,7 @@ private JLabel createImageLabel(Product product) {
             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
             java.sql.ResultSet rs = pstmt.executeQuery();
 
-            while (rs.next() && bestProducts.size() < 4) {
+            while (rs.next() && bestProducts.size() < totalProduct) {
                 int productId = rs.getInt("product_id");
                 String productName = rs.getString("product_name");
                 double price = rs.getDouble("price");
