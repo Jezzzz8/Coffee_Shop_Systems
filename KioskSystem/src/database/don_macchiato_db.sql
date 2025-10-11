@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 02, 2025 at 03:35 PM
+-- Generation Time: Oct 11, 2025 at 03:44 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -39,18 +39,9 @@ CREATE TABLE `customer_order_tb` (
 --
 
 INSERT INTO `customer_order_tb` (`order_id`, `order_datetime`, `total_amount`, `payment_method_id`) VALUES
-(2, '2025-10-02 19:04:59', 78.00, 1),
-(3, '2025-10-02 19:07:01', 78.00, 1),
-(4, '2025-10-02 19:41:08', 78.00, 1),
-(5, '2025-10-02 19:55:07', 78.00, 2),
-(6, '2025-10-02 20:08:51', 78.00, 1),
-(7, '2025-10-02 20:15:57', 78.00, 2),
-(8, '2025-10-02 20:16:24', 117.00, 1),
-(9, '2025-10-02 20:34:57', 78.00, 1),
-(10, '2025-10-02 20:58:03', 78.00, 1),
-(11, '2025-10-02 21:05:10', 78.00, 1),
-(12, '2025-10-02 21:05:51', 78.00, 1),
-(13, '2025-10-02 21:06:52', 78.00, 1);
+(1, '2025-10-11 20:24:37', 78.00, 1),
+(2, '2025-10-11 20:25:21', 78.00, 2),
+(3, '2025-10-11 20:25:48', 39.00, 1);
 
 -- --------------------------------------------------------
 
@@ -71,17 +62,11 @@ CREATE TABLE `order_item_tb` (
 --
 
 INSERT INTO `order_item_tb` (`order_item_id`, `order_id`, `product_id`, `quantity`, `subtotal`) VALUES
-(1, 3, 12, 2, 78.00),
-(2, 4, 9, 2, 78.00),
-(3, 5, 9, 2, 78.00),
-(4, 6, 9, 2, 78.00),
-(5, 7, 9, 2, 78.00),
-(6, 8, 9, 3, 117.00),
-(7, 9, 12, 2, 78.00),
-(8, 10, 1, 2, 78.00),
-(9, 11, 8, 2, 78.00),
-(10, 12, 8, 2, 78.00),
-(11, 13, 13, 2, 78.00);
+(1, 1, 3, 1, 39.00),
+(2, 1, 4, 1, 39.00),
+(3, 2, 9, 1, 39.00),
+(4, 2, 5, 1, 39.00),
+(5, 3, 9, 1, 39.00);
 
 -- --------------------------------------------------------
 
@@ -101,7 +86,7 @@ CREATE TABLE `payment_method_tb` (
 
 INSERT INTO `payment_method_tb` (`payment_method_id`, `method_name`, `is_available`) VALUES
 (1, 'Cash', 1),
-(2, 'GCash', 0);
+(2, 'GCash', 1);
 
 -- --------------------------------------------------------
 
@@ -177,13 +162,13 @@ ALTER TABLE `product_tb`
 -- AUTO_INCREMENT for table `customer_order_tb`
 --
 ALTER TABLE `customer_order_tb`
-  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `order_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `order_item_tb`
 --
 ALTER TABLE `order_item_tb`
-  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `order_item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `product_tb`
