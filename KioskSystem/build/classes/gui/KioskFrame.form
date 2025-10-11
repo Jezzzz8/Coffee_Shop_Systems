@@ -11,10 +11,11 @@
       <Rectangle value="[0, 0, 0, 0]"/>
     </Property>
     <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-      <Dimension value="[1000, 650]"/>
+      <Dimension value="[1016, 690]"/>
     </Property>
+    <Property name="resizable" type="boolean" value="false"/>
     <Property name="size" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-      <Dimension value="[1000, 650]"/>
+      <Dimension value="[1016, 690]"/>
     </Property>
   </Properties>
   <AccessibilityProperties>
@@ -41,10 +42,10 @@
     <Property name="useNullLayout" type="boolean" value="false"/>
   </Layout>
   <SubComponents>
-    <Container class="javax.swing.JPanel" name="jPanel2">
+    <Container class="javax.swing.JPanel" name="MainPanel">
       <Properties>
         <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-          <Color blue="99" green="99" red="99" type="rgb"/>
+          <Color blue="0" green="0" red="0" type="rgb"/>
         </Property>
         <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[1000, 600]"/>
@@ -485,6 +486,9 @@
                             <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                               <Dimension value="[200, 100]"/>
                             </Property>
+                            <Property name="selectedIcon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                              <Image iconType="3" name="/gui/Images/icons/menu_selected.png"/>
+                            </Property>
                           </Properties>
                           <Events>
                             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="MenuButtonActionPerformed"/>
@@ -513,6 +517,9 @@
                             <Property name="iconTextGap" type="int" value="10"/>
                             <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                               <Dimension value="[200, 100]"/>
+                            </Property>
+                            <Property name="selectedIcon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                              <Image iconType="3" name="/gui/Images/icons/cup.png"/>
                             </Property>
                           </Properties>
                           <Events>
@@ -543,6 +550,9 @@
                             <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                               <Dimension value="[200, 100]"/>
                             </Property>
+                            <Property name="selectedIcon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                              <Image iconType="3" name="/gui/Images/icons/cart_selected.png"/>
+                            </Property>
                           </Properties>
                           <Events>
                             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="CartButtonActionPerformed"/>
@@ -571,6 +581,9 @@
                             <Property name="iconTextGap" type="int" value="10"/>
                             <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                               <Dimension value="[200, 100]"/>
+                            </Property>
+                            <Property name="selectedIcon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                              <Image iconType="3" name="/gui/Images/icons/assist_selected.png"/>
                             </Property>
                           </Properties>
                           <Events>
@@ -859,9 +872,6 @@
                                                 <Property name="iconTextGap" type="int" value="10"/>
                                                 <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                                                   <Dimension value="[64, 64]"/>
-                                                </Property>
-                                                <Property name="pressedIcon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                                                  <Image iconType="3" name="/gui/Images/icons/pressed_add.png"/>
                                                 </Property>
                                               </Properties>
                                               <Events>
@@ -1250,9 +1260,6 @@
                                                 <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                                                   <Dimension value="[64, 64]"/>
                                                 </Property>
-                                                <Property name="pressedIcon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                                                  <Image iconType="3" name="/gui/Images/icons/pressed_add.png"/>
-                                                </Property>
                                               </Properties>
                                               <Events>
                                                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="SpecialsProductAddToCartButtonActionPerformed"/>
@@ -1528,7 +1535,7 @@
                                           <Color blue="23" green="28" red="1f" type="rgb"/>
                                         </Property>
                                         <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-                                          <Dimension value="[730, 400]"/>
+                                          <Dimension value="[760, 400]"/>
                                         </Property>
                                       </Properties>
 
@@ -1670,9 +1677,6 @@
                                                 <Property name="iconTextGap" type="int" value="10"/>
                                                 <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                                                   <Dimension value="[64, 64]"/>
-                                                </Property>
-                                                <Property name="pressedIcon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                                                  <Image iconType="3" name="/gui/Images/icons/pressed_delete.png"/>
                                                 </Property>
                                               </Properties>
                                               <Events>

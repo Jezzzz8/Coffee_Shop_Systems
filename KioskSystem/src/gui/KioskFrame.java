@@ -41,6 +41,7 @@ public class KioskFrame extends javax.swing.JFrame {
     
     public KioskFrame() {
         initComponents();
+        
         cartItems = new HashMap<>();
         totalPrice = 0.0;
         printService = new ConsolePrintService();
@@ -74,7 +75,7 @@ public class KioskFrame extends javax.swing.JFrame {
         updateCartDisplay();
         updateCartAnnouncement();
         updateProgressBar();
-
+        updateSidebarButtonSelection();
         initializeProducts();
         updatePaymentButtonAvailability();
     }
@@ -104,6 +105,66 @@ public class KioskFrame extends javax.swing.JFrame {
         }
         
         OrderingProgressBar.setValue(progress);
+    }
+    
+    private void updateSidebarButtonSelection() {
+        int selectedIndex = PlaceOrderTabbedPane.getSelectedIndex();
+        
+        resetSidebarButtons();
+        
+        switch (selectedIndex) {
+            case 0:
+                setButtonSelected(MenuButton, true);
+                break;
+            case 1:
+                setButtonSelected(SpecialsButton, true);
+                break;
+            case 2:
+                setButtonSelected(CartButton, true);
+                break;
+            case 3:
+                setButtonSelected(GetHelpButton1, true);
+                break;
+        }
+    }
+    
+    private void resetSidebarButtons() {
+        setButtonSelected(MenuButton, false);
+        setButtonSelected(SpecialsButton, false);
+        setButtonSelected(CartButton, false);
+        setButtonSelected(GetHelpButton1, false);
+    }
+    
+    private void setButtonSelected(JButton button, boolean selected) {
+        if (selected) {
+            button.setBackground(new Color(255, 255, 255));
+            button.setForeground(new Color(31, 40, 35));
+            button.setBorder(BorderFactory.createLineBorder(new Color(31, 40, 35), 2));
+            
+            if (button == MenuButton) {
+                button.setIcon(new ImageIcon(getClass().getResource("/gui/Images/icons/menu_selected.png")));
+            } else if (button == SpecialsButton) {
+                button.setIcon(new ImageIcon(getClass().getResource("/gui/Images/icons/cup_selected.png")));
+            } else if (button == CartButton) {
+                button.setIcon(new ImageIcon(getClass().getResource("/gui/Images/icons/cart_selected.png")));
+            } else if (button == GetHelpButton1) {
+                button.setIcon(new ImageIcon(getClass().getResource("/gui/Images/icons/assist_selected.png")));
+            }
+        } else {
+            button.setBackground(new Color(31, 40, 35));
+            button.setForeground(new Color(249, 241, 240));
+            button.setBorder(BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+            
+            if (button == MenuButton) {
+                button.setIcon(new ImageIcon(getClass().getResource("/gui/Images/icons/menu.png")));
+            } else if (button == SpecialsButton) {
+                button.setIcon(new ImageIcon(getClass().getResource("/gui/Images/icons/cup.png")));
+            } else if (button == CartButton) {
+                button.setIcon(new ImageIcon(getClass().getResource("/gui/Images/icons/cart.png")));
+            } else if (button == GetHelpButton1) {
+                button.setIcon(new ImageIcon(getClass().getResource("/gui/Images/icons/assist.png")));
+            }
+        }
     }
     
     private void initializeProducts() {
@@ -496,7 +557,7 @@ private JLabel createImageLabel(Product product) {
 
         if (productCount >= 2) {
             int rows = (int) Math.ceil(productCount / 2.0); 
-            preferredHeight = rows * 500 + 60;
+            preferredHeight = rows * 500 + 40;
         } else {
             preferredHeight = 400;
         }
@@ -840,7 +901,7 @@ private JLabel createImageLabel(Product product) {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel2 = new javax.swing.JPanel();
+        MainPanel = new javax.swing.JPanel();
         ProgressBarHeaderPanel = new javax.swing.JPanel();
         OrderingProgressBar = new javax.swing.JProgressBar();
         new_order_progress_image = new javax.swing.JLabel();
@@ -966,14 +1027,15 @@ private JLabel createImageLabel(Product product) {
         setTitle("Kiosk");
         setBackground(new java.awt.Color(201, 177, 158));
         setBounds(new java.awt.Rectangle(0, 0, 0, 0));
-        setPreferredSize(new java.awt.Dimension(1000, 650));
-        setSize(new java.awt.Dimension(1000, 650));
+        setPreferredSize(new java.awt.Dimension(1016, 690));
+        setResizable(false);
+        setSize(new java.awt.Dimension(1016, 690));
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jPanel2.setBackground(new java.awt.Color(153, 153, 153));
-        jPanel2.setMinimumSize(new java.awt.Dimension(1000, 600));
-        jPanel2.setPreferredSize(new java.awt.Dimension(1000, 650));
-        jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        MainPanel.setBackground(new java.awt.Color(0, 0, 0));
+        MainPanel.setMinimumSize(new java.awt.Dimension(1000, 600));
+        MainPanel.setPreferredSize(new java.awt.Dimension(1000, 650));
+        MainPanel.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         ProgressBarHeaderPanel.setBackground(new java.awt.Color(255, 255, 255));
         ProgressBarHeaderPanel.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
@@ -1002,7 +1064,7 @@ private JLabel createImageLabel(Product product) {
         confirm_payment_progress_image.setPreferredSize(new java.awt.Dimension(96, 96));
         ProgressBarHeaderPanel.add(confirm_payment_progress_image, new org.netbeans.lib.awtextra.AbsoluteConstraints(680, 0, 30, 30));
 
-        jPanel2.add(ProgressBarHeaderPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
+        MainPanel.add(ProgressBarHeaderPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
         MainTabbedPane.setBackground(new java.awt.Color(201, 177, 158));
         MainTabbedPane.setTabPlacement(javax.swing.JTabbedPane.LEFT);
@@ -1103,6 +1165,7 @@ private JLabel createImageLabel(Product product) {
         MenuButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         MenuButton.setIconTextGap(10);
         MenuButton.setPreferredSize(new java.awt.Dimension(200, 100));
+        MenuButton.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/icons/menu_selected.png"))); // NOI18N
         MenuButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 MenuButtonActionPerformed(evt);
@@ -1118,6 +1181,7 @@ private JLabel createImageLabel(Product product) {
         SpecialsButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         SpecialsButton.setIconTextGap(10);
         SpecialsButton.setPreferredSize(new java.awt.Dimension(200, 100));
+        SpecialsButton.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/icons/cup.png"))); // NOI18N
         SpecialsButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 SpecialsButtonActionPerformed(evt);
@@ -1133,6 +1197,7 @@ private JLabel createImageLabel(Product product) {
         CartButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         CartButton.setIconTextGap(10);
         CartButton.setPreferredSize(new java.awt.Dimension(200, 100));
+        CartButton.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/icons/cart_selected.png"))); // NOI18N
         CartButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 CartButtonActionPerformed(evt);
@@ -1148,6 +1213,7 @@ private JLabel createImageLabel(Product product) {
         GetHelpButton1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         GetHelpButton1.setIconTextGap(10);
         GetHelpButton1.setPreferredSize(new java.awt.Dimension(200, 100));
+        GetHelpButton1.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/icons/assist_selected.png"))); // NOI18N
         GetHelpButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 GetHelpButton1ActionPerformed(evt);
@@ -1240,7 +1306,6 @@ private JLabel createImageLabel(Product product) {
         ProductAddToCartButton.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         ProductAddToCartButton.setIconTextGap(10);
         ProductAddToCartButton.setPreferredSize(new java.awt.Dimension(64, 64));
-        ProductAddToCartButton.setPressedIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/icons/pressed_add.png"))); // NOI18N
         ProductAddToCartButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 ProductAddToCartButtonActionPerformed(evt);
@@ -1366,7 +1431,6 @@ private JLabel createImageLabel(Product product) {
         SpecialsProductAddToCartButton.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         SpecialsProductAddToCartButton.setIconTextGap(10);
         SpecialsProductAddToCartButton.setPreferredSize(new java.awt.Dimension(64, 64));
-        SpecialsProductAddToCartButton.setPressedIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/icons/pressed_add.png"))); // NOI18N
         SpecialsProductAddToCartButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 SpecialsProductAddToCartButtonActionPerformed(evt);
@@ -1455,7 +1519,7 @@ private JLabel createImageLabel(Product product) {
 
         CartItemsPanel.setBackground(new java.awt.Color(31, 40, 35));
         CartItemsPanel.setForeground(new java.awt.Color(31, 40, 35));
-        CartItemsPanel.setPreferredSize(new java.awt.Dimension(730, 400));
+        CartItemsPanel.setPreferredSize(new java.awt.Dimension(760, 400));
 
         CartemptyLabel.setBackground(new java.awt.Color(100, 100, 100));
         CartemptyLabel.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
@@ -1503,7 +1567,6 @@ private JLabel createImageLabel(Product product) {
         CartProductDeleteToCartButton.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         CartProductDeleteToCartButton.setIconTextGap(10);
         CartProductDeleteToCartButton.setPreferredSize(new java.awt.Dimension(64, 64));
-        CartProductDeleteToCartButton.setPressedIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/icons/pressed_delete.png"))); // NOI18N
         CartProductDeleteToCartButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 CartProductDeleteToCartButtonActionPerformed(evt);
@@ -1934,9 +1997,9 @@ private JLabel createImageLabel(Product product) {
 
         MainTabbedPane.addTab("tab1", ConfirmCashPaymentPanelTab);
 
-        jPanel2.add(MainTabbedPane, new org.netbeans.lib.awtextra.AbsoluteConstraints(-50, 50, 1050, 650));
+        MainPanel.add(MainTabbedPane, new org.netbeans.lib.awtextra.AbsoluteConstraints(-50, 50, 1050, 650));
 
-        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
+        getContentPane().add(MainPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
         getAccessibleContext().setAccessibleName("KIOSK");
 
@@ -1945,6 +2008,7 @@ private JLabel createImageLabel(Product product) {
 
     private void GetHelpButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_GetHelpButton1ActionPerformed
         PlaceOrderTabbedPane.setSelectedIndex(3);
+        updateSidebarButtonSelection();
         updateProductDisplays();
         
         String selectedLanguage = LanguageChoice.getSelectedItem();
@@ -1953,16 +2017,19 @@ private JLabel createImageLabel(Product product) {
 
     private void CartButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CartButtonActionPerformed
         PlaceOrderTabbedPane.setSelectedIndex(2);
+        updateSidebarButtonSelection();
         updateProductDisplays();
     }//GEN-LAST:event_CartButtonActionPerformed
 
     private void MenuButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MenuButtonActionPerformed
         PlaceOrderTabbedPane.setSelectedIndex(0);
+        updateSidebarButtonSelection();
         updateProductDisplays();
     }//GEN-LAST:event_MenuButtonActionPerformed
 
     private void SpecialsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SpecialsButtonActionPerformed
         PlaceOrderTabbedPane.setSelectedIndex(1);
+        updateSidebarButtonSelection();
         updateProductDisplays();
     }//GEN-LAST:event_SpecialsButtonActionPerformed
 
@@ -2074,6 +2141,7 @@ private JLabel createImageLabel(Product product) {
     private javax.swing.JPanel GetHelpSideBarPanel;
     private javax.swing.JLabel GetHelpTitleLabel;
     private java.awt.Choice LanguageChoice;
+    private javax.swing.JPanel MainPanel;
     private javax.swing.JLabel MainProductImageLabel;
     private javax.swing.JLabel MainTabTitleLabel1;
     private javax.swing.JTabbedPane MainTabbedPane;
@@ -2142,7 +2210,6 @@ private JLabel createImageLabel(Product product) {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel menu_category_box;
     private javax.swing.JScrollPane menu_category_scroll_pane1;
     private javax.swing.JLabel new_order_progress_image;
