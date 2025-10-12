@@ -55,22 +55,21 @@ public class KioskFrame extends javax.swing.JFrame {
         menu_category_box.remove(MenuProductDetailBoxPanel);
         specials_category_box.remove(SpecialsProductDetailBoxPanel);
         CartItemsPanel.remove(CartProductDetailBoxPanel);
-
         
         menu_category_scroll_pane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         menu_category_scroll_pane1.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        menu_category_scroll_pane1.getVerticalScrollBar().setUnitIncrement(25);
+        menu_category_scroll_pane1.getVerticalScrollBar().setBlockIncrement(45);
+                
         specials_category_scroll_pane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         specials_category_scroll_pane1.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        specials_category_scroll_pane1.getVerticalScrollBar().setUnitIncrement(25);
+        specials_category_scroll_pane1.getVerticalScrollBar().setBlockIncrement(45);
+                
         CartScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         CartScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-
-        
-        MainTabbedPane.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                updateProgressBar();
-            }
-        });
+        CartScrollPane.getVerticalScrollBar().setUnitIncrement(25);
+        CartScrollPane.getVerticalScrollBar().setBlockIncrement(45);
 
         updateCartDisplay();
         updateCartAnnouncement();
@@ -1998,6 +1997,12 @@ private JLabel createImageLabel(Product product) {
         MainTabbedPane.addTab("tab1", ConfirmCashPaymentPanelTab);
 
         MainPanel.add(MainTabbedPane, new org.netbeans.lib.awtextra.AbsoluteConstraints(-50, 50, 1050, 650));
+        MainTabbedPane.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                updateProgressBar();
+            }
+        });
 
         getContentPane().add(MainPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
