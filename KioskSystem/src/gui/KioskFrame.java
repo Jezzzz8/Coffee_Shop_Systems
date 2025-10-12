@@ -1245,7 +1245,7 @@ private JLabel createImageLabel(Product product) {
         MainTabTitleLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         MainTabTitleLabel1.setText("MENU");
         MainTabTitleLabel1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        header.add(MainTabTitleLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(-10, 0, 840, 50));
+        header.add(MainTabTitleLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 850, 50));
 
         MenuPanelTab.add(header, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 0, 850, -1));
 
@@ -1372,7 +1372,7 @@ private JLabel createImageLabel(Product product) {
         SpecialsTabTitleLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         SpecialsTabTitleLabel.setText("BEST SELLING");
         SpecialsTabTitleLabel.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        header1.add(SpecialsTabTitleLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 840, 50));
+        header1.add(SpecialsTabTitleLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 850, 50));
 
         SpecialsPanelTab.add(header1, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 0, 850, -1));
 
@@ -1661,7 +1661,7 @@ private JLabel createImageLabel(Product product) {
         GetHelpTitleLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         GetHelpTitleLabel.setText("HELP & FAQ");
         GetHelpTitleLabel.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        header3.add(GetHelpTitleLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 840, 50));
+        header3.add(GetHelpTitleLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 850, 50));
 
         GetHelpPanelTab.add(header3, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 0, 850, -1));
 
