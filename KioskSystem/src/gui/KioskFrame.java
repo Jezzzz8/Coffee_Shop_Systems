@@ -377,7 +377,7 @@ private JLabel createImageLabel(Product product) {
         }
         
         for (Product product : specialsProducts) {
-            JPanel productBox = createProductBox(product, false);
+            JPanel productBox = createProductBox(product, true);
             specials_category_box.add(productBox);
         }
         
