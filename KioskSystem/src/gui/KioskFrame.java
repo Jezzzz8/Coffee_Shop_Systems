@@ -58,18 +58,18 @@ public class KioskFrame extends javax.swing.JFrame {
         
         menu_category_scroll_pane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         menu_category_scroll_pane1.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        menu_category_scroll_pane1.getVerticalScrollBar().setUnitIncrement(25);
-        menu_category_scroll_pane1.getVerticalScrollBar().setBlockIncrement(45);
+        menu_category_scroll_pane1.getVerticalScrollBar().setUnitIncrement(30);
+        menu_category_scroll_pane1.getVerticalScrollBar().setBlockIncrement(50);
                 
         specials_category_scroll_pane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         specials_category_scroll_pane1.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        specials_category_scroll_pane1.getVerticalScrollBar().setUnitIncrement(25);
-        specials_category_scroll_pane1.getVerticalScrollBar().setBlockIncrement(45);
+        specials_category_scroll_pane1.getVerticalScrollBar().setUnitIncrement(30);
+        specials_category_scroll_pane1.getVerticalScrollBar().setBlockIncrement(50);
                 
         CartScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         CartScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        CartScrollPane.getVerticalScrollBar().setUnitIncrement(25);
-        CartScrollPane.getVerticalScrollBar().setBlockIncrement(45);
+        CartScrollPane.getVerticalScrollBar().setUnitIncrement(30);
+        CartScrollPane.getVerticalScrollBar().setBlockIncrement(50);
 
         updateCartDisplay();
         updateCartAnnouncement();
@@ -415,13 +415,13 @@ private JLabel createImageLabel(Product product) {
         try {
             String sql = "SELECT p.product_id, p.product_name, p.price, p.description, " +
                         "p.image_filename, p.is_available, " +
-                        "COALESCE(SUM(oi.quantity), 0) as total_sold " +
-                        "FROM product_tb p " +
+                        "COALESCE(SUM(oi.quantity), 0) AS total_sold " +
+                        "FROM product_tb AS p " +
                         "LEFT JOIN order_item_tb oi ON p.product_id = oi.product_id " +
                         "GROUP BY p.product_id, p.product_name, p.price, p.description, " +
                         "p.image_filename, p.is_available " +
                         "ORDER BY total_sold DESC, p.product_name " +
-                        "LIMIT 8";
+                        "LIMIT 4";
 
             java.sql.Connection conn = database.DatabaseConnection.getConnection();
             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
