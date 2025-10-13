@@ -367,16 +367,16 @@ private JLabel createImageLabel(Product product) {
         
         menu_category_box.removeAll();
         specials_category_box.removeAll();
+        
+        specialsProducts = ProductManager.getBestSellingProducts(4);
 
         
         for (Product product : menuProducts) {
             JPanel productBox = createProductBox(product, true);
             menu_category_box.add(productBox);
         }
-
         
-        List<Product> bestSellingProducts = ProductManager.getBestSellingProducts(4);
-        for (Product product : bestSellingProducts) {
+        for (Product product : specialsProducts) {
             JPanel productBox = createProductBox(product, false);
             specials_category_box.add(productBox);
         }
