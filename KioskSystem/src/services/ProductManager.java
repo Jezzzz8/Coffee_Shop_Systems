@@ -62,6 +62,49 @@ public class ProductManager {
         return products;
     }
     
+    public static List<Product> getBestSellingProducts(int limit) {
+        List<Product> bestProducts = new ArrayList<>();
+
+        try {
+            String sql = "SELECT p.product_id, p.product_name, p.price, p.description, " +
+                        "p.image_filename, p.is_available, " +
+                        "COALESCE(SUM(oi.quantity), 0) AS total_sold " +
+                        "FROM product_tb AS p " +
+                        "LEFT JOIN order_item_tb oi ON p.product_id = oi.product_id " +
+                        "GROUP BY p.product_id, p.product_name, p.price, p.description, " +
+                        "p.image_filename, p.is_available " +
+                        "ORDER BY total_sold DESC, p.product_name " +
+                        "LIMIT ?";
+
+            Connection conn = DatabaseConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setInt(1, limit);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                int productId = rs.getInt("product_id");
+                String productName = rs.getString("product_name");
+                double price = rs.getDouble("price");
+                String description = rs.getString("description");
+                String imageFilename = rs.getString("image_filename");
+                boolean isAvailable = rs.getBoolean("is_available");
+
+                Product product = new Product(productId, productName, price, 
+                                            description, imageFilename, isAvailable);
+                bestProducts.add(product);
+            }
+
+            rs.close();
+            pstmt.close();
+
+        } catch (Exception e) {
+            System.out.println("Error loading best selling products: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return bestProducts;
+    }
+    
     public static List<Product> searchProductsByName(String searchTerm) {
         List<Product> products = new ArrayList<>();
         Connection conn = DatabaseConnection.getConnection();

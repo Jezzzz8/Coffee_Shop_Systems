@@ -375,92 +375,33 @@ private JLabel createImageLabel(Product product) {
         }
 
         
-        List<Product> bestSellingProducts = getActualBestSellingProducts();
+        List<Product> bestSellingProducts = ProductManager.getBestSellingProducts(4);
         for (Product product : bestSellingProducts) {
             JPanel productBox = createProductBox(product, false);
             specials_category_box.add(productBox);
         }
-
         
         adjustMenuCategoryBoxHeight();
         adjustSpecialsCategoryBoxHeight();
-
         
         menu_category_box.revalidate();
         menu_category_box.repaint();
         specials_category_box.revalidate();
         specials_category_box.repaint();
-
         
         updateCartDisplay();
-
         
         updateCartAnnouncement();
     }
     
     private void updateCartAnnouncement() {
         int totalItems = cartItems.values().stream().mapToInt(Integer::intValue).sum();
-        String announcement = totalItems > 0 ? 
-            "You have " + totalItems + " item(s) in your cart." : 
+        String announcement = totalItems > 0 ?
+            "You have " + totalItems + " item(s) in your cart." :
             "Your cart is empty.";
 
         CartUpdateAnnouncementOffscreenLabel1.setText(announcement);
         CartUpdateAnnouncementOffscreenLabel2.setText(announcement);
-    }
-    
-    private List<Product> getActualBestSellingProducts() {
-        List<Product> bestProducts = new ArrayList<>();
-        int totalProduct = 4;
-
-        try {
-            String sql = "SELECT p.product_id, p.product_name, p.price, p.description, " +
-                        "p.image_filename, p.is_available, " +
-                        "COALESCE(SUM(oi.quantity), 0) AS total_sold " +
-                        "FROM product_tb AS p " +
-                        "LEFT JOIN order_item_tb oi ON p.product_id = oi.product_id " +
-                        "GROUP BY p.product_id, p.product_name, p.price, p.description, " +
-                        "p.image_filename, p.is_available " +
-                        "ORDER BY total_sold DESC, p.product_name " +
-                        "LIMIT 4";
-
-            java.sql.Connection conn = database.DatabaseConnection.getConnection();
-            java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
-            java.sql.ResultSet rs = pstmt.executeQuery();
-
-            while (rs.next() && bestProducts.size() < totalProduct) {
-                int productId = rs.getInt("product_id");
-                String productName = rs.getString("product_name");
-                double price = rs.getDouble("price");
-                String description = rs.getString("description");
-                String imageFilename = rs.getString("image_filename");
-                boolean isAvailable = rs.getBoolean("is_available");
-
-                Product product = new Product(productId, productName, price, 
-                                            description, imageFilename, isAvailable);
-
-
-                bestProducts.add(product);
-            }
-
-            rs.close();
-            pstmt.close();
-            
-            specialsProducts = bestProducts;
-
-        } catch (Exception e) {
-            System.out.println("Error loading best selling products: " + e.getMessage());
-            e.printStackTrace();
-
-
-            for (Product product : menuProducts) {
-                if (bestProducts.size() >= 8) break;
-                bestProducts.add(product);
-            }
-            
-            specialsProducts = bestProducts;
-        }
-
-        return bestProducts;
     }
     
     private void addToCart(Product product, int quantity) {
