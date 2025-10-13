@@ -1,7 +1,5 @@
 package main;
 
-import services.QueueManager;
-
 import gui.KioskFrame;
 
 public class KioskSystemMain {
