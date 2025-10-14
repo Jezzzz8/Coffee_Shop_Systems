@@ -18,19 +18,23 @@ public class Product {
         this.isAvailable = isAvailable;
     }
     
+    public Product(int id, String name, double price, String description, String imagePath) {
+        this(id, name, price, description, imagePath, true);
+    }
     
     public int getId() { return id; }
     public String getName() { return name; }
     public double getPrice() { return price; }
     public String getDescription() { return description; }
-    public String getImageFilename() {return imageFilename; }
+    public String getImageFilename() { return imageFilename; }
+    public String getImagePath() { return imageFilename; } // Alias for compatibility
     public boolean isAvailable() { return isAvailable; }
-    
     
     public void setId(int id) { this.id = id; }
     public void setName(String name) { this.name = name; }
     public void setPrice(double price) { this.price = price; }
     public void setDescription(String description) { this.description = description; }
-    public void setImagePath(String imageFilename) { this.imageFilename = imageFilename; }
+    public void setImageFilename(String imageFilename) { this.imageFilename = imageFilename; }
+    public void setImagePath(String imagePath) { this.imageFilename = imagePath; } // Alias for compatibility
     public void setAvailable(boolean available) { this.isAvailable = available; }
 }

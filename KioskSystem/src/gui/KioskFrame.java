@@ -136,7 +136,7 @@ public class KioskFrame extends javax.swing.JFrame {
     
     private void setButtonSelected(JButton button, boolean selected) {
         if (selected) {
-            button.setBackground(new Color(255, 255, 255));
+            button.setBackground(new Color(249, 241, 240));
             button.setForeground(new Color(31, 40, 35));
             button.setBorder(BorderFactory.createLineBorder(new Color(31, 40, 35), 2));
             
@@ -168,16 +168,11 @@ public class KioskFrame extends javax.swing.JFrame {
     
     private void initializeProducts() {
         System.out.println("Loading products...");
-
         
         menuProducts = ProductManager.getAllProducts(); 
         specialsProducts = new ArrayList<>(); 
 
         System.out.println("Menu products loaded: " + menuProducts.size());
-
-        
-        updatePaymentButtonAvailability();
-
         
         updateProductDisplays();
 
@@ -185,91 +180,91 @@ public class KioskFrame extends javax.swing.JFrame {
     }
     
     private String loadProductImage(Product product) {
-    String imageDirectory = "/gui/Images/product_images/";
-    String imageFilename = product.getImageFilename();
+        String imageDirectory = "/gui/Images/product_images/";
+        String imageFilename = product.getImageFilename();
 
-    
-    if (imageFilename == null || imageFilename.trim().isEmpty()) {
-        imageFilename = "default.png";
+
+        if (imageFilename == null || imageFilename.trim().isEmpty()) {
+            imageFilename = "default.png";
+        }
+
+        return imageDirectory + imageFilename;
     }
 
-    return imageDirectory + imageFilename;
-}
+    private void customizeOptionPane() {
+            UIManager.put("OptionPane.background", new Color(249, 241, 240));
+            UIManager.put("Panel.background", new Color(249, 241, 240));
+            UIManager.put("OptionPane.messageForeground", new Color(31, 40, 35));
+            UIManager.put("OptionPane.messageFont", new Font("Segoe UI", Font.PLAIN, 14));
+            UIManager.put("OptionPane.buttonFont", new Font("Segoe UI", Font.BOLD, 12));
 
-private void customizeOptionPane() {
-        UIManager.put("OptionPane.background", new Color(249, 241, 240));
-        UIManager.put("Panel.background", new Color(249, 241, 240));
-        UIManager.put("OptionPane.messageForeground", new Color(31, 40, 35));
-        UIManager.put("OptionPane.messageFont", new Font("Segoe UI", Font.PLAIN, 14));
-        UIManager.put("OptionPane.buttonFont", new Font("Segoe UI", Font.BOLD, 12));
-        
-        UIManager.put("Button.margin", new Insets(10, 20, 10, 20));
-        UIManager.put("Button.padding", new Insets(8, 15, 8, 15));
+            UIManager.put("Button.margin", new Insets(10, 20, 10, 20));
+            UIManager.put("Button.padding", new Insets(8, 15, 8, 15));
 
-        UIManager.put("Button.background", new Color(31, 40, 35));
-        UIManager.put("Button.foreground", Color.WHITE);
-        UIManager.put("Button.focus", new Color(51, 60, 55));
-}
+            UIManager.put("Button.background", new Color(31, 40, 35));
+            UIManager.put("Button.foreground", Color.WHITE);
+            UIManager.put("Button.focus", new Color(51, 60, 55));
+    }
 
-private void initializeLanguageChoice() {
-        LanguageChoice.removeAll();
-        String[] languages = LanguageContent.getAvailableLanguages();
-        for (String language : languages) {
-            LanguageChoice.add(language);
-        }
-        
-        LanguageChoice.select(0);
-        
-        LanguageChoice.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                languageChoiceItemStateChanged(evt);
+    private void initializeLanguageChoice() {
+            LanguageChoice.removeAll();
+            String[] languages = LanguageContent.getAvailableLanguages();
+            for (String language : languages) {
+                LanguageChoice.add(language);
             }
-        });
-}
 
-private void languageChoiceItemStateChanged(java.awt.event.ItemEvent evt) {
-        if (evt.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
-            String selectedLanguage = LanguageChoice.getSelectedItem();
-            updateHelpContent(selectedLanguage);
-        }
-}
+            LanguageChoice.select(0);
 
-private void updateHelpContent(String language) {
-        String helpContent = LanguageContent.getHelpContent(language);
-        ContentsJTextArea.setText(helpContent);
-        
-        ContentsJTextArea.setCaretPosition(0);
+            LanguageChoice.addItemListener(new java.awt.event.ItemListener() {
+                public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                    languageChoiceItemStateChanged(evt);
+                }
+            });
     }
 
-private JLabel createImageLabel(Product product) {
-    JLabel imageLabel = new JLabel();
-    String fullImagePath = loadProductImage(product);
+    private void languageChoiceItemStateChanged(java.awt.event.ItemEvent evt) {
+            if (evt.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
+                String selectedLanguage = LanguageChoice.getSelectedItem();
+                updateHelpContent(selectedLanguage);
+            }
+    }
 
-    try {
-        java.net.URL imageUrl = getClass().getResource(fullImagePath);
-        if (imageUrl != null) {
-            ImageIcon originalIcon = new ImageIcon(imageUrl);
-            Image scaledImage = originalIcon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
-            imageLabel.setIcon(new ImageIcon(scaledImage));
-        } else {
-            
-            System.out.println("Image not found: " + fullImagePath);
-            ImageIcon defaultIcon = new ImageIcon(getClass().getResource("/gui/Images/product_images/default.png"));
-            if (defaultIcon.getImage() != null) {
-                Image scaledImage = defaultIcon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+    private void updateHelpContent(String language) {
+            String helpContent = LanguageContent.getHelpContent(language);
+            ContentsJTextArea.setText(helpContent);
+
+            ContentsJTextArea.setCaretPosition(0);
+    }
+
+    private JLabel createImageLabel(Product product) {
+        JLabel imageLabel = new JLabel();
+        String fullImagePath = loadProductImage(product);
+
+        try {
+            java.net.URL imageUrl = getClass().getResource(fullImagePath);
+            if (imageUrl != null) {
+                ImageIcon originalIcon = new ImageIcon(imageUrl);
+                Image scaledImage = originalIcon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
                 imageLabel.setIcon(new ImageIcon(scaledImage));
-            }
-        }
-    } catch (Exception e) {
-        System.out.println("Error loading image for product: " + product.getName());
-        System.out.println("Attempted path: " + fullImagePath);
-        e.printStackTrace();
-    }
+            } else {
 
-    imageLabel.setBorder(BorderFactory.createLineBorder(new Color(31, 40, 35), 2));
-    imageLabel.setPreferredSize(new Dimension(150, 150));
-    return imageLabel;
-}
+                System.out.println("Image not found: " + fullImagePath);
+                ImageIcon defaultIcon = new ImageIcon(getClass().getResource("/gui/Images/product_images/default.png"));
+                if (defaultIcon.getImage() != null) {
+                    Image scaledImage = defaultIcon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+                    imageLabel.setIcon(new ImageIcon(scaledImage));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error loading image for product: " + product.getName());
+            System.out.println("Attempted path: " + fullImagePath);
+            e.printStackTrace();
+        }
+
+        imageLabel.setBorder(BorderFactory.createLineBorder(new Color(31, 40, 35), 2));
+        imageLabel.setPreferredSize(new Dimension(150, 150));
+        return imageLabel;
+    }
     
     private JPanel createProductBox(Product product, boolean isMenuProduct) {
         JPanel panel = new JPanel();
@@ -280,6 +275,7 @@ private JLabel createImageLabel(Product product) {
             BorderFactory.createEmptyBorder(10, 10, 10, 10)
         ));
         panel.setPreferredSize(new Dimension(700, 250));
+        panel.setMaximumSize(new Dimension(700, 250));
 
         if (product == null) {
             return new JPanel(); 
@@ -317,13 +313,13 @@ private JLabel createImageLabel(Product product) {
         availabilityLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         availabilityLabel.setForeground(isAvailable ? new Color(42, 168, 83) : new Color(255, 0, 0));
         panel.add(availabilityLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 170, 260, 20));
-        
+
         // Quantity Label
         JLabel quantityLabel = new JLabel("Quantity:");
         quantityLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
         quantityLabel.setForeground(new Color(66, 133, 244));
         panel.add(quantityLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 155, 80, 40));
-        
+
         // Quantity Spinner
         JSpinner quantitySpinner = new JSpinner();
         quantitySpinner.setFont(new Font("Segoe UI", Font.BOLD, 24));
@@ -361,37 +357,6 @@ private JLabel createImageLabel(Product product) {
         panel.add(addButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 150, 64, 64));
 
         return panel;
-    }
-    
-    private void updateProductDisplays() {
-        
-        menu_category_box.removeAll();
-        specials_category_box.removeAll();
-        
-        specialsProducts = ProductManager.getBestSellingProducts(4);
-
-        
-        for (Product product : menuProducts) {
-            JPanel productBox = createProductBox(product, true);
-            menu_category_box.add(productBox);
-        }
-        
-        for (Product product : specialsProducts) {
-            JPanel productBox = createProductBox(product, true);
-            specials_category_box.add(productBox);
-        }
-        
-        adjustMenuCategoryBoxHeight();
-        adjustSpecialsCategoryBoxHeight();
-        
-        menu_category_box.revalidate();
-        menu_category_box.repaint();
-        specials_category_box.revalidate();
-        specials_category_box.repaint();
-        
-        updateCartDisplay();
-        
-        updateCartAnnouncement();
     }
     
     private void updateCartAnnouncement() {
@@ -443,6 +408,9 @@ private JLabel createImageLabel(Product product) {
     private void updateCartDisplay() {
         CartItemsPanel.removeAll();
 
+        // Set vertical layout for cart items
+        CartItemsPanel.setLayout(new BoxLayout(CartItemsPanel, BoxLayout.Y_AXIS));
+
         if (cartItems.isEmpty()) {
             JLabel emptyLabel = new JLabel("Your cart is empty");
             emptyLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
@@ -450,16 +418,16 @@ private JLabel createImageLabel(Product product) {
             emptyLabel.setForeground(new Color(100, 100, 100));
             emptyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
             CartItemsPanel.add(emptyLabel);
-            
+
             CheckOutButton.setEnabled(false);
         } else {
             boolean hasItems = cartItems.values().stream().anyMatch(qty -> qty > 0);
             CheckOutButton.setEnabled(hasItems && totalPrice > 0);
-            
+
             for (Map.Entry<Product, Integer> entry : cartItems.entrySet()) {
                 Product product = entry.getKey();
                 int quantity = entry.getValue();
-                
+
                 if (quantity > 0) {
                     JPanel cartItemPanel = createCartItemPanel(product, quantity);
                     cartItemPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -468,55 +436,94 @@ private JLabel createImageLabel(Product product) {
                 }
             }
         }
-        
+
         TotalPriceNumberLabel.setText(String.format("₱%.2f", totalPrice));
         
+        adjustMenuCategoryBoxHeight();
+        adjustSpecialsCategoryBoxHeight();
         adjustCartPanelHeight();
-        
+
         CartItemsPanel.revalidate();
         CartItemsPanel.repaint();
     }
     
+    private void updateProductDisplays() {
+        if (menuProducts == null) {
+            menuProducts = ProductManager.getAllProducts();
+        }
+        
+        if (specialsProducts == null) {
+            specialsProducts = ProductManager.getBestSellingProducts(4);
+        } else {
+            specialsProducts = ProductManager.getBestSellingProducts(4);
+        }
+        
+        updateProductCategoryDisplay(menu_category_box, menuProducts, true);
+        
+        updateProductCategoryDisplay(specials_category_box, specialsProducts, false);
+
+        updateCartDisplay();
+        updateCartAnnouncement();
+    }
+
+    private void updateProductCategoryDisplay(JPanel categoryPanel, List<Product> products, boolean isMenuProduct) {
+        categoryPanel.removeAll();
+
+        // Use the same layout as cart for consistency
+        categoryPanel.setLayout(new BoxLayout(categoryPanel, BoxLayout.Y_AXIS));
+
+        if (products.isEmpty()) {
+            JLabel emptyLabel = new JLabel("No products available");
+            emptyLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+            emptyLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            emptyLabel.setForeground(new Color(100, 100, 100));
+            emptyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            categoryPanel.add(emptyLabel);
+        } else {
+            for (Product product : products) {
+                JPanel productBox = createProductBox(product, isMenuProduct);
+                productBox.setAlignmentX(Component.CENTER_ALIGNMENT);
+                categoryPanel.add(productBox);
+                categoryPanel.add(Box.createRigidArea(new Dimension(0, 10))); // Add spacing between products
+            }
+        }
+
+        // Update the panel height based on content
+        adjustCategoryPanelHeight(categoryPanel, products.size());
+
+        categoryPanel.revalidate();
+        categoryPanel.repaint();
+    }
+
+    private void adjustCategoryPanelHeight(JPanel panel, int productCount) {
+        int preferredHeight;
+
+        if (productCount > 0) {
+            preferredHeight = (productCount * 270) + 20; // 250 height + 20 spacing
+        } else {
+            preferredHeight = 400;
+        }
+
+        preferredHeight = Math.max(preferredHeight, 400);
+        panel.setPreferredSize(new Dimension(760, preferredHeight));
+    }
+    
     private void adjustMenuCategoryBoxHeight() {
-        int productCount = menuProducts.size();
-        int preferredHeight;
-
-        if (productCount >= 2) {
-            int rows = (int) Math.ceil(productCount / 2.0); 
-            preferredHeight = rows * 470 + 40;
-        } else {
-            preferredHeight = 400;
+        if (menuProducts != null) {
+            adjustCategoryPanelHeight(menu_category_box, menuProducts.size());
         }
-
-        menu_category_box.setPreferredSize(new Dimension(760, preferredHeight));
     }
-    
+
     private void adjustSpecialsCategoryBoxHeight() {
-        int productCount = specialsProducts.size();
-        int preferredHeight;
-
-        if (productCount >= 2) {
-            int rows = (int) Math.ceil(productCount / 2.0); 
-            preferredHeight = rows * 500 + 40;
-        } else {
-            preferredHeight = 400;
+        if (specialsProducts != null) {
+            adjustCategoryPanelHeight(specials_category_box, specialsProducts.size());
         }
-
-        specials_category_box.setPreferredSize(new Dimension(760, preferredHeight));
     }
-    
+
     private void adjustCartPanelHeight() {
-        int cartCount = cartItems.size();
-        int preferredHeight;
-        
-        if (cartCount >= 2) {
-            int rows = (int) Math.ceil(cartCount / 2.0);
-            preferredHeight = rows * 500 + 40;
-        } else {
-            preferredHeight = 400;
+        if (cartItems != null) {
+            adjustCategoryPanelHeight(CartItemsPanel, cartItems.size());
         }
-        
-        CartItemsPanel.setPreferredSize(new Dimension(760, preferredHeight));
     }
     
     private JPanel createCartItemPanel(Product product, int quantity) {
@@ -644,7 +651,7 @@ private JLabel createImageLabel(Product product) {
 
         GCashButton.setEnabled(isGCashAvailable);
         CashButton.setEnabled(isCashAvailable);
-
+        
         // Update button appearance based on availability
         if (!isGCashAvailable) {
             GCashButton.setBackground(new Color(200, 200, 200)); 
@@ -1052,6 +1059,7 @@ private JLabel createImageLabel(Product product) {
 
         NewOrderButton.setBackground(new java.awt.Color(249, 241, 240));
         NewOrderButton.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        NewOrderButton.setForeground(new java.awt.Color(31, 40, 35));
         NewOrderButton.setText("NEW ORDER");
         NewOrderButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         NewOrderButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -1760,6 +1768,8 @@ private JLabel createImageLabel(Product product) {
         CashPayment_box.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, 400, 380));
 
         CashButton.setBackground(new java.awt.Color(249, 241, 240));
+        CashButton.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        CashButton.setForeground(new java.awt.Color(31, 40, 35));
         CashButton.setText(" CASH PAYMENT");
         CashButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         CashButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -1785,6 +1795,8 @@ private JLabel createImageLabel(Product product) {
         GCashPayment_box.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, 400, 380));
 
         GCashButton.setBackground(new java.awt.Color(249, 241, 240));
+        GCashButton.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        GCashButton.setForeground(new java.awt.Color(31, 40, 35));
         GCashButton.setText("GCASH PAYMENT");
         GCashButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         GCashButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -1850,6 +1862,8 @@ private JLabel createImageLabel(Product product) {
         ConfirmGCashPayment_box.add(GCashPaymentQRCodeImage, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, 400, 380));
 
         ConfirmGCashPaymentButton.setBackground(new java.awt.Color(249, 241, 240));
+        ConfirmGCashPaymentButton.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        ConfirmGCashPaymentButton.setForeground(new java.awt.Color(31, 40, 35));
         ConfirmGCashPaymentButton.setText("CONFIRM");
         ConfirmGCashPaymentButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         ConfirmGCashPaymentButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -1914,6 +1928,8 @@ private JLabel createImageLabel(Product product) {
         ConfirmCashPayment_box.add(GCashPaymentQRCodeImage1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, 400, 380));
 
         ConfirmCashPaymentButton.setBackground(new java.awt.Color(249, 241, 240));
+        ConfirmCashPaymentButton.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        ConfirmCashPaymentButton.setForeground(new java.awt.Color(31, 40, 35));
         ConfirmCashPaymentButton.setText("CONFIRM");
         ConfirmCashPaymentButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         ConfirmCashPaymentButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
