@@ -163,12 +163,9 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             button.setBorder(BorderFactory.createLineBorder(new Color(255, 255, 255), 2));
 
             if (button == ProductListButton) {
-                button.setIcon(new ImageIcon(getClass().getResource("/gui/Images/icons/items.png")));
-            } else if (button == AddProductButton) {
-                button.setIcon(new ImageIcon(getClass().getResource("/gui/Images/icons/queue.png")));
-            } else if (button == LogoutButton) {
-                button.setIcon(new ImageIcon(getClass().getResource("/gui/Images/icons/queue.png")));
-            }
+                button.setIcon(new ImageIcon(getClass().getResource("/gui/Images/icons/items_selected.png")));
+            } else if (button == AddProductButton)
+                button.setIcon(new ImageIcon(getClass().getResource("/gui/Images/icons/queue_selected.png")));
         } else {
             button.setBackground(new Color(249, 241, 240));
             button.setForeground(new Color(0, 0, 0));
@@ -176,12 +173,9 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
 
             if (button == ProductListButton) {
                 button.setIcon(new ImageIcon(getClass().getResource("/gui/Images/icons/items.png")));
-            } else if (button == AddProductButton) {
+            } else if (button == AddProductButton)
                 button.setIcon(new ImageIcon(getClass().getResource("/gui/Images/icons/queue.png")));
-            } else if (button == LogoutButton) {
-                button.setIcon(new ImageIcon(getClass().getResource("/gui/Images/icons/logout.png")));
             }
-        }
     }
     
     private void addNewProduct() {
@@ -739,11 +733,11 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
+        LogoutButton = new javax.swing.JButton();
         SideBarPanel = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         ProductListButton = new javax.swing.JButton();
         AddProductButton = new javax.swing.JButton();
-        LogoutButton = new javax.swing.JButton();
         MainTabbedPane = new javax.swing.JTabbedPane();
         ProductListTab = new javax.swing.JPanel();
         header = new javax.swing.JPanel();
@@ -786,6 +780,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         ProductChooseImageUpdateLabel = new javax.swing.JLabel();
         ProductChooseImagePathUpdateTextField = new java.awt.TextField();
         ProductChooseImageFileUpdateButton = new javax.swing.JButton();
+        ProductAddItemGoBackButton = new javax.swing.JButton();
         footer8 = new javax.swing.JPanel();
         UpdateIProductPanelLabel = new javax.swing.JLabel();
 
@@ -795,12 +790,30 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         setLocationByPlatform(true);
         setMaximizedBounds(new java.awt.Rectangle(0, 0, 1000, 600));
         setMinimumSize(new java.awt.Dimension(1000, 600));
-        setPreferredSize(new java.awt.Dimension(1000, 600));
-        setSize(new java.awt.Dimension(1000, 600));
+        setPreferredSize(new java.awt.Dimension(1015, 635));
+        setResizable(false);
+        setSize(new java.awt.Dimension(1015, 635));
 
         jPanel1.setBackground(new java.awt.Color(201, 177, 158));
         jPanel1.setPreferredSize(new java.awt.Dimension(1000, 600));
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        LogoutButton.setBackground(new java.awt.Color(249, 241, 240));
+        LogoutButton.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        LogoutButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/icons/logout.png"))); // NOI18N
+        LogoutButton.setText("LOGOUT");
+        LogoutButton.setBorder(null);
+        LogoutButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        LogoutButton.setFocusable(false);
+        LogoutButton.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        LogoutButton.setIconTextGap(10);
+        LogoutButton.setPreferredSize(new java.awt.Dimension(200, 40));
+        LogoutButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                LogoutButtonActionPerformed(evt);
+            }
+        });
+        jPanel1.add(LogoutButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 555, -1, -1));
 
         SideBarPanel.setBackground(new java.awt.Color(0, 0, 0));
         SideBarPanel.setPreferredSize(new java.awt.Dimension(200, 600));
@@ -816,6 +829,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         ProductListButton.setText("PRODUCT LIST");
         ProductListButton.setBorder(null);
         ProductListButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        ProductListButton.setFocusable(false);
         ProductListButton.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         ProductListButton.setIconTextGap(10);
         ProductListButton.setPreferredSize(new java.awt.Dimension(200, 120));
@@ -832,6 +846,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         AddProductButton.setText("ADD PRODUCT");
         AddProductButton.setBorder(null);
         AddProductButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        AddProductButton.setFocusable(false);
         AddProductButton.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         AddProductButton.setIconTextGap(10);
         AddProductButton.setPreferredSize(new java.awt.Dimension(200, 120));
@@ -841,22 +856,6 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             }
         });
         SideBarPanel.add(AddProductButton);
-
-        LogoutButton.setBackground(new java.awt.Color(249, 241, 240));
-        LogoutButton.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        LogoutButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/icons/logout.png"))); // NOI18N
-        LogoutButton.setText("LOGOUT");
-        LogoutButton.setBorder(null);
-        LogoutButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        LogoutButton.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-        LogoutButton.setIconTextGap(10);
-        LogoutButton.setPreferredSize(new java.awt.Dimension(200, 120));
-        LogoutButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                LogoutButtonActionPerformed(evt);
-            }
-        });
-        SideBarPanel.add(LogoutButton);
 
         jPanel1.add(SideBarPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, 600));
 
@@ -903,7 +902,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         ProductListTable.setForeground(new java.awt.Color(31, 40, 35));
         ProductListTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                { new Integer(1),  new Integer(1), null, "This is a Coffee Blend", null, null, null}
+                { new Integer(1),  new Integer(1), "Coffee", "This is a Coffee Blend",  new Double(39.0),  new Boolean(true), null}
             },
             new String [] {
                 "#", "ID", "Name", "Description", "Price", "Is Available", "Actions"
@@ -939,7 +938,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             ProductListTable.getColumnModel().getColumn(1).setResizable(false);
             ProductListTable.getColumnModel().getColumn(1).setPreferredWidth(5);
             ProductListTable.getColumnModel().getColumn(2).setResizable(false);
-            ProductListTable.getColumnModel().getColumn(2).setPreferredWidth(100);
+            ProductListTable.getColumnModel().getColumn(2).setPreferredWidth(75);
             ProductListTable.getColumnModel().getColumn(3).setResizable(false);
             ProductListTable.getColumnModel().getColumn(3).setPreferredWidth(200);
             ProductListTable.getColumnModel().getColumn(4).setResizable(false);
@@ -1067,8 +1066,9 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         AddProductConfirmButton.setBackground(new java.awt.Color(249, 241, 240));
         AddProductConfirmButton.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         AddProductConfirmButton.setText("ADD");
-        AddProductConfirmButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        AddProductConfirmButton.setBorder(null);
         AddProductConfirmButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        AddProductConfirmButton.setFocusable(false);
         AddProductConfirmButton.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         AddProductConfirmButton.setIconTextGap(10);
         AddProductConfirmButton.setPreferredSize(new java.awt.Dimension(120, 40));
@@ -1099,9 +1099,10 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
 
         ProductChooseImageFileButton.setBackground(new java.awt.Color(249, 241, 240));
         ProductChooseImageFileButton.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        ProductChooseImageFileButton.setText("Choose File");
-        ProductChooseImageFileButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        ProductChooseImageFileButton.setText("Choose Image");
+        ProductChooseImageFileButton.setBorder(null);
         ProductChooseImageFileButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        ProductChooseImageFileButton.setFocusable(false);
         ProductChooseImageFileButton.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         ProductChooseImageFileButton.setIconTextGap(10);
         ProductChooseImageFileButton.setPreferredSize(new java.awt.Dimension(120, 40));
@@ -1200,8 +1201,9 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         ProductAddItemConfirmUpdateButton.setBackground(new java.awt.Color(249, 241, 240));
         ProductAddItemConfirmUpdateButton.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         ProductAddItemConfirmUpdateButton.setText("UPDATE");
-        ProductAddItemConfirmUpdateButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        ProductAddItemConfirmUpdateButton.setBorder(null);
         ProductAddItemConfirmUpdateButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        ProductAddItemConfirmUpdateButton.setFocusable(false);
         ProductAddItemConfirmUpdateButton.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         ProductAddItemConfirmUpdateButton.setIconTextGap(10);
         ProductAddItemConfirmUpdateButton.setPreferredSize(new java.awt.Dimension(120, 40));
@@ -1220,7 +1222,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         ProductChooseImagePathUpdateTextField.setBackground(new java.awt.Color(249, 241, 240));
         ProductChooseImagePathUpdateTextField.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         ProductChooseImagePathUpdateTextField.setForeground(new java.awt.Color(31, 40, 35));
-        ProductChooseImagePathUpdateTextField.setText("\\ui\\images\\product_images\\default.png");
+        ProductChooseImagePathUpdateTextField.setText("default.png");
         ProductChooseImagePathUpdateTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 ProductChooseImagePathUpdateTextFieldActionPerformed(evt);
@@ -1230,9 +1232,10 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
 
         ProductChooseImageFileUpdateButton.setBackground(new java.awt.Color(249, 241, 240));
         ProductChooseImageFileUpdateButton.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        ProductChooseImageFileUpdateButton.setText("Choose File");
-        ProductChooseImageFileUpdateButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        ProductChooseImageFileUpdateButton.setText("Choose Image");
+        ProductChooseImageFileUpdateButton.setBorder(null);
         ProductChooseImageFileUpdateButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        ProductChooseImageFileUpdateButton.setFocusable(false);
         ProductChooseImageFileUpdateButton.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         ProductChooseImageFileUpdateButton.setIconTextGap(10);
         ProductChooseImageFileUpdateButton.setPreferredSize(new java.awt.Dimension(120, 40));
@@ -1242,6 +1245,22 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             }
         });
         UpdateProductPanelContent.add(ProductChooseImageFileUpdateButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 190, 120, 40));
+
+        ProductAddItemGoBackButton.setBackground(new java.awt.Color(249, 241, 240));
+        ProductAddItemGoBackButton.setFont(new java.awt.Font("Segoe UI", 0, 10)); // NOI18N
+        ProductAddItemGoBackButton.setText("GO BACK");
+        ProductAddItemGoBackButton.setBorder(null);
+        ProductAddItemGoBackButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        ProductAddItemGoBackButton.setFocusable(false);
+        ProductAddItemGoBackButton.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        ProductAddItemGoBackButton.setIconTextGap(10);
+        ProductAddItemGoBackButton.setPreferredSize(new java.awt.Dimension(75, 30));
+        ProductAddItemGoBackButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ProductAddItemGoBackButtonActionPerformed(evt);
+            }
+        });
+        UpdateProductPanelContent.add(ProductAddItemGoBackButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(650, 400, -1, -1));
 
         UpdateProductEntryTab.add(UpdateProductPanelContent, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 90, 740, 440));
 
@@ -1452,6 +1471,10 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         logout();
     }//GEN-LAST:event_LogoutButtonActionPerformed
 
+    private void ProductAddItemGoBackButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ProductAddItemGoBackButtonActionPerformed
+        MainTabbedPane.setSelectedIndex(0);
+    }//GEN-LAST:event_ProductAddItemGoBackButtonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton AddProductButton;
     private javax.swing.JButton AddProductConfirmButton;
@@ -1463,6 +1486,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
     private javax.swing.JButton LogoutButton;
     private javax.swing.JTabbedPane MainTabbedPane;
     private javax.swing.JButton ProductAddItemConfirmUpdateButton;
+    private javax.swing.JButton ProductAddItemGoBackButton;
     private javax.swing.JButton ProductChooseImageFileButton;
     private javax.swing.JButton ProductChooseImageFileUpdateButton;
     private javax.swing.JLabel ProductChooseImageLabel;

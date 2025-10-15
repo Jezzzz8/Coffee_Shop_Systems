@@ -346,7 +346,8 @@ public class KioskFrame extends javax.swing.JFrame {
         addButton.setCursor(isAvailable ? new Cursor(Cursor.HAND_CURSOR) : new Cursor(Cursor.DEFAULT_CURSOR));
         addButton.setEnabled(isAvailable);
         addButton.setToolTipText(isAvailable ? "Add to Cart" : "Product not available");
-
+        addButton.setFocusable(false);
+        
         addButton.addActionListener(e -> {
             int quantity = (Integer) quantitySpinner.getValue();
             if (quantity > 0) {
@@ -628,7 +629,8 @@ public class KioskFrame extends javax.swing.JFrame {
         deleteButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         deleteButton.setToolTipText("Remove from Cart");
         deleteButton.setPreferredSize(new Dimension(64, 64));
-
+        deleteButton.setFocusable(false);
+        
         deleteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -1063,6 +1065,7 @@ public class KioskFrame extends javax.swing.JFrame {
         NewOrderButton.setText("NEW ORDER");
         NewOrderButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         NewOrderButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        NewOrderButton.setFocusable(false);
         NewOrderButton.setIconTextGap(10);
         NewOrderButton.setPreferredSize(new java.awt.Dimension(200, 100));
         NewOrderButton.addActionListener(new java.awt.event.ActionListener() {
@@ -1111,6 +1114,7 @@ public class KioskFrame extends javax.swing.JFrame {
         MenuButton.setText("MENU");
         MenuButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         MenuButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        MenuButton.setFocusable(false);
         MenuButton.setIconTextGap(10);
         MenuButton.setPreferredSize(new java.awt.Dimension(200, 100));
         MenuButton.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/icons/menu_selected.png"))); // NOI18N
@@ -1127,6 +1131,7 @@ public class KioskFrame extends javax.swing.JFrame {
         SpecialsButton.setText("BEST SELLING");
         SpecialsButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         SpecialsButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        SpecialsButton.setFocusable(false);
         SpecialsButton.setIconTextGap(10);
         SpecialsButton.setPreferredSize(new java.awt.Dimension(200, 100));
         SpecialsButton.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/icons/cup.png"))); // NOI18N
@@ -1143,6 +1148,7 @@ public class KioskFrame extends javax.swing.JFrame {
         CartButton.setText("CART");
         CartButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         CartButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        CartButton.setFocusable(false);
         CartButton.setIconTextGap(10);
         CartButton.setPreferredSize(new java.awt.Dimension(200, 100));
         CartButton.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/icons/cart_selected.png"))); // NOI18N
@@ -1159,6 +1165,7 @@ public class KioskFrame extends javax.swing.JFrame {
         GetHelpButton1.setText("GET HELP");
         GetHelpButton1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         GetHelpButton1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        GetHelpButton1.setFocusable(false);
         GetHelpButton1.setIconTextGap(10);
         GetHelpButton1.setPreferredSize(new java.awt.Dimension(200, 100));
         GetHelpButton1.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/icons/assist_selected.png"))); // NOI18N
@@ -1251,6 +1258,7 @@ public class KioskFrame extends javax.swing.JFrame {
         ProductAddToCartButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/icons/add.png"))); // NOI18N
         ProductAddToCartButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         ProductAddToCartButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        ProductAddToCartButton.setFocusable(false);
         ProductAddToCartButton.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         ProductAddToCartButton.setIconTextGap(10);
         ProductAddToCartButton.setPreferredSize(new java.awt.Dimension(64, 64));
@@ -1376,6 +1384,7 @@ public class KioskFrame extends javax.swing.JFrame {
         SpecialsProductAddToCartButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/icons/add.png"))); // NOI18N
         SpecialsProductAddToCartButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         SpecialsProductAddToCartButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        SpecialsProductAddToCartButton.setFocusable(false);
         SpecialsProductAddToCartButton.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         SpecialsProductAddToCartButton.setIconTextGap(10);
         SpecialsProductAddToCartButton.setPreferredSize(new java.awt.Dimension(64, 64));
@@ -1512,6 +1521,7 @@ public class KioskFrame extends javax.swing.JFrame {
         CartProductDeleteToCartButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/icons/delete.png"))); // NOI18N
         CartProductDeleteToCartButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         CartProductDeleteToCartButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        CartProductDeleteToCartButton.setFocusable(false);
         CartProductDeleteToCartButton.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         CartProductDeleteToCartButton.setIconTextGap(10);
         CartProductDeleteToCartButton.setPreferredSize(new java.awt.Dimension(64, 64));
@@ -1560,6 +1570,7 @@ public class KioskFrame extends javax.swing.JFrame {
         CheckOutButton.setText("CHECKOUT");
         CheckOutButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         CheckOutButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        CheckOutButton.setFocusable(false);
         CheckOutButton.setIconTextGap(1);
         CheckOutButton.setPreferredSize(new java.awt.Dimension(200, 40));
         CheckOutButton.addActionListener(new java.awt.event.ActionListener() {
@@ -1855,7 +1866,7 @@ public class KioskFrame extends javax.swing.JFrame {
         GCashPaymentQRCodeImage.setBackground(new java.awt.Color(31, 40, 35));
         GCashPaymentQRCodeImage.setForeground(new java.awt.Color(255, 255, 255));
         GCashPaymentQRCodeImage.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        GCashPaymentQRCodeImage.setText("QR CODE IMAGE");
+        GCashPaymentQRCodeImage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/logos/gcash_qrcode.png"))); // NOI18N
         GCashPaymentQRCodeImage.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
         GCashPaymentQRCodeImage.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         GCashPaymentQRCodeImage.setPreferredSize(new java.awt.Dimension(100, 100));
@@ -1867,6 +1878,7 @@ public class KioskFrame extends javax.swing.JFrame {
         ConfirmGCashPaymentButton.setText("CONFIRM");
         ConfirmGCashPaymentButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         ConfirmGCashPaymentButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        ConfirmGCashPaymentButton.setFocusable(false);
         ConfirmGCashPaymentButton.setIconTextGap(10);
         ConfirmGCashPaymentButton.setPreferredSize(new java.awt.Dimension(200, 100));
         ConfirmGCashPaymentButton.addActionListener(new java.awt.event.ActionListener() {
@@ -1933,6 +1945,7 @@ public class KioskFrame extends javax.swing.JFrame {
         ConfirmCashPaymentButton.setText("CONFIRM");
         ConfirmCashPaymentButton.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         ConfirmCashPaymentButton.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        ConfirmCashPaymentButton.setFocusable(false);
         ConfirmCashPaymentButton.setIconTextGap(10);
         ConfirmCashPaymentButton.setPreferredSize(new java.awt.Dimension(200, 100));
         ConfirmCashPaymentButton.addActionListener(new java.awt.event.ActionListener() {
