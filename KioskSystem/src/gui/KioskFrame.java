@@ -1771,7 +1771,7 @@ public class KioskFrame extends javax.swing.JFrame {
         CashPayment_box.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/icons/cash-payment.png"))); // NOI18N
+        jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/logos/cash-payment.png"))); // NOI18N
         jLabel5.setToolTipText("");
         jLabel5.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 5, true));
         jLabel5.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -1800,7 +1800,7 @@ public class KioskFrame extends javax.swing.JFrame {
         GCashPayment_box.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/icons/cashless-payment.png"))); // NOI18N
+        jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/logos/cashless-payment.png"))); // NOI18N
         jLabel6.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 0, 0), 5, true));
         jLabel6.setPreferredSize(new java.awt.Dimension(100, 100));
         GCashPayment_box.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, 400, 380));
@@ -1934,7 +1934,7 @@ public class KioskFrame extends javax.swing.JFrame {
         GCashPaymentQRCodeImage1.setBackground(new java.awt.Color(31, 40, 35));
         GCashPaymentQRCodeImage1.setForeground(new java.awt.Color(255, 255, 255));
         GCashPaymentQRCodeImage1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        GCashPaymentQRCodeImage1.setText("PROCEED TO COUNTER");
+        GCashPaymentQRCodeImage1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/logos/proceedtocounter_message.png"))); // NOI18N
         GCashPaymentQRCodeImage1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         GCashPaymentQRCodeImage1.setPreferredSize(new java.awt.Dimension(100, 100));
         ConfirmCashPayment_box.add(GCashPaymentQRCodeImage1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, 400, 380));
