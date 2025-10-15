@@ -211,7 +211,6 @@ public class LoginFrame extends javax.swing.JFrame {
         LoginPanel.setPreferredSize(new java.awt.Dimension(800, 500));
 
         LEFT.setBackground(new java.awt.Color(0, 0, 0));
-        LEFT.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
         LogoLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/logos/logo1.png"))); // NOI18N
         LogoLabel.setText("jLabel2");
@@ -235,7 +234,6 @@ public class LoginFrame extends javax.swing.JFrame {
         );
 
         RIGHT.setBackground(new java.awt.Color(249, 241, 240));
-        RIGHT.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.LOWERED));
         RIGHT.setPreferredSize(new java.awt.Dimension(400, 500));
 
         jLabel1.setBackground(new java.awt.Color(255, 255, 255));
@@ -246,7 +244,8 @@ public class LoginFrame extends javax.swing.JFrame {
         UsernameLabel.setText("Username");
 
         UsernameText.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        UsernameText.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.LOWERED));
+        UsernameText.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        UsernameText.setCursor(new java.awt.Cursor(java.awt.Cursor.TEXT_CURSOR));
         UsernameText.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 UsernameTextActionPerformed(evt);
@@ -256,7 +255,8 @@ public class LoginFrame extends javax.swing.JFrame {
         PasswordLabel.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         PasswordLabel.setText("Password");
 
-        PasswordText.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.LOWERED));
+        PasswordText.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        PasswordText.setCursor(new java.awt.Cursor(java.awt.Cursor.TEXT_CURSOR));
         PasswordText.setPreferredSize(new java.awt.Dimension(300, 40));
         PasswordText.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -327,7 +327,7 @@ public class LoginFrame extends javax.swing.JFrame {
                     .addGroup(RIGHTLayout.createSequentialGroup()
                         .addGap(145, 145, 145)
                         .addComponent(jLabel1)))
-                .addContainerGap(10, Short.MAX_VALUE))
+                .addContainerGap(16, Short.MAX_VALUE))
         );
         RIGHTLayout.setVerticalGroup(
             RIGHTLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -346,7 +346,7 @@ public class LoginFrame extends javax.swing.JFrame {
                     .addComponent(PasswordText, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
                 .addComponent(LoginButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 119, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 125, Short.MAX_VALUE)
                 .addComponent(KioskButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -356,7 +356,7 @@ public class LoginFrame extends javax.swing.JFrame {
         LoginPanelLayout.setHorizontalGroup(
             LoginPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(LoginPanelLayout.createSequentialGroup()
-                .addComponent(LEFT, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(LEFT, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
                 .addComponent(RIGHT, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
