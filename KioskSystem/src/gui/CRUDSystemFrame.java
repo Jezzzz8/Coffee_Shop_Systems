@@ -721,10 +721,10 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
     }
     
     private void logout() {
-        KioskFrame kioskFrame = new KioskFrame();
-        kioskFrame.setVisible(true);
-        kioskFrame.pack();
-        kioskFrame.setLocationRelativeTo(null);
+        LoginFrame login = new LoginFrame();
+        login.setVisible(true);
+        login.pack();
+        login.setLocationRelativeTo(null);
         this.dispose();
     }
     
@@ -800,6 +800,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
 
         LogoutButton.setBackground(new java.awt.Color(249, 241, 240));
         LogoutButton.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        LogoutButton.setForeground(new java.awt.Color(31, 40, 35));
         LogoutButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/icons/logout.png"))); // NOI18N
         LogoutButton.setText("LOGOUT");
         LogoutButton.setBorder(null);
