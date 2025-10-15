@@ -269,6 +269,7 @@ public class LoginFrame extends javax.swing.JFrame {
         LoginButton.setForeground(new java.awt.Color(255, 255, 255));
         LoginButton.setText("Login");
         LoginButton.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        LoginButton.setFocusable(false);
         LoginButton.setPreferredSize(new java.awt.Dimension(91, 35));
         LoginButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -296,6 +297,7 @@ public class LoginFrame extends javax.swing.JFrame {
         KioskButton.setForeground(new java.awt.Color(255, 255, 255));
         KioskButton.setText("OPEN KIOSK");
         KioskButton.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        KioskButton.setFocusable(false);
         KioskButton.setPreferredSize(new java.awt.Dimension(130, 40));
         KioskButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
