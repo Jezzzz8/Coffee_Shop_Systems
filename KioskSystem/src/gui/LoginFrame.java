@@ -8,7 +8,6 @@ import javax.swing.SwingWorker;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Insets;
-import java.util.*;
 import javax.swing.UIManager;
 
 public class LoginFrame extends javax.swing.JFrame {
@@ -20,6 +19,7 @@ public class LoginFrame extends javax.swing.JFrame {
         setupEnterKeySupport();
         customizeOptionPane();
     }
+     
      private void customizeOptionPane() {
          UIManager.put("OptionPane.background", new Color(249, 241, 240));
          UIManager.put("Panel.background", new Color(249, 241, 240));
@@ -99,9 +99,11 @@ public class LoginFrame extends javax.swing.JFrame {
                 } catch (Exception ex) {
                     System.out.println("Exception during login: " + ex.getMessage());
                     ex.printStackTrace();
+                    showError("An unexpected error occurred during login.", "System Error", null);
+                    PasswordText.setText("");
                 } finally {
-                    // Reset UI state
-                    isLoggingIn = true;
+                    // Reset logging state
+                    isLoggingIn = false;
                     setUiState(true);
                 }
             }
@@ -174,11 +176,9 @@ public class LoginFrame extends javax.swing.JFrame {
     }
     
     private void redirectToKiosk() {
-        System.out.println("Redirecting to Kiosk...");
+        System.out.println("Redirecting to Inventory...");
         KioskFrame kioskFrame = new KioskFrame();
         kioskFrame.setVisible(true);
-        kioskFrame.pack();
-        kioskFrame.setLocationRelativeTo(null);
         this.dispose();
     }
 
