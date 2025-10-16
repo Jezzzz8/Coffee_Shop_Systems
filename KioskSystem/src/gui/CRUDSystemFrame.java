@@ -7,13 +7,10 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.Insets;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractCellEditor;
@@ -23,7 +20,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.TableCellEditor;
@@ -53,6 +49,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
     private void initApp() {
         try {
             initializeData();
+            initializeFilterOptions();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Database connection failed: " + e.getMessage(), 
                                         "Connection Error", JOptionPane.ERROR_MESSAGE);
@@ -69,6 +66,20 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         }
     }
     
+    private void initializeFilterOptions() {
+        FilterChoice.removeAll();
+        
+        FilterChoice.add("All Products");
+        FilterChoice.add("Available Only");
+        FilterChoice.add("Archived Only");
+        
+        FilterChoice.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                filterInventoryTable();
+            }
+        });
+    }
+    
     private void initializeData() {
         currentProducts = ProductManager.getAllProducts();
         refreshInventoryTable();
@@ -80,21 +91,39 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
     
     private void filterInventoryTable() {
         String searchTerm = ProductListSearchBar.getText().trim().toLowerCase();
+        String filterChoice = FilterChoice.getSelectedItem();
         DefaultTableModel model = (DefaultTableModel) ProductListTable.getModel();
-        
-        if (searchTerm.isEmpty()) {
-            refreshInventoryTable();
-            return;
-        }
 
         List<Product> filteredProducts = new ArrayList<>();
+
         for (Product product : currentProducts) {
-            if (product.getName().toLowerCase().contains(searchTerm) ||
+            
+            boolean matchesSearch = searchTerm.isEmpty() ||
+                product.getName().toLowerCase().contains(searchTerm) ||
                 product.getDescription().toLowerCase().contains(searchTerm) ||
                 String.valueOf(product.getId()).contains(searchTerm) ||
                 String.valueOf(product.getPrice()).contains(searchTerm) ||
-                (product.isAvailable() ? "yes" : "no").contains(searchTerm)) {
-                filteredProducts.add(product);
+                (product.isAvailable() ? "yes" : "no").contains(searchTerm);
+
+            if (!matchesSearch) {
+                continue;
+            }
+            
+            switch (filterChoice) {
+                case "Available Only":
+                    if (product.isAvailable()) {
+                        filteredProducts.add(product);
+                    }
+                    break;
+                case "Archived Only":
+                    if (!product.isAvailable()) {
+                        filteredProducts.add(product);
+                    }
+                    break;
+                case "All Products":
+                default:
+                    filteredProducts.add(product);
+                    break;
             }
         }
 
@@ -121,6 +150,11 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             ProductListTable.getColumnModel().getColumn(6).setCellRenderer(new ButtonRenderer());
             ProductListTable.getColumnModel().getColumn(6).setCellEditor(new ButtonEditor());
         }
+    }
+    
+    private void resetFilter() {
+        FilterChoice.select("All Products");
+        filterInventoryTable();
     }
     
     private void updateSidebarButtonSelection() {
@@ -341,34 +375,17 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
     }
     
     private void refreshInventoryTableSafely() {
-        
+    
         if (ProductListTable.isEditing()) {
             ProductListTable.getCellEditor().cancelCellEditing();
         }
 
         SwingUtilities.invokeLater(() -> {
             try {
-                
+
                 currentProducts = ProductManager.getAllProducts();
-
-                DefaultTableModel model = (DefaultTableModel) ProductListTable.getModel();
-                model.setRowCount(0);
-
-                for (int i = 0; i < currentProducts.size(); i++) {
-                    Product product = currentProducts.get(i);
-                    Object[] row = {
-                        i + 1,
-                        product.getId(),
-                        product.getName(),
-                        product.getDescription(),
-                        product.getPrice(),
-                        product.isAvailable(),
-                        product.getId()
-                    };
-                    model.addRow(row);
-                }
-
-                setupTableRenderersAndEditors();
+                
+                filterInventoryTable();
 
             } catch (Exception e) {
                 System.err.println("Error refreshing table: " + e.getMessage());
@@ -741,6 +758,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         ProductListTable = new javax.swing.JTable();
         ProductListSearchBar = new javax.swing.JTextField();
         ProductListSearchLabel = new javax.swing.JLabel();
+        FilterChoice = new java.awt.Choice();
         footer1 = new javax.swing.JPanel();
         AddProductTab = new javax.swing.JPanel();
         header2 = new javax.swing.JPanel();
@@ -975,6 +993,14 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         ProductListSearchLabel.setForeground(new java.awt.Color(31, 40, 35));
         ProductListSearchLabel.setText("Search:");
         ProductListContentPanel.add(ProductListSearchLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 0, 70, 40));
+
+        FilterChoice.setBackground(new java.awt.Color(249, 241, 240));
+        FilterChoice.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        FilterChoice.setFont(new java.awt.Font("Segoe UI", 0, 12)); // NOI18N
+        FilterChoice.setForeground(new java.awt.Color(31, 40, 35));
+        FilterChoice.setName("language"); // NOI18N
+        FilterChoice.setPreferredSize(new java.awt.Dimension(150, 20));
+        ProductListContentPanel.add(FilterChoice, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 10, -1, -1));
 
         ProductListTab.add(ProductListContentPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 50, 790, 500));
 
@@ -1459,6 +1485,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
 
     private void ProductListButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ProductListButtonActionPerformed
         MainTabbedPane.setSelectedIndex(0);
+        resetFilter();
     }//GEN-LAST:event_ProductListButtonActionPerformed
 
     private void LogoutButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LogoutButtonActionPerformed
@@ -1477,6 +1504,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
     private javax.swing.JLabel AddProductPanelLabel;
     private javax.swing.JPanel AddProductTab;
     private javax.swing.JLabel AddProductTitleLabel;
+    private java.awt.Choice FilterChoice;
     private javax.swing.JButton LogoutButton;
     private javax.swing.JTabbedPane MainTabbedPane;
     private javax.swing.JButton ProductAddItemConfirmUpdateButton;
