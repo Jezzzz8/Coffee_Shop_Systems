@@ -1632,6 +1632,7 @@ public class KioskFrame extends javax.swing.JFrame {
 
         LanguageChoice.setBackground(new java.awt.Color(249, 241, 240));
         LanguageChoice.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        LanguageChoice.setFocusable(false);
         LanguageChoice.setFont(new java.awt.Font("Segoe UI", 0, 12)); // NOI18N
         LanguageChoice.setForeground(new java.awt.Color(31, 40, 35));
         LanguageChoice.setName("language"); // NOI18N

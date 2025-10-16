@@ -996,6 +996,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
 
         FilterChoice.setBackground(new java.awt.Color(249, 241, 240));
         FilterChoice.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        FilterChoice.setFocusable(false);
         FilterChoice.setFont(new java.awt.Font("Segoe UI", 0, 12)); // NOI18N
         FilterChoice.setForeground(new java.awt.Color(31, 40, 35));
         FilterChoice.setName("language"); // NOI18N
