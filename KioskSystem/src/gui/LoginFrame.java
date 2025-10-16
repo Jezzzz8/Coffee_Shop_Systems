@@ -234,7 +234,7 @@ public class LoginFrame extends javax.swing.JFrame {
 
         jLabel1.setBackground(new java.awt.Color(255, 255, 255));
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
-        jLabel1.setText("ADMIN");
+        jLabel1.setText("LOGIN");
 
         UsernameLabel.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         UsernameLabel.setText("Username");
@@ -264,7 +264,7 @@ public class LoginFrame extends javax.swing.JFrame {
         LoginButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         LoginButton.setForeground(new java.awt.Color(255, 255, 255));
         LoginButton.setText("Login");
-        LoginButton.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        LoginButton.setBorder(null);
         LoginButton.setFocusable(false);
         LoginButton.setPreferredSize(new java.awt.Dimension(91, 35));
         LoginButton.addActionListener(new java.awt.event.ActionListener() {
@@ -289,12 +289,11 @@ public class LoginFrame extends javax.swing.JFrame {
         });
 
         KioskButton.setBackground(new java.awt.Color(0, 0, 0));
-        KioskButton.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        KioskButton.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         KioskButton.setForeground(new java.awt.Color(255, 255, 255));
-        KioskButton.setText("OPEN KIOSK");
-        KioskButton.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        KioskButton.setFocusable(false);
-        KioskButton.setPreferredSize(new java.awt.Dimension(130, 40));
+        KioskButton.setText("CUSTOMER");
+        KioskButton.setBorder(null);
+        KioskButton.setPreferredSize(new java.awt.Dimension(100, 35));
         KioskButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 KioskButtonActionPerformed(evt);
@@ -306,23 +305,24 @@ public class LoginFrame extends javax.swing.JFrame {
         RIGHTLayout.setHorizontalGroup(
             RIGHTLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(RIGHTLayout.createSequentialGroup()
-                .addGroup(RIGHTLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(RIGHTLayout.createSequentialGroup()
-                        .addGap(40, 40, 40)
-                        .addGroup(RIGHTLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(UsernameLabel)
-                            .addComponent(PasswordLabel)
-                            .addComponent(LoginButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(RIGHTLayout.createSequentialGroup()
-                                .addGroup(RIGHTLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addComponent(UsernameText, javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(PasswordText, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(SeePasswordToggleButton, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(KioskButton, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(RIGHTLayout.createSequentialGroup()
-                        .addGap(145, 145, 145)
-                        .addComponent(jLabel1)))
+                .addGroup(RIGHTLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(KioskButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(RIGHTLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(RIGHTLayout.createSequentialGroup()
+                            .addGap(40, 40, 40)
+                            .addGroup(RIGHTLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(UsernameLabel)
+                                .addComponent(PasswordLabel)
+                                .addComponent(LoginButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(RIGHTLayout.createSequentialGroup()
+                                    .addGroup(RIGHTLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                        .addComponent(UsernameText, javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(PasswordText, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(SeePasswordToggleButton, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addGroup(RIGHTLayout.createSequentialGroup()
+                            .addGap(145, 145, 145)
+                            .addComponent(jLabel1))))
                 .addContainerGap(16, Short.MAX_VALUE))
         );
         RIGHTLayout.setVerticalGroup(
@@ -342,7 +342,7 @@ public class LoginFrame extends javax.swing.JFrame {
                     .addComponent(PasswordText, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
                 .addComponent(LoginButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 125, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 130, Short.MAX_VALUE)
                 .addComponent(KioskButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
