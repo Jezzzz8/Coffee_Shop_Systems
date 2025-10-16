@@ -36,7 +36,6 @@ public class LoginFrame extends javax.swing.JFrame {
     }
      
     private void setupEnterKeySupport() {
-        // Enter key support for both fields
         UsernameText.addActionListener(e -> PasswordText.requestFocus());
         PasswordText.addActionListener(e -> attemptLogin());
     }
@@ -62,7 +61,6 @@ public class LoginFrame extends javax.swing.JFrame {
         System.out.println("Username: " + username);
         System.out.println("Password: " + (password.isEmpty() ? "[empty]" : "[provided]"));
         
-        // Input validation
         if (username.isEmpty()) {
             showError("Please enter your username", "Input Error", UsernameText);
             return;
@@ -73,11 +71,9 @@ public class LoginFrame extends javax.swing.JFrame {
             return;
         }
         
-        // Set logging state
         isLoggingIn = true;
         setUiState(false);
         
-        // Use SwingWorker for background authentication
         new SwingWorker<UserAuthentication.AuthResult, Void>() {
             @Override
             protected UserAuthentication.AuthResult doInBackground() throws Exception {
@@ -115,11 +111,11 @@ public class LoginFrame extends javax.swing.JFrame {
         System.out.println("  Username: " + username);
         
         // Set session data
-        Admin.login(username);
+        Login.login(username);
         
         System.out.println("Session data set:");
-        System.out.println("  Current username: " + Admin.getCurrentUsername());
-        System.out.println("  Is logged in: " + Admin.isLoggedIn());
+        System.out.println("  Current username: " + Login.getCurrentUsername());
+        System.out.println("  Is logged in: " + Login.isLoggedIn());
         
         showWelcomeMessage();
     }

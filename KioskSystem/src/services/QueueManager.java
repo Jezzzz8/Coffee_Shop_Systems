@@ -32,7 +32,6 @@ public class QueueManager {
             System.err.println("Error initializing queue: " + e.getMessage());
             e.printStackTrace();
         } finally {
-            // Close resources in finally block
             try {
                 if (rs != null) rs.close();
                 if (pstmt != null) pstmt.close();

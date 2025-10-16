@@ -121,8 +121,7 @@ public class LanguageContent {
                 return ENGLISH_HELP;
         }
     }
-
-    // Method to get all available languages
+    
     public static String[] getAvailableLanguages() {
         return new String[]{ENGLISH, TAGALOG, CEBUANO};
     }

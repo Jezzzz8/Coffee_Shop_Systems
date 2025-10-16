@@ -41,8 +41,13 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         
         initApp();
         
-        customizeOptionPane();
         updateSidebarButtonSelection();
+        
+        ProductChooseImageFileButton.setForeground(Color.BLACK);
+        AddProductConfirmButton.setForeground(Color.BLACK);
+        ProductChooseImageFileUpdateButton.setForeground(Color.BLACK);
+        ProductAddItemConfirmUpdateButton.setForeground(Color.BLACK);
+        ProductAddItemGoBackButton.setForeground(Color.BLACK);
     }
     
     private void initApp() {
@@ -116,21 +121,6 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             ProductListTable.getColumnModel().getColumn(6).setCellRenderer(new ButtonRenderer());
             ProductListTable.getColumnModel().getColumn(6).setCellEditor(new ButtonEditor());
         }
-    }
-    
-    private void customizeOptionPane() {
-            UIManager.put("OptionPane.background", new Color(249, 241, 240));
-            UIManager.put("Panel.background", new Color(249, 241, 240));
-            UIManager.put("OptionPane.messageForeground", new Color(31, 40, 35));
-            UIManager.put("OptionPane.messageFont", new Font("Segoe UI", Font.PLAIN, 14));
-            UIManager.put("OptionPane.buttonFont", new Font("Segoe UI", Font.BOLD, 12));
-
-            UIManager.put("Button.margin", new Insets(10, 20, 10, 20));
-            UIManager.put("Button.padding", new Insets(8, 15, 8, 15));
-
-            UIManager.put("Button.background", new Color(31, 40, 35));
-            UIManager.put("Button.foreground", Color.WHITE);
-            UIManager.put("Button.focus", new Color(51, 60, 55));
     }
     
     private void updateSidebarButtonSelection() {
@@ -644,15 +634,18 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
-            if (isSelected) {
-                setBackground(table.getSelectionBackground());
-            } else {
-                setBackground(table.getBackground());
-            }
-
+            
             if (value instanceof Boolean) {
                 checkBox.setSelected((Boolean) value);
             }
+            
+            if (isSelected) {
+                setBackground(table.getSelectionBackground());
+
+            } else {
+                setBackground(table.getBackground());
+            }
+            
             return this;
         }
     }
@@ -663,7 +656,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         private boolean currentValue;
 
         public BooleanEditor() {
-            checkBox = new JCheckBox();
+            checkBox = new JCheckBox();      
             checkBox.addActionListener(e -> {
                 fireEditingStopped();
                 updateProductAvailability(currentProductId, checkBox.isSelected());
@@ -692,7 +685,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             } else {
                 checkBox.setBackground(table.getBackground());
             }
-
+            
             return checkBox;
         }
 

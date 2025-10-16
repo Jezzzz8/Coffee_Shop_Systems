@@ -1,6 +1,6 @@
 package objects;
 
-public class Admin {
+public class Login {
     private static String currentUsername;
     private static boolean loggedIn = false;
     

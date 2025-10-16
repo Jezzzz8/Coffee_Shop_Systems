@@ -24,7 +24,6 @@ public class OrderManager {
 
             pstmt.setDouble(1, totalAmount);
             
-            // Use PaymentManager to get payment method ID
             int paymentMethodId = getPaymentMethodId(paymentMethod);
             pstmt.setInt(2, paymentMethodId);
 
@@ -59,7 +58,6 @@ public class OrderManager {
             return payment.getPaymentMethodId();
         }
         
-        // Fallback if payment method not found
         switch (paymentMethod.toLowerCase()) {
             case "cash": 
                 return 1;

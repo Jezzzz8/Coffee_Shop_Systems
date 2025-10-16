@@ -27,7 +27,7 @@ public class Product {
     public double getPrice() { return price; }
     public String getDescription() { return description; }
     public String getImageFilename() { return imageFilename; }
-    public String getImagePath() { return imageFilename; } // Alias for compatibility
+    public String getImagePath() { return imageFilename; }
     public boolean isAvailable() { return isAvailable; }
     
     public void setId(int id) { this.id = id; }
@@ -35,6 +35,6 @@ public class Product {
     public void setPrice(double price) { this.price = price; }
     public void setDescription(String description) { this.description = description; }
     public void setImageFilename(String imageFilename) { this.imageFilename = imageFilename; }
-    public void setImagePath(String imagePath) { this.imageFilename = imagePath; } // Alias for compatibility
+    public void setImagePath(String imagePath) { this.imageFilename = imagePath; }
     public void setAvailable(boolean available) { this.isAvailable = available; }
 }
