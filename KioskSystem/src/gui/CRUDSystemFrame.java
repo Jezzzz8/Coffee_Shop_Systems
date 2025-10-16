@@ -44,6 +44,8 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         ProductChooseImageFileUpdateButton.setForeground(Color.BLACK);
         ProductAddItemConfirmUpdateButton.setForeground(Color.BLACK);
         ProductAddItemGoBackButton.setForeground(Color.BLACK);
+        
+        FilterChoice.setFocusable(false);
     }
     
     private void initApp() {
@@ -73,6 +75,8 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         FilterChoice.add("Available Only");
         FilterChoice.add("Archived Only");
         
+        FilterChoice.setFocusable(false);
+        
         FilterChoice.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 filterInventoryTable();
@@ -93,7 +97,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         String searchTerm = ProductListSearchBar.getText().trim().toLowerCase();
         String filterChoice = FilterChoice.getSelectedItem();
         DefaultTableModel model = (DefaultTableModel) ProductListTable.getModel();
-
+        
         List<Product> filteredProducts = new ArrayList<>();
 
         for (Product product : currentProducts) {
