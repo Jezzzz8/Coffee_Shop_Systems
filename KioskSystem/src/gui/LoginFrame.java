@@ -293,6 +293,7 @@ public class LoginFrame extends javax.swing.JFrame {
         KioskButton.setForeground(new java.awt.Color(255, 255, 255));
         KioskButton.setText("CUSTOMER");
         KioskButton.setBorder(null);
+        KioskButton.setFocusable(false);
         KioskButton.setPreferredSize(new java.awt.Dimension(100, 35));
         KioskButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
