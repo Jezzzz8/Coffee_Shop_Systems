@@ -172,7 +172,7 @@ public class LoginFrame extends javax.swing.JFrame {
     }
     
     private void redirectToKiosk() {
-        System.out.println("Redirecting to Inventory...");
+        System.out.println("Redirecting to Kiosk...");
         KioskFrame kioskFrame = new KioskFrame();
         kioskFrame.setVisible(true);
         this.dispose();
