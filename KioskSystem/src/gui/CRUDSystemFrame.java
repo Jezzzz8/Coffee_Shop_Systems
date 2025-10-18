@@ -444,6 +444,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
 
                 SwingUtilities.invokeLater(() -> {
                     MainTabbedPane.setSelectedIndex(2);
+                    resetSidebarButtons();
                     loadProductForUpdate(currentProductId);
                 });
             });
@@ -1439,10 +1440,14 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
                 currentProductIdForUpdate = 0;
                 initializeData();
                 MainTabbedPane.setSelectedIndex(0);
+                resetSidebarButtons();
+                setButtonSelected(ProductListButton, true);
                 
             } else {
                 JOptionPane.showMessageDialog(this, "Failed to update product!");
                 MainTabbedPane.setSelectedIndex(0);
+                resetSidebarButtons();
+                setButtonSelected(ProductListButton, true);
             }
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Please enter valid data!");

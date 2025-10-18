@@ -2060,6 +2060,8 @@ public class KioskFrame extends javax.swing.JFrame {
         checkoutWithPayment("GCash");
         MainTabbedPane.setSelectedIndex(0);
         PlaceOrderTabbedPane.setSelectedIndex(0);
+        resetSidebarButtons();
+        setButtonSelected(MenuButton, true);
         updateProductDisplays();
     }//GEN-LAST:event_ConfirmGCashPaymentButtonActionPerformed
 
@@ -2067,6 +2069,8 @@ public class KioskFrame extends javax.swing.JFrame {
         checkoutWithPayment("Cash");
         MainTabbedPane.setSelectedIndex(0);
         PlaceOrderTabbedPane.setSelectedIndex(0);
+        resetSidebarButtons();
+        setButtonSelected(MenuButton, true);
         updateProductDisplays();
     }//GEN-LAST:event_ConfirmCashPaymentButtonActionPerformed
 
