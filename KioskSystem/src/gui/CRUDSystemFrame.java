@@ -7,12 +7,14 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.TextField;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.prefs.Preferences;
 import javax.swing.AbstractCellEditor;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -743,6 +745,29 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         this.dispose();
     }
     
+    private void selectImageFile(TextField textField) {
+        Preferences prefs = Preferences.userNodeForPackage(getClass());
+        String lastDir = prefs.get("LAST_IMAGE_DIR", System.getProperty("user.home"));
+
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new File(lastDir));
+
+        FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
+            "Image files (JPG, JPEG, PNG, GIF, BMP)", 
+            "jpg", "jpeg", "png", "gif", "bmp"
+        );
+
+        fileChooser.setFileFilter(imageFilter);
+
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            String fileName = file.getName();
+            textField.setText(fileName);
+
+            prefs.put("LAST_IMAGE_DIR", file.getParent());
+        }
+    }
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -1378,37 +1403,11 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_AddProductConfirmButtonActionPerformed
 
     private void ProductChooseImageFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ProductChooseImageFileButtonActionPerformed
-        JFileChooser fileChooser = new JFileChooser();
-
-        FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
-            "Image files (JPG, JPEG, PNG, GIF, BMP)", 
-            "jpg", "jpeg", "png", "gif", "bmp"
-        );
-
-        fileChooser.setFileFilter(imageFilter);
-
-        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-            String fileName = extractFileName(file.getAbsolutePath());
-            ProductChooseImagePathTextField.setText(fileName); // Set only the filename
-        }
+        selectImageFile(ProductChooseImagePathTextField);
     }//GEN-LAST:event_ProductChooseImageFileButtonActionPerformed
 
     private void ProductChooseImagePathTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ProductChooseImagePathTextFieldActionPerformed
-        JFileChooser fileChooser = new JFileChooser();
-
-        FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
-            "Image files (JPG, JPEG, PNG, GIF, BMP)", 
-            "jpg", "jpeg", "png", "gif", "bmp"
-        );
-
-        fileChooser.setFileFilter(imageFilter);
-
-        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-            String fileName = extractFileName(file.getAbsolutePath());
-            ProductChooseImagePathTextField.setText(fileName);
-        }
+        // TODO add your handling code here:
     }//GEN-LAST:event_ProductChooseImagePathTextFieldActionPerformed
 
     private void ProductNameUpdateTextBarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ProductNameUpdateTextBarActionPerformed
@@ -1456,37 +1455,11 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_ProductAddItemConfirmUpdateButtonActionPerformed
 
     private void ProductChooseImagePathUpdateTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ProductChooseImagePathUpdateTextFieldActionPerformed
-        JFileChooser fileChooser = new JFileChooser();
-
-        FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
-            "Image files (JPG, JPEG, PNG, GIF, BMP)", 
-            "jpg", "jpeg", "png", "gif", "bmp"
-        );
-
-        fileChooser.setFileFilter(imageFilter);
-
-        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-            String fileName = extractFileName(file.getAbsolutePath());
-            ProductChooseImagePathUpdateTextField.setText(fileName); // Set only the filename
-        }
+        // TODO add your handling code here:
     }//GEN-LAST:event_ProductChooseImagePathUpdateTextFieldActionPerformed
 
     private void ProductChooseImageFileUpdateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ProductChooseImageFileUpdateButtonActionPerformed
-        JFileChooser fileChooser = new JFileChooser();
-
-        FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
-            "Image files (JPG, JPEG, PNG, GIF, BMP)", 
-            "jpg", "jpeg", "png", "gif", "bmp"
-        );
-
-        fileChooser.setFileFilter(imageFilter);
-
-        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-            String fileName = extractFileName(file.getAbsolutePath());
-            ProductChooseImagePathUpdateTextField.setText(fileName); // Set only the filename
-        }
+        selectImageFile(ProductChooseImagePathUpdateTextField);
     }//GEN-LAST:event_ProductChooseImageFileUpdateButtonActionPerformed
 
     private void AddProductButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddProductButtonActionPerformed
