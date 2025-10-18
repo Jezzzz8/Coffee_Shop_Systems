@@ -747,10 +747,25 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
     
     private void selectImageFile(TextField textField) {
         Preferences prefs = Preferences.userNodeForPackage(getClass());
-        String lastDir = prefs.get("LAST_IMAGE_DIR", System.getProperty("user.home"));
+
+        // Try to set default directory to product_images folder
+        File productImagesDir = new File("product_images");
+        String lastDir = prefs.get("LAST_IMAGE_DIR", 
+            productImagesDir.exists() ? productImagesDir.getAbsolutePath() : System.getProperty("user.home"));
 
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new File(lastDir));
+
+        // Only show message if not already in product_images folder
+        if (!lastDir.contains("product_images")) {
+            JOptionPane.showMessageDialog(this,
+                "For images to display in the kiosk, please:\n" +
+                "1. Place images in the 'product_images' folder\n" +
+                "2. Select images from that location\n" +
+                "3. Ensure images are properly formatted (JPG, PNG, etc.)",
+                "Kiosk Image Requirements",
+                JOptionPane.INFORMATION_MESSAGE);
+        }
 
         FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
             "Image files (JPG, JPEG, PNG, GIF, BMP)", 
@@ -765,6 +780,16 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             textField.setText(fileName);
 
             prefs.put("LAST_IMAGE_DIR", file.getParent());
+
+            // Additional warning if file is not in product_images folder
+            if (!file.getParent().contains("product_images")) {
+                JOptionPane.showMessageDialog(this,
+                    "Warning: This image is not in the 'product_images' folder.\n" +
+                    "It may not display correctly in the kiosk.\n" +
+                    "Please move the image to the 'product_images' folder.",
+                    "Image Location Warning",
+                    JOptionPane.WARNING_MESSAGE);
+            }
         }
     }
     
