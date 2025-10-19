@@ -255,21 +255,6 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         }
     }
     
-    private String extractFileName(String fullPath) {
-        if (fullPath == null || fullPath.trim().isEmpty()) {
-            return "default.png";
-        }
-
-        String fileName = fullPath;
-        int lastSeparator = Math.max(fullPath.lastIndexOf('\\'), fullPath.lastIndexOf('/'));
-
-        if (lastSeparator != -1 && lastSeparator < fullPath.length() - 1) {
-            fileName = fullPath.substring(lastSeparator + 1);
-        }
-
-        return fileName;
-    }
-    
     private int getCurrentProductId() {
         if (currentProductIdForUpdate == 0) {
             JOptionPane.showMessageDialog(this, "Please select a product to update first!");
@@ -415,17 +400,6 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
                 e.printStackTrace();
             }
         });
-    }
-    
-    private void setupTableRenderersAndEditors() {
-        if (ProductListTable.getColumnModel().getColumnCount() > 6) {
-            
-            ProductListTable.getColumnModel().getColumn(5).setCellRenderer(new BooleanRenderer());
-            ProductListTable.getColumnModel().getColumn(5).setCellEditor(new BooleanEditor());
-
-            ProductListTable.getColumnModel().getColumn(6).setCellRenderer(new ButtonRenderer());
-            ProductListTable.getColumnModel().getColumn(6).setCellEditor(new ButtonEditor());
-        }
     }
     
     class ButtonEditor extends AbstractCellEditor implements TableCellEditor {
