@@ -3,27 +3,16 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/gui/KioskFrame.java</file>
-            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/gui/CRUDSystemFrame.java</file>
-            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/services/ProductManager.java</file>
-            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/objects/Product.java</file>
             <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/main/KioskSystemMain.java</file>
-            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/gui/LoginFrame.java</file>
-            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/objects/Login.java</file>
-            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/database/DatabaseConnection.java</file>
-            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/services/UserAuthentication.java</file>
-            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/services/QueueManager.java</file>
-            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/services/PrintService.java</file>
-            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/services/PaymentManager.java</file>
-            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/services/OrderSlipManager.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/gui/KioskFrame.java</file>
             <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/services/OrderManager.java</file>
-            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/services/ConsolePrintService.java</file>
-            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/objects/Payment.java</file>
-            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/objects/OrderSlip.java</file>
-            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/objects/OrderItem.java</file>
             <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/objects/Order.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/services/OrderSlipManager.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/services/ConsolePrintService.java</file>
             <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/gui/PrintPreviewDialog.java</file>
-            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/gui/LanguageContent.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/gui/LoginFrame.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/objects/OrderSlip.java</file>
+            <file>file:/C:/Users/Jess/OneDrive/Desktop/Git/Coffee_Shop_Systems/KioskSystem/src/services/PrintService.java</file>
         </group>
     </open-files>
 </project-private>

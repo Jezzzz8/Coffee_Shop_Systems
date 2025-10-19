@@ -37,6 +37,30 @@ public class ProductManager {
         return products;
     }
     
+    public static Product getProductByName(String productName) {
+        Connection conn = DatabaseConnection.getConnection();
+        String sql = "SELECT * FROM product_tb WHERE LOWER(product_name) = LOWER(?)";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, productName);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return new Product(
+                    rs.getInt("product_id"),
+                    rs.getString("product_name"),
+                    rs.getDouble("price"),
+                    rs.getString("description"),
+                    rs.getString("image_filename"),
+                    rs.getBoolean("is_available")
+                );
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting product by name: " + e.getMessage());
+        }
+        return null;
+    }
+    
     public static boolean addProduct(Product product) {
         Connection conn = DatabaseConnection.getConnection();
         String sql = "INSERT INTO product_tb (product_name, price, description, image_filename, is_available) VALUES (?, ?, ?, ?, ?)";

@@ -165,7 +165,7 @@ public class LoginFrame extends javax.swing.JFrame {
     }
     
     private void redirectToCrud() {
-        System.out.println("Redirecting to Inventory...");
+        System.out.println("Redirecting to Product List...");
         CRUDSystemFrame crud = new CRUDSystemFrame();
         crud.setVisible(true);
         this.dispose();

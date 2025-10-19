@@ -1391,10 +1391,10 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
 
     private void AddProductConfirmButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddProductConfirmButtonActionPerformed
         try {
-            String name = ProductNameTextBar.getText();
+            String name = ProductNameTextBar.getText().trim();
             double price = Double.parseDouble(ProductPriceText.getText());
-            String description = ProductDescriptionTextField.getText();
-            String imagePath = ProductChooseImagePathTextField.getText();
+            String description = ProductDescriptionTextField.getText().trim();
+            String imagePath = ProductChooseImagePathTextField.getText().trim();
 
             if (name.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please enter a product name!");
@@ -1410,18 +1410,27 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(this, "Please enter a valid price (positive number)!");
                 return;
             }
+            
+            Product existingProduct = ProductManager.getProductByName(name);
+            if (existingProduct != null) {
+                JOptionPane.showMessageDialog(this, 
+                    "Product name '" + name + "' already exists!\nPlease choose a different product name.",
+                    "Duplicate Product Name",
+                    JOptionPane.WARNING_MESSAGE);
+                return;
+            }
 
-            Product product = new Product(0, name, price, description, imagePath);
+            Product product = new Product(0, name, price, description, imagePath, true);
 
             if (ProductManager.addProduct(product)) {
                 JOptionPane.showMessageDialog(this, "Product added successfully!");
                 clearAddItemForm();
                 initializeData();
             } else {
-                JOptionPane.showMessageDialog(this, "Failed to add product! Product ID may already exist.");
+                JOptionPane.showMessageDialog(this, "Failed to add product!");
             }
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Please enter valid ID and price!");
+            JOptionPane.showMessageDialog(this, "Please enter valid price!");
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "An error occurred: " + e.getMessage());
         }
