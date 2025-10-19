@@ -213,7 +213,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             String name = ProductNameTextBar.getText().trim();
             double price = Double.parseDouble(ProductPriceText.getText());
             String description = ProductDescriptionTextField.getText().trim();
-            String imagePath = ProductChooseImagePathTextField.getText().trim();
+            String imageFilename = ProductChooseImagePathTextField.getText().trim();
 
             if (name.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please enter a product name!");
@@ -230,7 +230,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
                 return;
             }
             
-            if (imagePath.isEmpty()) {
+            if (imageFilename.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please enter a product image!");
                 return;
             }
@@ -244,7 +244,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
                 return;
             }
 
-            Product product = new Product(0, name, price, description, imagePath, true);
+            Product product = new Product(0, name, price, description, imageFilename, true);
 
             if (ProductManager.addProduct(product)) {
                 JOptionPane.showMessageDialog(this, "Product added successfully!");
@@ -334,8 +334,32 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
                 return;
             }
             
+            if (name.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter a product name!");
+                return;
+            }
+
+            if (description.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter a description!");
+                return;
+            }
+
+            if (price <= 0) {
+                JOptionPane.showMessageDialog(this, "Please enter a valid price (positive number)!");
+                return;
+            }
+            
             if (imageFilename.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please enter a product image!");
+                return;
+            }
+            
+            Product existingProduct = ProductManager.getProductByName(name);
+            if (existingProduct != null) {
+                JOptionPane.showMessageDialog(this, 
+                    "Product name '" + name + "' already exists!\nPlease choose a different product name.",
+                    "Duplicate Product Name",
+                    JOptionPane.WARNING_MESSAGE);
                 return;
             }
             
