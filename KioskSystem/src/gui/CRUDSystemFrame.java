@@ -230,6 +230,11 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
                 return;
             }
             
+            if (imagePath.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter a product image!");
+                return;
+            }
+            
             Product existingProduct = ProductManager.getProductByName(name);
             if (existingProduct != null) {
                 JOptionPane.showMessageDialog(this, 
@@ -255,6 +260,21 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         }
     }
     
+    private String extractFileName(String fullPath) {
+        if (fullPath == null || fullPath.trim().isEmpty()) {
+            return "default.png";
+        }
+
+        String fileName = fullPath;
+        int lastSeparator = Math.max(fullPath.lastIndexOf('\\'), fullPath.lastIndexOf('/'));
+
+        if (lastSeparator != -1 && lastSeparator < fullPath.length() - 1) {
+            fileName = fullPath.substring(lastSeparator + 1);
+        }
+
+        return fileName;
+    }
+    
     private int getCurrentProductId() {
         if (currentProductIdForUpdate == 0) {
             JOptionPane.showMessageDialog(this, "Please select a product to update first!");
@@ -278,7 +298,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
                 if (imagePath != null && !imagePath.trim().isEmpty()) {
                     ProductChooseImagePathUpdateTextField.setText(imagePath);
                 } else {
-                    ProductChooseImagePathUpdateTextField.setText("\\ui\\images\\product_images\\default.png");
+                    ProductChooseImagePathUpdateTextField.setText("default.png");
                 }
 
                 for (int i = 0; i < MainTabbedPane.getTabCount(); i++) {
@@ -306,15 +326,19 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             String name = ProductNameUpdateTextBar.getText();
             double price = Double.parseDouble(ProductPriceUpdateText.getText());
             String description = ProductDescriptionUpdateTextField.getText();
-            String imageFilename = ProductChooseImagePathUpdateTextField.getText().trim();
+            String imageFilename = ProductChooseImagePathUpdateTextField.getText();
 
             int productId = getCurrentProductId();
-            if (productId == 0) return;
-
-            if (imageFilename.isEmpty()) {
-                imageFilename = "default.png";
+            if (productId == 0) {
+                JOptionPane.showMessageDialog(this, "Please select a product to update first!");
+                return;
             }
-
+            
+            if (imageFilename.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter a product image!");
+                return;
+            }
+            
             Product product = new Product(productId, name, price, description, imageFilename);
 
             if (ProductManager.updateProduct(product)) {
@@ -322,8 +346,15 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
                 
                 currentProductIdForUpdate = 0;
                 initializeData();
+                MainTabbedPane.setSelectedIndex(0);
+                resetSidebarButtons();
+                setButtonSelected(ProductListButton, true);
+                
             } else {
                 JOptionPane.showMessageDialog(this, "Failed to update product!");
+                MainTabbedPane.setSelectedIndex(0);
+                resetSidebarButtons();
+                setButtonSelected(ProductListButton, true);
             }
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Please enter valid data!");
@@ -738,16 +769,14 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
     
     private void selectImageFile(TextField textField) {
         Preferences prefs = Preferences.userNodeForPackage(getClass());
-
-        // Try to set default directory to product_images folder
+        
         File productImagesDir = new File("product_images");
         String lastDir = prefs.get("LAST_IMAGE_DIR", 
             productImagesDir.exists() ? productImagesDir.getAbsolutePath() : System.getProperty("user.home"));
 
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new File(lastDir));
-
-        // Only show message if not already in product_images folder
+        
         if (!lastDir.contains("product_images")) {
             JOptionPane.showMessageDialog(this,
                 "For images to display in the kiosk, please:\n" +
@@ -771,8 +800,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             textField.setText(fileName);
 
             prefs.put("LAST_IMAGE_DIR", file.getParent());
-
-            // Additional warning if file is not in product_images folder
+            
             if (!file.getParent().contains("product_images")) {
                 JOptionPane.showMessageDialog(this,
                     "Warning: This image is not in the 'product_images' folder.\n" +
@@ -1154,6 +1182,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
 
         ProductChooseImagePathTextField.setBackground(new java.awt.Color(249, 241, 240));
         ProductChooseImagePathTextField.setCursor(new java.awt.Cursor(java.awt.Cursor.TEXT_CURSOR));
+        ProductChooseImagePathTextField.setEditable(false);
         ProductChooseImagePathTextField.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         ProductChooseImagePathTextField.setForeground(new java.awt.Color(31, 40, 35));
         ProductChooseImagePathTextField.setText("default.png");
@@ -1287,6 +1316,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         UpdateProductPanelContent.add(ProductChooseImageUpdateLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 170, 360, 20));
 
         ProductChooseImagePathUpdateTextField.setBackground(new java.awt.Color(249, 241, 240));
+        ProductChooseImagePathUpdateTextField.setEditable(false);
         ProductChooseImagePathUpdateTextField.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         ProductChooseImagePathUpdateTextField.setForeground(new java.awt.Color(31, 40, 35));
         ProductChooseImagePathUpdateTextField.setText("default.png");
@@ -1401,39 +1431,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_ProductPriceUpdateTextActionPerformed
 
     private void ProductAddItemConfirmUpdateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ProductAddItemConfirmUpdateButtonActionPerformed
-        try {
-            String name = ProductNameUpdateTextBar.getText();
-            double price = Double.parseDouble(ProductPriceUpdateText.getText());
-            String description = ProductDescriptionUpdateTextField.getText();
-            String imagePath = ProductChooseImagePathUpdateTextField.getText();
-
-            int productId = getCurrentProductId();
-            if (productId == 0) {
-                JOptionPane.showMessageDialog(this, "Please select a product to update first!");
-                return;
-            }
-
-            Product product = new Product(productId, name, price, description, imagePath);
-
-            if (ProductManager.updateProduct(product)) {
-                JOptionPane.showMessageDialog(this, "Product updated successfully!");
-                
-                currentProductIdForUpdate = 0;
-                initializeData();
-                MainTabbedPane.setSelectedIndex(0);
-                resetSidebarButtons();
-                setButtonSelected(ProductListButton, true);
-                
-            } else {
-                JOptionPane.showMessageDialog(this, "Failed to update product!");
-                MainTabbedPane.setSelectedIndex(0);
-                resetSidebarButtons();
-                setButtonSelected(ProductListButton, true);
-            }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Please enter valid data!");
-        }
-        
+        updateProduct();
     }//GEN-LAST:event_ProductAddItemConfirmUpdateButtonActionPerformed
 
     private void ProductChooseImagePathUpdateTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ProductChooseImagePathUpdateTextFieldActionPerformed
