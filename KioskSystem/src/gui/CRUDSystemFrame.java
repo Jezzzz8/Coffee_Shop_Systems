@@ -210,21 +210,36 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
     
     private void addNewProduct() {
         try {
-            String name = ProductNameTextBar.getText();
+            String name = ProductNameTextBar.getText().trim();
             double price = Double.parseDouble(ProductPriceText.getText());
-            String description = ProductDescriptionTextField.getText();
-            String imageFilename = ProductChooseImagePathTextField.getText().trim();
+            String description = ProductDescriptionTextField.getText().trim();
+            String imagePath = ProductChooseImagePathTextField.getText().trim();
 
-            if (name.isEmpty() || description.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please fill in all required fields!");
+            if (name.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter a product name!");
                 return;
             }
 
-            if (imageFilename.isEmpty()) {
-                imageFilename = "default.png";
+            if (description.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter a description!");
+                return;
             }
 
-            Product product = new Product(0, name, price, description, imageFilename);
+            if (price <= 0) {
+                JOptionPane.showMessageDialog(this, "Please enter a valid price (positive number)!");
+                return;
+            }
+            
+            Product existingProduct = ProductManager.getProductByName(name);
+            if (existingProduct != null) {
+                JOptionPane.showMessageDialog(this, 
+                    "Product name '" + name + "' already exists!\nPlease choose a different product name.",
+                    "Duplicate Product Name",
+                    JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            Product product = new Product(0, name, price, description, imagePath, true);
 
             if (ProductManager.addProduct(product)) {
                 JOptionPane.showMessageDialog(this, "Product added successfully!");
@@ -235,6 +250,8 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             }
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Please enter valid price!");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "An error occurred: " + e.getMessage());
         }
     }
     
@@ -332,7 +349,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         ProductNameTextBar.setText("");
         ProductPriceText.setText("");
         ProductDescriptionTextField.setText("");
-        ProductChooseImagePathTextField.setText("");
+        ProductChooseImagePathTextField.setText("default.png");
     }
     
     class ButtonRenderer extends JPanel implements TableCellRenderer {
@@ -1390,50 +1407,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_ProductPriceTextActionPerformed
 
     private void AddProductConfirmButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddProductConfirmButtonActionPerformed
-        try {
-            String name = ProductNameTextBar.getText().trim();
-            double price = Double.parseDouble(ProductPriceText.getText());
-            String description = ProductDescriptionTextField.getText().trim();
-            String imagePath = ProductChooseImagePathTextField.getText().trim();
-
-            if (name.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please enter a product name!");
-                return;
-            }
-
-            if (description.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please enter a description!");
-                return;
-            }
-
-            if (price <= 0) {
-                JOptionPane.showMessageDialog(this, "Please enter a valid price (positive number)!");
-                return;
-            }
-            
-            Product existingProduct = ProductManager.getProductByName(name);
-            if (existingProduct != null) {
-                JOptionPane.showMessageDialog(this, 
-                    "Product name '" + name + "' already exists!\nPlease choose a different product name.",
-                    "Duplicate Product Name",
-                    JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            Product product = new Product(0, name, price, description, imagePath, true);
-
-            if (ProductManager.addProduct(product)) {
-                JOptionPane.showMessageDialog(this, "Product added successfully!");
-                clearAddItemForm();
-                initializeData();
-            } else {
-                JOptionPane.showMessageDialog(this, "Failed to add product!");
-            }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Please enter valid price!");
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "An error occurred: " + e.getMessage());
-        }
+        addNewProduct();
     }//GEN-LAST:event_AddProductConfirmButtonActionPerformed
 
     private void ProductChooseImageFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ProductChooseImageFileButtonActionPerformed
