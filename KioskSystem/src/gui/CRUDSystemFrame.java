@@ -1019,7 +1019,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         UpdateIProductPanelLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Inventory");
+        setTitle("Crud");
         setBackground(new java.awt.Color(201, 177, 158));
         setLocationByPlatform(true);
         setMaximizedBounds(new java.awt.Rectangle(0, 0, 1000, 600));
