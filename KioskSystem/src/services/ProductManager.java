@@ -15,6 +15,32 @@ public class ProductManager {
     public static List<Product> getAllProducts() {
         List<Product> products = new ArrayList<>();
         Connection conn = DatabaseConnection.getConnection();
+        String sql = "SELECT * FROM product_tb WHERE archived = 0 ORDER BY product_name";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                Product product = new Product(
+                    rs.getInt("product_id"),
+                    rs.getString("product_name"),
+                    rs.getDouble("price"),
+                    rs.getString("description"),
+                    rs.getString("image_filename"),
+                    rs.getBoolean("is_available"),
+                    rs.getBoolean("archived")
+                );
+                products.add(product);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting products: " + e.getMessage());
+        }
+        return products;
+    }
+    
+    public static List<Product> getAllProductsIncludingArchived() {
+        List<Product> products = new ArrayList<>();
+        Connection conn = DatabaseConnection.getConnection();
         String sql = "SELECT * FROM product_tb ORDER BY product_name";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -27,19 +53,20 @@ public class ProductManager {
                     rs.getDouble("price"),
                     rs.getString("description"),
                     rs.getString("image_filename"),
-                    rs.getBoolean("is_available")
+                    rs.getBoolean("is_available"),
+                    rs.getBoolean("archived")
                 );
                 products.add(product);
             }
         } catch (SQLException e) {
-            System.err.println("Error getting products: " + e.getMessage());
+            System.err.println("Error getting all products including archived: " + e.getMessage());
         }
         return products;
     }
     
     public static Product getProductByName(String productName) {
         Connection conn = DatabaseConnection.getConnection();
-        String sql = "SELECT * FROM product_tb WHERE LOWER(product_name) = LOWER(?)";
+        String sql = "SELECT * FROM product_tb WHERE LOWER(product_name) = LOWER(?) AND archived = 0";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, productName);
@@ -52,7 +79,8 @@ public class ProductManager {
                     rs.getDouble("price"),
                     rs.getString("description"),
                     rs.getString("image_filename"),
-                    rs.getBoolean("is_available")
+                    rs.getBoolean("is_available"),
+                    rs.getBoolean("archived")
                 );
             }
         } catch (SQLException e) {
@@ -63,7 +91,7 @@ public class ProductManager {
     
     public static boolean addProduct(Product product) {
         Connection conn = DatabaseConnection.getConnection();
-        String sql = "INSERT INTO product_tb (product_name, price, description, image_filename, is_available) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO product_tb (product_name, price, description, image_filename, is_available, archived) VALUES (?, ?, ?, ?, ?, ?)";
         
         try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, product.getName());
@@ -71,6 +99,7 @@ public class ProductManager {
             pstmt.setString(3, product.getDescription());
             pstmt.setString(4, product.getImageFilename());
             pstmt.setBoolean(5, product.isAvailable());
+            pstmt.setBoolean(6, product.isArchived());
             
             int rowsAffected = pstmt.executeUpdate();
             
@@ -90,7 +119,7 @@ public class ProductManager {
     
     public static boolean updateProduct(Product product) {
         Connection conn = DatabaseConnection.getConnection();
-        String sql = "UPDATE product_tb SET product_name = ?, price = ?, description = ?, image_filename = ?, is_available = ? WHERE product_id = ?";
+        String sql = "UPDATE product_tb SET product_name = ?, price = ?, description = ?, image_filename = ?, is_available = ?, archived = ? WHERE product_id = ?";
         
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, product.getName());
@@ -98,7 +127,8 @@ public class ProductManager {
             pstmt.setString(3, product.getDescription());
             pstmt.setString(4, product.getImageFilename());
             pstmt.setBoolean(5, product.isAvailable());
-            pstmt.setInt(6, product.getId());
+            pstmt.setBoolean(6, product.isArchived());
+            pstmt.setInt(7, product.getId());
             
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
@@ -110,19 +140,7 @@ public class ProductManager {
     }
     
     public static boolean deleteProduct(int productId) {
-        Connection conn = DatabaseConnection.getConnection();
-        String sql = "DELETE FROM product_tb WHERE product_id = ?";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, productId);
-
-            int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
-        } catch (SQLException e) {
-            System.err.println("Error deleting product: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return false;
+        return archiveProduct(productId);
     }
     
     public static boolean hardDeleteProduct(int productId) {
@@ -146,11 +164,41 @@ public class ProductManager {
         return false;
     }
     
+    public static boolean archiveProduct(int productId) {
+        Connection conn = DatabaseConnection.getConnection();
+        String sql = "UPDATE product_tb SET archived = 1 WHERE product_id = ?";
+        
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, productId);
+            
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            System.err.println("Error archiving product: " + e.getMessage());
+        }
+        return false;
+    }
+    
+    public static boolean restoreProduct(int productId) {
+        Connection conn = DatabaseConnection.getConnection();
+        String sql = "UPDATE product_tb SET archived = 0 WHERE product_id = ?";
+        
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, productId);
+            
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            System.err.println("Error restoring product: " + e.getMessage());
+        }
+        return false;
+    }
+    
     public static List<Product> getAllAvailableProducts() {
         List<Product> products = new ArrayList<>();
         Connection conn = DatabaseConnection.getConnection();
         String sql = "SELECT product_id, product_name, price, description, " +
-             "image_filename, is_available FROM product_tb WHERE is_available = 1";
+             "image_filename, is_available, archived FROM product_tb WHERE is_available = 1 AND archived = 0";
         
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             ResultSet rs = pstmt.executeQuery();
@@ -162,7 +210,8 @@ public class ProductManager {
                     rs.getDouble("price"),
                     rs.getString("description"),
                     rs.getString("image_filename"),
-                    true 
+                    true,
+                    false
                 );
                 products.add(product);
             }
@@ -177,12 +226,13 @@ public class ProductManager {
 
         try {
             String sql = "SELECT p.product_id, p.product_name, p.price, p.description, " +
-                        "p.image_filename, p.is_available, " +
+                        "p.image_filename, p.is_available, p.archived, " +
                         "COALESCE(SUM(oi.quantity), 0) AS total_sold " +
                         "FROM product_tb AS p " +
                         "LEFT JOIN order_item_tb oi ON p.product_id = oi.product_id " +
+                        "WHERE p.archived = 0 " +
                         "GROUP BY p.product_id, p.product_name, p.price, p.description, " +
-                        "p.image_filename, p.is_available " +
+                        "p.image_filename, p.is_available, p.archived " +
                         "ORDER BY total_sold DESC, p.product_name " +
                         "LIMIT ?";
 
@@ -198,7 +248,8 @@ public class ProductManager {
                     rs.getDouble("price"),
                     rs.getString("description"),
                     rs.getString("image_filename"),
-                    rs.getBoolean("is_available")
+                    rs.getBoolean("is_available"),
+                    rs.getBoolean("archived")
                 );
                 bestProducts.add(product);
             }
@@ -229,7 +280,8 @@ public class ProductManager {
                     rs.getDouble("price"),
                     rs.getString("description"),
                     rs.getString("image_filename"),
-                    rs.getBoolean("is_available")
+                    rs.getBoolean("is_available"),
+                    rs.getBoolean("archived")
                 );
             }
         } catch (SQLException e) {
@@ -240,7 +292,7 @@ public class ProductManager {
     
     public static boolean updateProductAvailability(int productId, boolean isAvailable) {
         Connection conn = DatabaseConnection.getConnection();
-        String sql = "UPDATE product_tb SET is_available = ? WHERE product_id = ?";
+        String sql = "UPDATE product_tb SET is_available = ? WHERE product_id = ? AND archived = 0";
         
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setBoolean(1, isAvailable);
@@ -256,7 +308,7 @@ public class ProductManager {
     
     public static int getTotalProducts() {
         Connection conn = DatabaseConnection.getConnection();
-        String sql = "SELECT COUNT(*) as count FROM product_tb";
+        String sql = "SELECT COUNT(*) as count FROM product_tb WHERE archived = 0";
         
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             ResultSet rs = pstmt.executeQuery();
@@ -271,7 +323,7 @@ public class ProductManager {
     
     public static int getAvailableProductsCount() {
         Connection conn = DatabaseConnection.getConnection();
-        String sql = "SELECT COUNT(*) as count FROM product_tb WHERE is_available = 1";
+        String sql = "SELECT COUNT(*) as count FROM product_tb WHERE is_available = 1 AND archived = 0";
         
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             ResultSet rs = pstmt.executeQuery();
@@ -280,6 +332,21 @@ public class ProductManager {
             }
         } catch (SQLException e) {
             System.err.println("Error getting available products count: " + e.getMessage());
+        }
+        return 0;
+    }
+    
+    public static int getArchivedProductsCount() {
+        Connection conn = DatabaseConnection.getConnection();
+        String sql = "SELECT COUNT(*) as count FROM product_tb WHERE archived = 1";
+        
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("count");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting archived products count: " + e.getMessage());
         }
         return 0;
     }
@@ -300,5 +367,31 @@ public class ProductManager {
             e.printStackTrace();
         }
         return false;
+    }
+    
+    public static List<Product> getArchivedProducts() {
+        List<Product> products = new ArrayList<>();
+        Connection conn = DatabaseConnection.getConnection();
+        String sql = "SELECT * FROM product_tb WHERE archived = 1 ORDER BY product_name";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                Product product = new Product(
+                    rs.getInt("product_id"),
+                    rs.getString("product_name"),
+                    rs.getDouble("price"),
+                    rs.getString("description"),
+                    rs.getString("image_filename"),
+                    rs.getBoolean("is_available"),
+                    true
+                );
+                products.add(product);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting archived products: " + e.getMessage());
+        }
+        return products;
     }
 }

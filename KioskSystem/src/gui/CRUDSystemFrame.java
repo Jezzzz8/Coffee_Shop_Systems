@@ -72,13 +72,14 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
     
     private void initializeFilterOptions() {
         FilterChoice.removeAll();
-        
+
         FilterChoice.add("All Products");
         FilterChoice.add("Available Only");
-        FilterChoice.add("Archived Only");
-        
+        FilterChoice.add("Unavailable Only");
+        FilterChoice.add("Archived Products");
+
         FilterChoice.setFocusable(false);
-        
+
         FilterChoice.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 filterInventoryTable();
@@ -99,36 +100,44 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         String searchTerm = ProductListSearchBar.getText().trim().toLowerCase();
         String filterChoice = FilterChoice.getSelectedItem();
         DefaultTableModel model = (DefaultTableModel) ProductListTable.getModel();
-        
+
         List<Product> filteredProducts = new ArrayList<>();
 
         for (Product product : currentProducts) {
-            
+
             boolean matchesSearch = searchTerm.isEmpty() ||
                 product.getName().toLowerCase().contains(searchTerm) ||
                 product.getDescription().toLowerCase().contains(searchTerm) ||
                 String.valueOf(product.getId()).contains(searchTerm) ||
                 String.valueOf(product.getPrice()).contains(searchTerm) ||
-                (product.isAvailable() ? "yes" : "no").contains(searchTerm);
+                (product.isAvailable() ? "yes" : "no").contains(searchTerm) ||
+                (product.isArchived() ? "archived" : "").contains(searchTerm);
 
             if (!matchesSearch) {
                 continue;
             }
-            
+
             switch (filterChoice) {
                 case "Available Only":
-                    if (product.isAvailable()) {
+                    if (product.isAvailable() && !product.isArchived()) {
                         filteredProducts.add(product);
                     }
                     break;
-                case "Archived Only":
-                    if (!product.isAvailable()) {
+                case "Unavailable Only":
+                    if (!product.isAvailable() && !product.isArchived()) {
+                        filteredProducts.add(product);
+                    }
+                    break;
+                case "Archived Products":
+                    if (product.isArchived()) {
                         filteredProducts.add(product);
                     }
                     break;
                 case "All Products":
                 default:
-                    filteredProducts.add(product);
+                    if (!product.isArchived()) {
+                        filteredProducts.add(product);
+                    }
                     break;
             }
         }
@@ -145,16 +154,19 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
                 product.getDescription(),
                 product.getPrice(),
                 product.isAvailable(),
-                product.getId()
+                product.getId(),
+                product.isArchived()
             };
             model.addRow(row);
         }
 
-        if (ProductListTable.getColumnModel().getColumnCount() > 6) {
+        if (ProductListTable.getColumnModel().getColumnCount() > 7) {
             ProductListTable.getColumnModel().getColumn(5).setCellRenderer(new BooleanRenderer());
             ProductListTable.getColumnModel().getColumn(5).setCellEditor(new BooleanEditor());
             ProductListTable.getColumnModel().getColumn(6).setCellRenderer(new ButtonRenderer());
             ProductListTable.getColumnModel().getColumn(6).setCellEditor(new ButtonEditor());
+            ProductListTable.getColumnModel().getColumn(7).setCellRenderer(new BooleanRenderer());
+            ProductListTable.getColumnModel().getColumn(7).setCellEditor(new BooleanEditor());
         }
     }
     
@@ -393,7 +405,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
     }
     
     class ButtonRenderer extends JPanel implements TableCellRenderer {
-        private JButton updateBtn, deleteBtn;
+        private JButton updateBtn, deleteBtn, retrieveBtn;
 
         public ButtonRenderer() {
             setLayout(new FlowLayout(FlowLayout.CENTER, 5, 2));
@@ -401,6 +413,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
 
             updateBtn = new JButton("Update");
             deleteBtn = new JButton("Delete");
+            retrieveBtn = new JButton("Retrieve");
 
             Dimension buttonSize = new Dimension(90, 30);
             updateBtn.setPreferredSize(buttonSize);
@@ -411,43 +424,69 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             deleteBtn.setMaximumSize(buttonSize);
             deleteBtn.setMinimumSize(buttonSize);
 
+            retrieveBtn.setPreferredSize(new Dimension(100, 30));
+            retrieveBtn.setMaximumSize(new Dimension(100, 30));
+            retrieveBtn.setMinimumSize(new Dimension(100, 30));
+            
+            retrieveBtn.setBackground(new Color(52, 168, 83));
+            retrieveBtn.setForeground(Color.WHITE);
+
             add(updateBtn);
             add(deleteBtn);
+            add(retrieveBtn);
         }
 
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
+            boolean isArchived = false;
+            try {
+                DefaultTableModel model = (DefaultTableModel) table.getModel();
+                if (row < model.getRowCount() && model.getColumnCount() > 7) {
+                    isArchived = (Boolean) model.getValueAt(row, 7);
+                }
+            } catch (Exception e) {
+                isArchived = false;
+            }
+
             if (isSelected) {
                 setBackground(table.getSelectionBackground());
-                updateBtn.setBackground(new java.awt.Color(66,133,244));
-                deleteBtn.setBackground(new java.awt.Color(234,67,53));
-                
-                updateBtn.setForeground(new java.awt.Color(255, 255, 255));
-                deleteBtn.setForeground(new java.awt.Color(255, 255, 255));
+                updateBtn.setBackground(new Color(66,133,244));
+                deleteBtn.setBackground(new Color(234,67,53));
+                retrieveBtn.setBackground(new Color(52,168,83));
+
+                updateBtn.setForeground(Color.WHITE);
+                deleteBtn.setForeground(Color.WHITE);
+                retrieveBtn.setForeground(Color.WHITE);
             } else {
                 setBackground(table.getBackground());
-                updateBtn.setBackground(new java.awt.Color(66,133,244));
-                deleteBtn.setBackground(new java.awt.Color(234,67,53));
-                
-                updateBtn.setForeground(new java.awt.Color(255, 255, 255));
-                deleteBtn.setForeground(new java.awt.Color(255, 255, 255));
+                updateBtn.setBackground(new Color(66,133,244));
+                deleteBtn.setBackground(new Color(234,67,53));
+                retrieveBtn.setBackground(new Color(52,168,83));
+
+                updateBtn.setForeground(Color.WHITE);
+                deleteBtn.setForeground(Color.WHITE);
+                retrieveBtn.setForeground(Color.WHITE);
             }
+            
+            updateBtn.setVisible(!isArchived);
+            deleteBtn.setVisible(!isArchived);
+            retrieveBtn.setVisible(isArchived);
+
             return this;
         }
     }
     
     private void refreshInventoryTableSafely() {
-    
         if (ProductListTable.isEditing()) {
             ProductListTable.getCellEditor().cancelCellEditing();
         }
 
         SwingUtilities.invokeLater(() -> {
             try {
-
-                currentProducts = ProductManager.getAllProducts();
                 
+                currentProducts = ProductManager.getAllProductsIncludingArchived();
+
                 filterInventoryTable();
 
             } catch (Exception e) {
@@ -459,9 +498,10 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
     
     class ButtonEditor extends AbstractCellEditor implements TableCellEditor {
         private JPanel panel;
-        private JButton updateBtn, deleteBtn;
+        private JButton updateBtn, deleteBtn, retrieveBtn;
         private int currentProductId;
         private int currentRow;
+        private boolean isArchived;
 
         public ButtonEditor() {
             panel = new JPanel();
@@ -471,25 +511,30 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
 
             updateBtn = new JButton("Update");
             deleteBtn = new JButton("Delete");
+            retrieveBtn = new JButton("Retrieve");
 
             Dimension buttonSize = new Dimension(90, 30);
             updateBtn.setPreferredSize(buttonSize);
             updateBtn.setMaximumSize(buttonSize);
             updateBtn.setMinimumSize(buttonSize);
-            
 
             deleteBtn.setPreferredSize(buttonSize);
             deleteBtn.setMaximumSize(buttonSize);
             deleteBtn.setMinimumSize(buttonSize);
+
+            retrieveBtn.setPreferredSize(new Dimension(100, 30));
+            retrieveBtn.setMaximumSize(new Dimension(100, 30));
+            retrieveBtn.setMinimumSize(new Dimension(100, 30));
             
-            
+            retrieveBtn.setBackground(new Color(52, 168, 83));
+            retrieveBtn.setForeground(Color.WHITE);
+
             panel.add(updateBtn);
             panel.add(deleteBtn);
+            panel.add(retrieveBtn);
 
             updateBtn.addActionListener(e -> {
-                
                 fireEditingStopped();
-
                 SwingUtilities.invokeLater(() -> {
                     MainTabbedPane.setSelectedIndex(2);
                     resetSidebarButtons();
@@ -498,11 +543,16 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             });
 
             deleteBtn.addActionListener(e -> {
-                
                 fireEditingStopped();
-
                 SwingUtilities.invokeLater(() -> {
                     showDeleteConfirmationDialog(currentProductId);
+                });
+            });
+
+            retrieveBtn.addActionListener(e -> {
+                fireEditingStopped();
+                SwingUtilities.invokeLater(() -> {
+                    showRetrieveConfirmationDialog(currentProductId);
                 });
             });
         }
@@ -512,22 +562,39 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
                 boolean isSelected, int row, int column) {
             currentProductId = (Integer) value;
             currentRow = row;
+            
+            try {
+                DefaultTableModel model = (DefaultTableModel) table.getModel();
+                if (row < model.getRowCount() && model.getColumnCount() > 7) {
+                    isArchived = (Boolean) model.getValueAt(row, 7);
+                }
+            } catch (Exception e) {
+                isArchived = false;
+            }
 
             if (isSelected) {
                 panel.setBackground(table.getSelectionBackground());
-                updateBtn.setBackground(new java.awt.Color(66,133,244));
-                deleteBtn.setBackground(new java.awt.Color(234,67,53));
+                updateBtn.setBackground(new Color(66,133,244));
+                deleteBtn.setBackground(new Color(234,67,53));
+                retrieveBtn.setBackground(new Color(52,168,83));
 
-                updateBtn.setForeground(new java.awt.Color(255, 255, 255));
-                deleteBtn.setForeground(new java.awt.Color(255, 255, 255));
+                updateBtn.setForeground(Color.WHITE);
+                deleteBtn.setForeground(Color.WHITE);
+                retrieveBtn.setForeground(Color.WHITE);
             } else {
                 panel.setBackground(table.getBackground());
-                updateBtn.setBackground(new java.awt.Color(66,133,244));
-                deleteBtn.setBackground(new java.awt.Color(234,67,53));
+                updateBtn.setBackground(new Color(66,133,244));
+                deleteBtn.setBackground(new Color(234,67,53));
+                retrieveBtn.setBackground(new Color(52,168,83));
 
-                updateBtn.setForeground(new java.awt.Color(255, 255, 255));
-                deleteBtn.setForeground(new java.awt.Color(255, 255, 255));
+                updateBtn.setForeground(Color.WHITE);
+                deleteBtn.setForeground(Color.WHITE);
+                retrieveBtn.setForeground(Color.WHITE);
             }
+            
+            updateBtn.setVisible(!isArchived);
+            deleteBtn.setVisible(!isArchived);
+            retrieveBtn.setVisible(isArchived);
 
             return panel;
         }
@@ -537,6 +604,65 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             return currentProductId;
         }
 
+        private void showRetrieveConfirmationDialog(int productId) {
+            Product product = ProductManager.getProductById(productId);
+            if (product == null) {
+                JOptionPane.showMessageDialog(
+                    CRUDSystemFrame.this,
+                    "Product not found!",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+
+            String productName = product.getName();
+
+            int confirm = JOptionPane.showConfirmDialog(
+                CRUDSystemFrame.this,
+                "<html><b>Retrieve Product: " + productName + "</b><br><br>" +
+                "This will restore the product and make it available in the system.<br>" +
+                "The product will be visible in the kiosk and can be ordered again.</html>",
+                "Confirm Product Retrieval",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+            );
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                performRetrieveProduct(productId, productName);
+            }
+        }
+
+        private void performRetrieveProduct(int productId, String productName) {
+            try {
+                if (ProductManager.restoreProduct(productId)) {
+                    JOptionPane.showMessageDialog(
+                        CRUDSystemFrame.this, 
+                        "Product '" + productName + "' has been retrieved successfully!\n" +
+                        "It is now available in the system and visible in the kiosk.",
+                        "Product Retrieved",
+                        JOptionPane.INFORMATION_MESSAGE
+                    );
+                    refreshInventoryTableSafely();
+                } else {
+                    JOptionPane.showMessageDialog(
+                        CRUDSystemFrame.this, 
+                        "Failed to retrieve product '" + productName + "'!",
+                        "Retrieve Failed",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(
+                    CRUDSystemFrame.this, 
+                    "Error retrieving product: " + ex.getMessage(),
+                    "Retrieve Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
+                ex.printStackTrace();
+            }
+        }
+        
         private void showDeleteConfirmationDialog(int productId) {
             Product product = ProductManager.getProductById(productId);
             if (product == null) {
@@ -571,7 +697,6 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         }
 
         private void showDeleteOptionsDialog(int productId, String productName) {
-            
             Object[] options = {"Soft Delete", "Hard Delete", "Cancel"};
 
             int choice = JOptionPane.showOptionDialog(
@@ -590,26 +715,25 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             );
 
             switch (choice) {
-                case 0: // Soft Delete
+                case 0:
                     performSoftDeleteProduct(productId, productName);
                     break;
-                case 1: // Hard Delete
+                case 1:
                     performHardDeleteProduct(productId, productName);
                     break;
-                case 2: // Cancel
+                case 2:
                 default:
-                    // Do nothing, user cancelled
                     break;
             }
         }
 
         private void performSoftDeleteProduct(int productId, String productName) {
             try {
-                if (ProductManager.updateProductAvailability(productId, false)) {
+                if (ProductManager.archiveProduct(productId)) {
                     JOptionPane.showMessageDialog(
                         CRUDSystemFrame.this, 
                         "Product '" + productName + "' has been archived successfully!\n" +
-                        "It is now marked as unavailable for new orders.",
+                        "It is now hidden from the kiosk but can be retrieved later.",
                         "Product Archived",
                         JOptionPane.INFORMATION_MESSAGE
                     );
@@ -690,6 +814,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             }
         }
     }
+    
     class BooleanRenderer extends JPanel implements TableCellRenderer {
         private JCheckBox checkBox;
 
@@ -908,7 +1033,6 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         LogoutButton.setBackground(new java.awt.Color(249, 241, 240));
-        LogoutButton.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         LogoutButton.setForeground(new java.awt.Color(31, 40, 35));
         LogoutButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/icons/logout.png"))); // NOI18N
         LogoutButton.setText("LOGOUT");
@@ -917,7 +1041,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         LogoutButton.setFocusable(false);
         LogoutButton.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         LogoutButton.setIconTextGap(10);
-        LogoutButton.setPreferredSize(new java.awt.Dimension(200, 40));
+        LogoutButton.setPreferredSize(new java.awt.Dimension(150, 40));
         LogoutButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 LogoutButtonActionPerformed(evt);
@@ -926,7 +1050,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         jPanel1.add(LogoutButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 555, -1, -1));
 
         SideBarPanel.setBackground(new java.awt.Color(0, 0, 0));
-        SideBarPanel.setPreferredSize(new java.awt.Dimension(200, 600));
+        SideBarPanel.setPreferredSize(new java.awt.Dimension(150, 600));
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/logos/smalldonmacblack.png"))); // NOI18N
         jLabel1.setText("jLabel1");
@@ -934,7 +1058,6 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         SideBarPanel.add(jLabel1);
 
         ProductListButton.setBackground(new java.awt.Color(249, 241, 240));
-        ProductListButton.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         ProductListButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/icons/items.png"))); // NOI18N
         ProductListButton.setText("PRODUCT LIST");
         ProductListButton.setBorder(null);
@@ -942,7 +1065,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         ProductListButton.setFocusable(false);
         ProductListButton.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         ProductListButton.setIconTextGap(10);
-        ProductListButton.setPreferredSize(new java.awt.Dimension(200, 120));
+        ProductListButton.setPreferredSize(new java.awt.Dimension(150, 100));
         ProductListButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 ProductListButtonActionPerformed(evt);
@@ -951,7 +1074,6 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         SideBarPanel.add(ProductListButton);
 
         AddProductButton.setBackground(new java.awt.Color(249, 241, 240));
-        AddProductButton.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         AddProductButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gui/Images/icons/queue.png"))); // NOI18N
         AddProductButton.setText("ADD PRODUCT");
         AddProductButton.setBorder(null);
@@ -959,7 +1081,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         AddProductButton.setFocusable(false);
         AddProductButton.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         AddProductButton.setIconTextGap(10);
-        AddProductButton.setPreferredSize(new java.awt.Dimension(200, 120));
+        AddProductButton.setPreferredSize(new java.awt.Dimension(150, 100));
         AddProductButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 AddProductButtonActionPerformed(evt);
@@ -967,7 +1089,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         });
         SideBarPanel.add(AddProductButton);
 
-        jPanel1.add(SideBarPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, 600));
+        jPanel1.add(SideBarPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
         MainTabbedPane.setBackground(new java.awt.Color(249, 241, 240));
         MainTabbedPane.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.LOWERED));
@@ -1012,17 +1134,17 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         ProductListTable.setForeground(new java.awt.Color(31, 40, 35));
         ProductListTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                { new Integer(1),  new Integer(1), "Coffee", "This is a Coffee Blend",  new Double(39.0),  new Boolean(true), null}
+                { new Integer(1),  new Integer(1), "Coffee", "This is a Coffee Blend",  new Double(39.0),  new Boolean(true), null, null}
             },
             new String [] {
-                "#", "ID", "Name", "Description", "Price", "Is Available", "Actions"
+                "#", "ID", "Name", "Description", "Price", "Available", "Actions", "Archived"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class, java.lang.Boolean.class, java.lang.Integer.class
+                java.lang.Integer.class, java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class, java.lang.Boolean.class, java.lang.Integer.class, java.lang.Boolean.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, true, true
+                false, false, false, false, false, true, true, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -1050,13 +1172,15 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             ProductListTable.getColumnModel().getColumn(2).setResizable(false);
             ProductListTable.getColumnModel().getColumn(2).setPreferredWidth(75);
             ProductListTable.getColumnModel().getColumn(3).setResizable(false);
-            ProductListTable.getColumnModel().getColumn(3).setPreferredWidth(200);
+            ProductListTable.getColumnModel().getColumn(3).setPreferredWidth(150);
             ProductListTable.getColumnModel().getColumn(4).setResizable(false);
             ProductListTable.getColumnModel().getColumn(4).setPreferredWidth(20);
             ProductListTable.getColumnModel().getColumn(5).setResizable(false);
-            ProductListTable.getColumnModel().getColumn(5).setPreferredWidth(35);
+            ProductListTable.getColumnModel().getColumn(5).setPreferredWidth(25);
             ProductListTable.getColumnModel().getColumn(6).setResizable(false);
             ProductListTable.getColumnModel().getColumn(6).setPreferredWidth(175);
+            ProductListTable.getColumnModel().getColumn(7).setResizable(false);
+            ProductListTable.getColumnModel().getColumn(7).setPreferredWidth(25);
         }
 
         ProductListTablePanel.add(jScrollPane1);
@@ -1399,7 +1523,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
 
         MainTabbedPane.addTab("tab8", UpdateProductEntryTab);
 
-        jPanel1.add(MainTabbedPane, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 0, 860, 600));
+        jPanel1.add(MainTabbedPane, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 0, 910, 600));
         MainTabbedPane.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 updateSidebarButtonSelection();

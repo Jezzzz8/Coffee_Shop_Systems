@@ -880,6 +880,7 @@ public class KioskFrame extends javax.swing.JFrame {
         MenuContentPanel = new javax.swing.JPanel();
         menu_category_scroll_pane1 = new javax.swing.JScrollPane();
         menu_category_box = new javax.swing.JPanel();
+        MenusemptyLabel = new javax.swing.JLabel();
         MenuProductDetailBoxPanel = new javax.swing.JPanel();
         ProductQuantityDetailLabel = new javax.swing.JLabel();
         ProductNameLabel = new javax.swing.JLabel();
@@ -897,6 +898,7 @@ public class KioskFrame extends javax.swing.JFrame {
         SpecialsContentPanel = new javax.swing.JPanel();
         specials_category_scroll_pane1 = new javax.swing.JScrollPane();
         specials_category_box = new javax.swing.JPanel();
+        SpecialsemptyLabel = new javax.swing.JLabel();
         SpecialsProductDetailBoxPanel = new javax.swing.JPanel();
         SpecialsProductQuantityDetailLabel = new javax.swing.JLabel();
         SpecialsProductNameLabel = new javax.swing.JLabel();
@@ -1222,6 +1224,14 @@ public class KioskFrame extends javax.swing.JFrame {
         menu_category_box.setMinimumSize(new java.awt.Dimension(760, 400));
         menu_category_box.setPreferredSize(new java.awt.Dimension(760, 400));
 
+        MenusemptyLabel.setBackground(new java.awt.Color(100, 100, 100));
+        MenusemptyLabel.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        MenusemptyLabel.setForeground(new java.awt.Color(100, 100, 100));
+        MenusemptyLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        MenusemptyLabel.setText("No products available");
+        MenusemptyLabel.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        menu_category_box.add(MenusemptyLabel);
+
         MenuProductDetailBoxPanel.setBackground(new java.awt.Color(249, 241, 240));
         MenuProductDetailBoxPanel.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.LOWERED));
         MenuProductDetailBoxPanel.setForeground(new java.awt.Color(31, 40, 35));
@@ -1348,6 +1358,14 @@ public class KioskFrame extends javax.swing.JFrame {
 
         specials_category_box.setBackground(new java.awt.Color(31, 40, 35));
         specials_category_box.setPreferredSize(new java.awt.Dimension(760, 400));
+
+        SpecialsemptyLabel.setBackground(new java.awt.Color(100, 100, 100));
+        SpecialsemptyLabel.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        SpecialsemptyLabel.setForeground(new java.awt.Color(100, 100, 100));
+        SpecialsemptyLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        SpecialsemptyLabel.setText("No products available");
+        SpecialsemptyLabel.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        specials_category_box.add(SpecialsemptyLabel);
 
         SpecialsProductDetailBoxPanel.setBackground(new java.awt.Color(249, 241, 240));
         SpecialsProductDetailBoxPanel.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.LOWERED));
@@ -2131,6 +2149,7 @@ public class KioskFrame extends javax.swing.JFrame {
     private javax.swing.JPanel MenuPanelTab;
     private javax.swing.JPanel MenuProductDetailBoxPanel;
     private javax.swing.JPanel MenuSideBarPanel;
+    private javax.swing.JLabel MenusemptyLabel;
     private javax.swing.JButton NewOrderButton;
     private javax.swing.JPanel NewOrderContentPanel;
     private javax.swing.JPanel NewOrderPanelTab;
@@ -2165,6 +2184,7 @@ public class KioskFrame extends javax.swing.JFrame {
     private javax.swing.JLabel SpecialsProductQuantityDetailLabel;
     private javax.swing.JSpinner SpecialsProductQuantitySpinner;
     private javax.swing.JLabel SpecialsTabTitleLabel;
+    private javax.swing.JLabel SpecialsemptyLabel;
     private javax.swing.JLabel TotalPriceLabel;
     private javax.swing.JLabel TotalPriceNumberLabel;
     private javax.swing.JLabel confirm_payment_progress_image;

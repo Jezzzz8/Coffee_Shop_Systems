@@ -2,7 +2,7 @@ package gui;
 
 import java.awt.Color;
 import objects.*;
-import services.UserAuthentication;
+import services.AdminAuthentication;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 import java.awt.Cursor;
@@ -74,17 +74,17 @@ public class LoginFrame extends javax.swing.JFrame {
         isLoggingIn = true;
         setUiState(false);
         
-        new SwingWorker<UserAuthentication.AuthResult, Void>() {
+        new SwingWorker<AdminAuthentication.AuthResult, Void>() {
             @Override
-            protected UserAuthentication.AuthResult doInBackground() throws Exception {
+            protected AdminAuthentication.AuthResult doInBackground() throws Exception {
                 System.out.println("Starting authentication process...");
-                return UserAuthentication.authenticateWithDetails(username, password);
+                return AdminAuthentication.authenticateWithDetails(username, password);
             }
             
             @Override
             protected void done() {
                 try {
-                    UserAuthentication.AuthResult result = get();
+                    AdminAuthentication.AuthResult result = get();
                     System.out.println("Authentication result: " + result.isSuccess());
                     
                     if (result.isSuccess()) {
