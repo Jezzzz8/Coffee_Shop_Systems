@@ -76,7 +76,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         FilterChoice.add("All Products");
         FilterChoice.add("Available Only");
         FilterChoice.add("Unavailable Only");
-        FilterChoice.add("Archived Products");
+        FilterChoice.add("Hidden Products");
 
         FilterChoice.setFocusable(false);
 
@@ -128,7 +128,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
                         filteredProducts.add(product);
                     }
                     break;
-                case "Archived Products":
+                case "Hidden Products":
                     if (product.isArchived()) {
                         filteredProducts.add(product);
                     }
