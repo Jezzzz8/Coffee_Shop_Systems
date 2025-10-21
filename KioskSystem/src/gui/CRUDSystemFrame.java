@@ -76,7 +76,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
         FilterChoice.add("All Products");
         FilterChoice.add("Available Only");
         FilterChoice.add("Unavailable Only");
-        FilterChoice.add("Hidden Products");
+        FilterChoice.add("Archived Products");
 
         FilterChoice.setFocusable(false);
 
@@ -128,7 +128,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
                         filteredProducts.add(product);
                     }
                     break;
-                case "Hidden Products":
+                case "Archived Products":
                     if (product.isArchived()) {
                         filteredProducts.add(product);
                     }
@@ -405,14 +405,14 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
     }
     
     class ButtonRenderer extends JPanel implements TableCellRenderer {
-        private JButton updateBtn, deleteBtn, retrieveBtn;
+        private JButton updateBtn, archiveBtn, retrieveBtn;
 
         public ButtonRenderer() {
             setLayout(new FlowLayout(FlowLayout.CENTER, 5, 2));
             setOpaque(true);
 
             updateBtn = new JButton("Update");
-            deleteBtn = new JButton("Delete");
+            archiveBtn = new JButton("Archive");
             retrieveBtn = new JButton("Retrieve");
 
             Dimension buttonSize = new Dimension(90, 30);
@@ -420,9 +420,9 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             updateBtn.setMaximumSize(buttonSize);
             updateBtn.setMinimumSize(buttonSize);
 
-            deleteBtn.setPreferredSize(buttonSize);
-            deleteBtn.setMaximumSize(buttonSize);
-            deleteBtn.setMinimumSize(buttonSize);
+            archiveBtn.setPreferredSize(buttonSize);
+            archiveBtn.setMaximumSize(buttonSize);
+            archiveBtn.setMinimumSize(buttonSize);
 
             retrieveBtn.setPreferredSize(new Dimension(100, 30));
             retrieveBtn.setMaximumSize(new Dimension(100, 30));
@@ -432,7 +432,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             retrieveBtn.setForeground(Color.WHITE);
 
             add(updateBtn);
-            add(deleteBtn);
+            add(archiveBtn);
             add(retrieveBtn);
         }
 
@@ -452,25 +452,25 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             if (isSelected) {
                 setBackground(table.getSelectionBackground());
                 updateBtn.setBackground(new Color(66,133,244));
-                deleteBtn.setBackground(new Color(234,67,53));
+                archiveBtn.setBackground(new Color(234,67,53));
                 retrieveBtn.setBackground(new Color(52,168,83));
 
                 updateBtn.setForeground(Color.WHITE);
-                deleteBtn.setForeground(Color.WHITE);
+                archiveBtn.setForeground(Color.WHITE);
                 retrieveBtn.setForeground(Color.WHITE);
             } else {
                 setBackground(table.getBackground());
                 updateBtn.setBackground(new Color(66,133,244));
-                deleteBtn.setBackground(new Color(234,67,53));
+                archiveBtn.setBackground(new Color(234,67,53));
                 retrieveBtn.setBackground(new Color(52,168,83));
 
                 updateBtn.setForeground(Color.WHITE);
-                deleteBtn.setForeground(Color.WHITE);
+                archiveBtn.setForeground(Color.WHITE);
                 retrieveBtn.setForeground(Color.WHITE);
             }
             
             updateBtn.setVisible(!isArchived);
-            deleteBtn.setVisible(!isArchived);
+            archiveBtn.setVisible(!isArchived);
             retrieveBtn.setVisible(isArchived);
 
             return this;
@@ -498,7 +498,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
     
     class ButtonEditor extends AbstractCellEditor implements TableCellEditor {
         private JPanel panel;
-        private JButton updateBtn, deleteBtn, retrieveBtn;
+        private JButton updateBtn, archiveBtn, retrieveBtn;
         private int currentProductId;
         private int currentRow;
         private boolean isArchived;
@@ -510,7 +510,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             panel.setOpaque(true);
 
             updateBtn = new JButton("Update");
-            deleteBtn = new JButton("Delete");
+            archiveBtn = new JButton("Archive");
             retrieveBtn = new JButton("Retrieve");
 
             Dimension buttonSize = new Dimension(90, 30);
@@ -518,9 +518,9 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             updateBtn.setMaximumSize(buttonSize);
             updateBtn.setMinimumSize(buttonSize);
 
-            deleteBtn.setPreferredSize(buttonSize);
-            deleteBtn.setMaximumSize(buttonSize);
-            deleteBtn.setMinimumSize(buttonSize);
+            archiveBtn.setPreferredSize(buttonSize);
+            archiveBtn.setMaximumSize(buttonSize);
+            archiveBtn.setMinimumSize(buttonSize);
 
             retrieveBtn.setPreferredSize(new Dimension(100, 30));
             retrieveBtn.setMaximumSize(new Dimension(100, 30));
@@ -530,7 +530,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             retrieveBtn.setForeground(Color.WHITE);
 
             panel.add(updateBtn);
-            panel.add(deleteBtn);
+            panel.add(archiveBtn);
             panel.add(retrieveBtn);
 
             updateBtn.addActionListener(e -> {
@@ -542,10 +542,10 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
                 });
             });
 
-            deleteBtn.addActionListener(e -> {
+            archiveBtn.addActionListener(e -> {
                 fireEditingStopped();
                 SwingUtilities.invokeLater(() -> {
-                    showDeleteConfirmationDialog(currentProductId);
+                    showArchiveConfirmationDialog(currentProductId);
                 });
             });
 
@@ -575,25 +575,25 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             if (isSelected) {
                 panel.setBackground(table.getSelectionBackground());
                 updateBtn.setBackground(new Color(66,133,244));
-                deleteBtn.setBackground(new Color(234,67,53));
+                archiveBtn.setBackground(new Color(234,67,53));
                 retrieveBtn.setBackground(new Color(52,168,83));
 
                 updateBtn.setForeground(Color.WHITE);
-                deleteBtn.setForeground(Color.WHITE);
+                archiveBtn.setForeground(Color.WHITE);
                 retrieveBtn.setForeground(Color.WHITE);
             } else {
                 panel.setBackground(table.getBackground());
                 updateBtn.setBackground(new Color(66,133,244));
-                deleteBtn.setBackground(new Color(234,67,53));
+                archiveBtn.setBackground(new Color(234,67,53));
                 retrieveBtn.setBackground(new Color(52,168,83));
 
                 updateBtn.setForeground(Color.WHITE);
-                deleteBtn.setForeground(Color.WHITE);
+                archiveBtn.setForeground(Color.WHITE);
                 retrieveBtn.setForeground(Color.WHITE);
             }
             
             updateBtn.setVisible(!isArchived);
-            deleteBtn.setVisible(!isArchived);
+            archiveBtn.setVisible(!isArchived);
             retrieveBtn.setVisible(isArchived);
 
             return panel;
@@ -663,7 +663,7 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             }
         }
         
-        private void showDeleteConfirmationDialog(int productId) {
+        private void showArchiveConfirmationDialog(int productId) {
             Product product = ProductManager.getProductById(productId);
             if (product == null) {
                 JOptionPane.showMessageDialog(
@@ -676,137 +676,46 @@ public class CRUDSystemFrame extends javax.swing.JFrame {
             }
 
             String productName = product.getName();
-
-            boolean hasOrders = ProductManager.hasExistingOrders(productId);
-
-            if (hasOrders) {
-                JOptionPane.showMessageDialog(
-                    CRUDSystemFrame.this,
-                    "<html><b>Cannot Hard Delete: " + productName + "</b><br><br>" +
-                    "This product has existing orders in the system.<br>" +
-                    "For data integrity, only <b>Soft Delete (Archive)</b> is available.<br><br>" +
-                    "Soft delete will make the product unavailable for new orders<br>" +
-                    "while preserving order history.</html>",
-                    "Product Has Existing Orders",
-                    JOptionPane.WARNING_MESSAGE
-                );
-                performSoftDeleteProduct(productId, productName);
-            } else {
-                showDeleteOptionsDialog(productId, productName);
-            }
+            
+            performArchiveProduct(productId, productName);
         }
 
-        private void showDeleteOptionsDialog(int productId, String productName) {
-            Object[] options = {"Soft Delete", "Hard Delete", "Cancel"};
-
-            int choice = JOptionPane.showOptionDialog(
+        private void performArchiveProduct(int productId, String productName) {
+            int confirm = JOptionPane.showConfirmDialog(
                 CRUDSystemFrame.this,
-                "<html><b>Delete Product: " + productName + "</b><br><br>" +
-                "Choose deletion method:<br>" +
-                "• <b>Soft Delete</b>: Archive product (can be restored)<br>" +
-                "• <b>Hard Delete</b>: Permanently remove from database<br><br>" +
-                "<font color='red'><b>Warning:</b> Hard delete cannot be undone!</font></html>",
-                "Confirm Product Deletion",
-                JOptionPane.DEFAULT_OPTION,
-                JOptionPane.WARNING_MESSAGE,
-                null,
-                options,
-                options[2]
-            );
-
-            switch (choice) {
-                case 0:
-                    performSoftDeleteProduct(productId, productName);
-                    break;
-                case 1:
-                    performHardDeleteProduct(productId, productName);
-                    break;
-                case 2:
-                default:
-                    break;
-            }
-        }
-
-        private void performSoftDeleteProduct(int productId, String productName) {
-            try {
-                if (ProductManager.archiveProduct(productId)) {
-                    JOptionPane.showMessageDialog(
-                        CRUDSystemFrame.this, 
-                        "Product '" + productName + "' has been archived successfully!\n" +
-                        "It is now hidden from the kiosk but can be retrieved later.",
-                        "Product Archived",
-                        JOptionPane.INFORMATION_MESSAGE
-                    );
-                    refreshInventoryTableSafely();
-                } else {
-                    JOptionPane.showMessageDialog(
-                        CRUDSystemFrame.this, 
-                        "Failed to archive product '" + productName + "'!",
-                        "Archive Failed",
-                        JOptionPane.ERROR_MESSAGE
-                    );
-                }
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(
-                    CRUDSystemFrame.this, 
-                    "Error archiving product: " + ex.getMessage(),
-                    "Archive Error",
-                    JOptionPane.ERROR_MESSAGE
-                );
-                ex.printStackTrace();
-            }
-        }
-
-        private void performHardDeleteProduct(int productId, String productName) {
-            if (ProductManager.hasExistingOrders(productId)) {
-                JOptionPane.showMessageDialog(
-                    CRUDSystemFrame.this,
-                    "<html><b>Cannot Delete: " + productName + "</b><br><br>" +
-                    "This product now has existing orders and cannot be hard deleted.<br>" +
-                    "It will be archived instead.</html>",
-                    "Deletion Blocked",
-                    JOptionPane.WARNING_MESSAGE
-                );
-                performSoftDeleteProduct(productId, productName);
-                return;
-            }
-
-            int finalConfirm = JOptionPane.showConfirmDialog(
-                CRUDSystemFrame.this,
-                "<html><b>FINAL WARNING: This action cannot be undone!</b><br><br>" +
-                "You are about to permanently delete:<br>" +
-                "<b>" + productName + "</b><br><br>" +
-                "This will remove all traces of this product from the database.<br>" +
-                "<font color='red'><b>Are you absolutely sure?</b></font></html>",
-                "Confirm Permanent Deletion",
+                "<html><b>Archive Product: " + productName + "</b><br><br>" +
+                "This will archive the product and hide it from the kiosk.<br>" +
+                "The product will be preserved in the system and can be retrieved later.<br><br>" +
+                "Are you sure you want to archive this product?</html>",
+                "Confirm Product Archival",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.WARNING_MESSAGE
             );
 
-            if (finalConfirm == JOptionPane.YES_OPTION) {
+            if (confirm == JOptionPane.YES_OPTION) {
                 try {
-                    if (ProductManager.hardDeleteProduct(productId)) {
+                    if (ProductManager.archiveProduct(productId)) {
                         JOptionPane.showMessageDialog(
                             CRUDSystemFrame.this, 
-                            "Product '" + productName + "' has been permanently deleted!",
-                            "Product Deleted",
+                            "Product '" + productName + "' has been archived successfully!\n" +
+                            "It is now hidden from the kiosk but can be retrieved later.",
+                            "Product Archived",
                             JOptionPane.INFORMATION_MESSAGE
                         );
                         refreshInventoryTableSafely();
                     } else {
                         JOptionPane.showMessageDialog(
                             CRUDSystemFrame.this, 
-                            "Failed to delete product '" + productName + "'! " +
-                            "The product may be referenced elsewhere in the system.",
-                            "Deletion Failed",
+                            "Failed to archive product '" + productName + "'!",
+                            "Archive Failed",
                             JOptionPane.ERROR_MESSAGE
                         );
                     }
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(
                         CRUDSystemFrame.this, 
-                        "Error deleting product: " + ex.getMessage(),
-                        "Deletion Error",
+                        "Error archiving product: " + ex.getMessage(),
+                        "Archive Error",
                         JOptionPane.ERROR_MESSAGE
                     );
                     ex.printStackTrace();

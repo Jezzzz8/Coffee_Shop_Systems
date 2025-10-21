@@ -168,12 +168,15 @@ public class KioskFrame extends javax.swing.JFrame {
     
     private void initializeProducts() {
         System.out.println("Loading products...");
+
+        menuProducts = ProductManager.getAllProducts();
         
-        menuProducts = ProductManager.getAllProducts(); 
-        specialsProducts = new ArrayList<>(); 
+        List<Product> allSpecials = ProductManager.getBestSellingProducts(4);
+        specialsProducts = filterAvailableProducts(allSpecials);
 
         System.out.println("Menu products loaded: " + menuProducts.size());
-        
+        System.out.println("Best selling products loaded: " + specialsProducts.size() + " (available only)");
+
         updateProductDisplays();
 
         System.out.println("Product display updated");
@@ -453,28 +456,35 @@ public class KioskFrame extends javax.swing.JFrame {
             menuProducts = ProductManager.getAllProducts();
         }
         
-        if (specialsProducts == null) {
-            specialsProducts = ProductManager.getBestSellingProducts(4);
-        } else {
-            specialsProducts = ProductManager.getBestSellingProducts(4);
-        }
-        
+        List<Product> allSpecials = ProductManager.getBestSellingProducts(4);
+        specialsProducts = filterAvailableProducts(allSpecials);
+
         updateProductCategoryDisplay(menu_category_box, menuProducts, true);
-        
+
         updateProductCategoryDisplay(specials_category_box, specialsProducts, false);
 
         updateCartDisplay();
         updateCartAnnouncement();
     }
-
+    
+    private List<Product> filterAvailableProducts(List<Product> products) {
+        List<Product> availableProducts = new ArrayList<>();
+        for (Product product : products) {
+            if (product.isAvailable()) {
+                availableProducts.add(product);
+            }
+        }
+        return availableProducts;
+    }
+    
     private void updateProductCategoryDisplay(JPanel categoryPanel, List<Product> products, boolean isMenuProduct) {
         categoryPanel.removeAll();
-
-        // Use the same layout as cart for consistency
+        
         categoryPanel.setLayout(new BoxLayout(categoryPanel, BoxLayout.Y_AXIS));
 
         if (products.isEmpty()) {
-            JLabel emptyLabel = new JLabel("No products available");
+            String message = isMenuProduct ? "No products available" : "No best selling products available at the moment";
+            JLabel emptyLabel = new JLabel(message);
             emptyLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
             emptyLabel.setHorizontalAlignment(SwingConstants.CENTER);
             emptyLabel.setForeground(new Color(100, 100, 100));
@@ -485,11 +495,10 @@ public class KioskFrame extends javax.swing.JFrame {
                 JPanel productBox = createProductBox(product, isMenuProduct);
                 productBox.setAlignmentX(Component.CENTER_ALIGNMENT);
                 categoryPanel.add(productBox);
-                categoryPanel.add(Box.createRigidArea(new Dimension(0, 10))); // Add spacing between products
+                categoryPanel.add(Box.createRigidArea(new Dimension(0, 10)));
             }
         }
-
-        // Update the panel height based on content
+        
         adjustCategoryPanelHeight(categoryPanel, products.size());
 
         categoryPanel.revalidate();
